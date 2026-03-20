@@ -179,21 +179,6 @@
   .dinner-meal { font-size: 13px; color: var(--text); }
   .dinner-empty { font-size: 12px; color: var(--dim); font-style: italic; }
 
-  .keep-notes { display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
-  .keep-note {
-    background: var(--surface2);
-    border-radius: 8px;
-    padding: 9px 11px;
-    border-left: 3px solid var(--purple);
-    overflow: hidden;
-  }
-  .keep-note.k-amber { border-left-color: var(--amber); }
-  .keep-note.k-teal { border-left-color: var(--teal); }
-  .keep-note.k-coral { border-left-color: var(--coral); }
-  .keep-note-title { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .keep-note-body { font-size: 11px; color: var(--muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .keep-setup { font-size: 11px; color: var(--dim); text-align: center; padding: 8px 0; }
-
   .scores-wrap { display: flex; flex-direction: column; gap: 8px; }
   .score-card { background: var(--surface2); border-radius: 8px; padding: 11px 13px; }
   .score-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -318,13 +303,6 @@
         <ul class="dinner-list" id="dinner-list">
           <li class="dinner-row"><span class="dinner-empty">Open Setup to add your dinner plan</span></li>
         </ul>
-      </div>
-      <div class="card" style="flex:1.2">
-        <div class="card-title">Google Keep</div>
-        <div class="keep-notes" id="keep-notes">
-          <div class="keep-setup">Connect Google Keep in Setup to display notes here.</div>
-        </div>
-      </div>
       <div class="card" style="flex:0.8">
         <div class="card-title">Boston scores</div>
         <div class="scores-wrap" id="scores-wrap">
@@ -375,12 +353,6 @@
       <textarea class="cfg-input cfg-textarea" id="dinner-input" placeholder="Fri: Pasta &amp; meatballs&#10;Sat: Grilled chicken&#10;Sun: Sunday roast&#10;Mon: Taco night&#10;Tue: Stir fry&#10;Wed: Pizza&#10;Thu: Leftovers"></textarea>
     </div>
 
-    <div class="cfg-section">
-      <div class="cfg-label">Google Keep notes (paste note content here)</div>
-      <div class="cfg-note">Google Keep has no public API. Paste your notes as JSON below. Format: [{"title":"Note title","body":"Note content","color":"purple"}]. Valid colors: purple, teal, amber, coral.</div>
-      <textarea class="cfg-input cfg-textarea" id="keep-input" placeholder='[{"title":"Grocery list","body":"Milk, eggs, bread, chicken","color":"teal"},{"title":"Reminders","body":"Call insurance Monday","color":"amber"}]'></textarea>
-    </div>
-
     <div class="cfg-actions">
       <button class="cfg-btn" onclick="closeConfig()">Cancel</button>
       <button class="cfg-btn primary" onclick="saveConfig()">Save & refresh</button>
@@ -404,7 +376,6 @@ const DEFAULT_CONFIG = {
   ],
   corsProxy: 'https://api.allorigins.win/raw?url=',
   dinners: [],
-  keepNotes: []
 };
 
 let config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
@@ -439,11 +410,6 @@ function saveConfig() {
     return idx > -1 ? { day: line.slice(0,idx).trim(), meal: line.slice(idx+1).trim() } : { day: '', meal: line };
   });
 
-  try {
-    const keepRaw = document.getElementById('keep-input').value.trim();
-    config.keepNotes = keepRaw ? JSON.parse(keepRaw) : [];
-  } catch(e) { config.keepNotes = []; }
-
   localStorage.setItem('famdash_config', JSON.stringify(config));
   closeConfig();
   refreshAll();
@@ -453,7 +419,6 @@ function openConfig() {
   document.getElementById('gcal-urls').value = config.calUrls.join('\n');
   document.getElementById('cors-proxy').value = config.corsProxy || 'https://api.allorigins.win/raw?url=';
   document.getElementById('dinner-input').value = config.dinners.map(d => `${d.day}: ${d.meal}`).join('\n');
-  document.getElementById('keep-input').value = config.keepNotes.length ? JSON.stringify(config.keepNotes, null, 2) : '';
   renderMembersConfig();
   document.getElementById('cfg-overlay').classList.add('open');
 }
@@ -779,22 +744,6 @@ function renderDinners() {
       <div class="dinner-dot"></div>
       <span class="dinner-meal">${d.meal}</span>
     </li>
-  `).join('');
-}
-
-/* ---- GOOGLE KEEP ---- */
-function renderKeep() {
-  const el = document.getElementById('keep-notes');
-  if (!config.keepNotes.length) {
-    el.innerHTML = '<div class="keep-setup">Paste your Keep notes in Setup ⚙ — Google Keep has no public API, so add notes manually as JSON.</div>';
-    return;
-  }
-  const colorMap = { purple: 'k-purple', teal: 'k-teal', amber: 'k-amber', coral: 'k-coral' };
-  el.innerHTML = config.keepNotes.slice(0, 4).map(n => `
-    <div class="keep-note ${colorMap[n.color] || ''}">
-      <div class="keep-note-title">${n.title}</div>
-      <div class="keep-note-body">${n.body}</div>
-    </div>
   `).join('');
 }
 
