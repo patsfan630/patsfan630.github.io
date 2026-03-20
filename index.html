@@ -345,8 +345,8 @@
 
     <div class="cfg-section">
       <div class="cfg-label">CORS proxy base URL (for calendar fetching)</div>
-      <div class="cfg-note">Host corsproxy.io or use: https://api.allorigins.win/raw?url= (free, no auth needed)</div>
-      <input type="text" class="cfg-input" id="cors-proxy" placeholder="https://api.allorigins.win/raw?url=" value="https://api.allorigins.win/raw?url=">
+      <div class="cfg-note">Host corsproxy.io or use: https://corsproxy.io/?url='</div>
+      <input type="text" class="cfg-input" id="cors-proxy" placeholder="https://corsproxy.io/?url=" value="https://corsproxy.io/?url=">
     </div>
 
     <div class="cfg-section">
@@ -377,7 +377,7 @@ const DEFAULT_CONFIG = {
     'https://calendar.google.com/calendar/ical/3lmel4i9s4986sorpekg2st8ek%40group.calendar.google.com/private-3be92f54f04c83fe4528edbd65aa795e/basic.ics',
     'https://download.hebcal.com/v4/CAEQARgBIAEoATABUAFqAXNwKngSgAEBiAEBkgEFMTA0NjOYAQGgAQE/hebcal_10463.ics?emoji=0'
   ],
-  corsProxy: 'https://api.allorigins.win/raw?url=',
+  corsProxy: 'https://corsproxy.io/?url=',
   dinners: [],
 };
 
@@ -420,7 +420,7 @@ function saveConfig() {
 
 function openConfig() {
   document.getElementById('gcal-urls').value = config.calUrls.join('\n');
-  document.getElementById('cors-proxy').value = config.corsProxy || 'https://api.allorigins.win/raw?url=';
+  document.getElementById('cors-proxy').value = config.corsProxy || 'https://corsproxy.io/?url=';
   document.getElementById('dinner-input').value = config.dinners.map(d => `${d.day}: ${d.meal}`).join('\n');
   renderMembersConfig();
   document.getElementById('cfg-overlay').classList.add('open');
