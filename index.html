@@ -694,32 +694,78 @@ const WX_DESC = {
 
 async function fetchWeather() {
   const el = document.getElementById('wx-grid');
+  el.innerHTML = '<div class="wx-loading" style="grid-column:1/-1"><span class="spinner"></span></div>';
   try {
-    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=40.8448&longitude=-73.8648&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max&temperature_unit=fahrenheit&timezone=America%2FNew_York&forecast_days=5');
-    const data = await res.json();
-    const { daily } = data;
+    const pointRes = await fetch('https://api.weather.gov/points/40.9001,-73.9120', {
+      headers: { 'User-Agent': 'FamilyDashboard/1.0' }
+    });
+    const pointData = await pointRes.json();
+    const forecastUrl = pointData.properties.forecast;
+
+    const fRes = await fetch(forecastUrl, {
+      headers: { 'User-Agent': 'FamilyDashboard/1.0' }
+    });
+    const fData = await fRes.json();
+    const periods = fData.properties.periods;
+
+    const days = get5Days();
+    const dayMap = {};
+    for (const p of periods) {
+      const d = new Date(p.startTime);
+      d.setHours(0,0,0,0);
+      const k = d.toDateString();
+      if (!dayMap[k]) dayMap[k] = {};
+      if (p.isDaytime) {
+        dayMap[k].hi = p.temperature;
+        dayMap[k].desc = p.shortForecast;
+        dayMap[k].icon = wxIconFromDesc(p.shortForecast);
+        dayMap[k].precip = p.probabilityOfPrecipitation?.value || 0;
+      } else {
+        dayMap[k].lo = p.temperature;
+        if (!dayMap[k].hi) {
+          dayMap[k].hi = p.temperature;
+          dayMap[k].desc = p.shortForecast;
+          dayMap[k].icon = wxIconFromDesc(p.shortForecast);
+          dayMap[k].precip = p.probabilityOfPrecipitation?.value || 0;
+        }
+      }
+    }
+
     el.innerHTML = '';
-    for (let i = 0; i < 5; i++) {
-      const d = new Date(daily.time[i] + 'T12:00:00');
+    days.forEach((day, i) => {
+      const k = day.toDateString();
+      const wx = dayMap[k] || {};
       const col = document.createElement('div');
       col.className = 'wx-col' + (i === 0 ? ' is-today' : '');
-      const code = daily.weathercode[i];
-      const precip = daily.precipitation_probability_max[i];
       col.innerHTML = `
-        <div class="wx-day">${i === 0 ? 'Today' : DAY_SHORT[d.getDay()]}</div>
-        <div class="wx-icon">${WX_ICONS[code] || '⛅'}</div>
-        <div class="wx-hi">${Math.round(daily.temperature_2m_max[i])}°</div>
-        <div class="wx-lo">${Math.round(daily.temperature_2m_min[i])}°</div>
-        <div class="wx-desc">${WX_DESC[code] || ''}</div>
-        ${precip > 20 ? `<div class="wx-precip">💧 ${precip}%</div>` : ''}
+        <div class="wx-day">${i === 0 ? 'Today' : DAY_SHORT[day.getDay()]}</div>
+        <div class="wx-icon">${wx.icon || '⛅'}</div>
+        <div class="wx-hi">${wx.hi !== undefined ? Math.round(wx.hi) + '°' : '—'}</div>
+        <div class="wx-lo">${wx.lo !== undefined ? Math.round(wx.lo) + '°' : '—'}</div>
+        <div class="wx-desc">${wx.desc ? wx.desc.split(' ').slice(0,3).join(' ') : ''}</div>
+        ${wx.precip > 20 ? `<div class="wx-precip">💧 ${Math.round(wx.precip)}%</div>` : ''}
       `;
       el.appendChild(col);
-    }
+    });
   } catch(e) {
     el.innerHTML = '<div class="wx-loading" style="grid-column:1/-1">Unable to load weather</div>';
   }
 }
 
+function wxIconFromDesc(desc) {
+  const d = (desc || '').toLowerCase();
+  if (d.includes('thunderstorm') || d.includes('t-storm')) return '⛈';
+  if (d.includes('snow') || d.includes('blizzard') || d.includes('flurr')) return '❄';
+  if (d.includes('sleet') || d.includes('freezing')) return '🌨';
+  if (d.includes('rain') || d.includes('shower') || d.includes('drizzle')) return '🌧';
+  if (d.includes('fog') || d.includes('mist') || d.includes('haze')) return '🌫';
+  if (d.includes('partly') || d.includes('mostly sunny') || d.includes('mostly clear')) return '⛅';
+  if (d.includes('cloudy') || d.includes('overcast')) return '☁';
+  if (d.includes('sunny') || d.includes('clear')) return '☀';
+  if (d.includes('wind')) return '💨';
+  return '⛅';
+}
+  
 /* ---- DINNERS ---- */
 function renderDinners() {
   const el = document.getElementById('dinner-list');
