@@ -367,13 +367,15 @@ const MEMBER_COLORS = ['#4f8ef7','#9b8ef5','#3ecfa6','#f5875a','#f5c842','#f0606
 const DEFAULT_CONFIG = {
   members: [
     { name: 'Marc',           color: '#7ec8f7' },
+    { name: 'Shosh',          color: '#e41f11' },
     { name: 'Kids',           color: '#9b8ef5' },
     { name: 'Candle Lighting',color: '#1a3a6b' }
   ],
   calUrls: [
     'https://calendar.google.com/calendar/ical/marcjlerman%40gmail.com/private-b721f9ea6e2ba5cb538bf6bc80a4940c/basic.ics',
+    'https://calendar.google.com/calendar/ical/shoshdavis%40gmail.com/private-1b7e7a3553864f3d53be2e66205faf73/basic.ics',
     'https://calendar.google.com/calendar/ical/3lmel4i9s4986sorpekg2st8ek%40group.calendar.google.com/private-3be92f54f04c83fe4528edbd65aa795e/basic.ics',
-    'http://download.hebcal.com/v4/CAEQARgBIAEoATABUAFqAXNwKngSgAEBiAEBkgEFMTA0NjOYAQGgAQE/hebcal_10463.ics?emoji=0'
+    'https://download.hebcal.com/v4/CAEQARgBIAEoATABUAFqAXNwKngSgAEBiAEBkgEFMTA0NjOYAQGgAQE/hebcal_10463.ics?emoji=0'
   ],
   corsProxy: 'https://api.allorigins.win/raw?url=',
   dinners: [],
@@ -493,7 +495,7 @@ async function fetchCalendars() {
   const proxy = config.corsProxy || '';
   const promises = config.calUrls.map(async (url, idx) => {
     try {
-      const fetchUrl = proxy ? `${proxy}${encodeURIComponent(url)}` : url;
+      const fetchUrl = proxy ? `${proxy}${url}` : url;
       const res = await fetch(fetchUrl);
       const text = await res.text();
       return parseICS(text, idx);
