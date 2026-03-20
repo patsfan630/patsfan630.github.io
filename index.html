@@ -640,24 +640,6 @@ function renderFamilyPanel() {
 }
 
 /* ---- WEATHER ---- */
-const WX_ICONS = {
-  0:'☀', 1:'🌤', 2:'⛅', 3:'☁',
-  45:'🌫',48:'🌫',
-  51:'🌦',53:'🌦',55:'🌧',
-  61:'🌧',63:'🌧',65:'🌧',
-  71:'❄',73:'❄',75:'❄',
-  80:'🌦',81:'🌧',82:'⛈',
-  95:'⛈',96:'⛈',99:'⛈'
-};
-const WX_DESC = {
-  0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Overcast',
-  45:'Fog',48:'Fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
-  61:'Light rain',63:'Rain',65:'Heavy rain',
-  71:'Light snow',73:'Snow',75:'Heavy snow',
-  80:'Showers',81:'Rain showers',82:'Storms',
-  95:'Thunderstorm',96:'Hail storm',99:'Heavy hail'
-};
-
 async function fetchWeather() {
   const el = document.getElementById('wx-grid');
   el.innerHTML = '<div class="wx-loading" style="grid-column:1/-1"><span class="spinner"></span></div>';
@@ -838,7 +820,6 @@ async function refreshAll() {
   renderLegend();
   renderFamilyPanel();
   renderDinners();
-  renderKeep();
   renderCalendar([]);
   await Promise.all([
     fetchCalendars().then(() => renderTodayGlance()),
