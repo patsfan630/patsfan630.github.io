@@ -653,7 +653,7 @@ async function fetchWeather() {
       divider +
       (today ? forecastRow('Today', today) : '') +
       (tonight ? forecastRow('Tonight', tonight) : '') +
-      futureDays.map(p => forecastRow(p.name.slice(0, 3), p)).join('');
+      futureDays.map(p => forecastRow(p.name.slice(0, 1), p)).join('');
 
   } catch(e) {
     el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:10px">Unable to load weather</div>';
