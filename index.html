@@ -432,36 +432,32 @@ async function fetchScores() {
   const el = document.getElementById('scores-wrap');
   el.innerHTML = '<div class="score-loading"><span class="spinner"></span></div>';
   try {
-    const [soxRes, celticsRes] = await Promise.all([
-      fetch('https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/2/schedule?limit=5'),
-      fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/17/schedule?limit=5')
+    const [mlbRes, nbaRes] = await Promise.all([
+      fetch('https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard'),
+      fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard')
     ]);
-    const soxData = await soxRes.json();
-    const celticsData = await celticsRes.json();
+    const mlbData = await mlbRes.json();
+    const nbaData = await nbaRes.json();
 
-    const soxGame = findRecentGame(soxData);
-    const celticsGame = findRecentGame(celticsData);
+    const soxGame = findTeamGame(mlbData, 'BOS');
+    const celticsGame = findTeamGame(nbaData, 'BOS');
 
     el.innerHTML = '';
     if (soxGame) el.appendChild(buildScoreCard(soxGame, 'MLB — Red Sox', '#bd3039', '#0d2b4e'));
     if (celticsGame) el.appendChild(buildScoreCard(celticsGame, 'NBA — Celtics', '#007a33', '#BA9A3C'));
-    if (!soxGame && !celticsGame) el.innerHTML = '<div class="score-loading">No recent games found</div>';
+    if (!soxGame && !celticsGame) el.innerHTML = '<div class="score-loading">No games today</div>';
   } catch(e) {
     el.innerHTML = '<div class="score-loading">Unable to load scores</div>';
   }
 }
 
-function findRecentGame(data) {
+function findTeamGame(data, abbrev) {
   const events = data?.events || [];
-  const now = Date.now();
-  let best = null;
-  for (const evt of events) {
-    const t = new Date(evt.date).getTime();
-    if (!best || Math.abs(t - now) < Math.abs(new Date(best.date).getTime() - now)) best = evt;
-  }
-  return best;
+  return events.find(evt =>
+    evt.competitions?.[0]?.competitors?.some(c => c.team?.abbreviation === abbrev)
+  ) || null;
 }
-
+  
 function buildScoreCard(game, label, c1, c2) {
   const comp = game.competitions?.[0];
   const status = comp?.status?.type;
