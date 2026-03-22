@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>Family Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0e14;
+    --surface: #13161f;
+    --surface2: #1a1e2a;
+    --border: rgba(255,255,255,0.07);
+    --text: #e2e5f0;
+    --muted: #565c72;
+    --dim: #363c50;
+    --blue: #4f8ef7;
+    --blue-dim: rgba(79,142,247,0.12);
+    --purple: #9b8ef5;
+    --teal: #3ecfa6;
+    --coral: #f5875a;
+    --amber: #f5c842;
+    --red: #f06060;
+    --green: #5dca7a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .screen {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    padding: 18px 22px 16px;
+    gap: 14px;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+  .clock-block { display: flex; flex-direction: column; }
+  .clock {
+    font-family: 'DM Mono', monospace;
+    font-size: 36px;
+    font-weight: 400;
+    color: #fff;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .clock-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .refresh-btn {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 11px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s;
+  }
+  .refresh-btn:hover { color: var(--text); }
+
+  /* MAIN GRID */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  .col { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    overflow: hidden;
+  }
+  .card-title {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  /* CALENDAR EMBED */
+  .cal-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+  }
+  .cal-iframe-wrap {
+    flex: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    min-height: 0;
+  }
+  .cal-iframe-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  .cal-placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--surface2);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+    padding: 24px;
+  }
+  .cal-placeholder .icon { font-size: 32px; opacity: 0.5; }
+  .cal-placeholder code {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: var(--bg);
+    padding: 4px 8px;
+    border-radius: 5px;
+    color: var(--blue);
+    word-break: break-all;
+    max-width: 400px;
+    display: block;
+    margin-top: 4px;
+  }
+
+  /* RIGHT COLUMN */
+  .dinner-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+  .dinner-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .dinner-row:last-child { border-bottom: none; }
+  .dinner-day { font-size: 11px; color: var(--muted); width: 26px; flex-shrink: 0; }
+  .dinner-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); flex-shrink: 0; }
+  .dinner-meal { font-size: 13px; color: var(--text); }
+  .dinner-empty { font-size: 12px; color: var(--dim); font-style: italic; }
+
+  .scores-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .score-card { background: var(--surface2); border-radius: 8px; padding: 11px 13px; }
+  .score-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .score-league { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .score-status { font-size: 10px; padding: 2px 8px; border-radius: 4px; }
+  .status-final { background: rgba(255,255,255,0.05); color: var(--muted); }
+  .status-live { background: rgba(240,96,96,0.15); color: var(--red); }
+  .status-soon { background: rgba(79,142,247,0.12); color: var(--blue); }
+  .score-teams { display: flex; flex-direction: column; gap: 5px; }
+  .score-team { display: flex; justify-content: space-between; align-items: center; }
+  .team-info { display: flex; align-items: center; gap: 8px; }
+  .team-stripe { width: 4px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .team-name { font-size: 13px; font-weight: 500; }
+  .team-score-val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--text); }
+  .team-score-val.winner { color: var(--green); }
+  .score-loading { font-size: 12px; color: var(--muted); text-align: center; padding: 10px 0; }
+
+  /* CONFIG MODAL */
+  .cfg-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .cfg-overlay.open { display: flex; }
+  .cfg-modal {
+    background: var(--surface);
+    border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 24px;
+    width: 540px;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .cfg-title { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 18px; }
+  .cfg-section { margin-bottom: 16px; }
+  .cfg-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .cfg-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    outline: none;
+  }
+  .cfg-input:focus { border-color: var(--blue); }
+  .cfg-textarea { min-height: 80px; resize: vertical; }
+  .cfg-note { font-size: 11px; color: var(--dim); line-height: 1.6; margin-top: 4px; }
+  .cfg-note code { font-family: 'DM Mono', monospace; color: var(--blue); background: var(--bg); padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+  .cfg-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+  .cfg-btn {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  .cfg-btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="screen">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="clock-block">
+      <div class="clock" id="clock">--:-- --</div>
+      <div class="clock-sub" id="datestr">Loading...</div>
+    </div>
+    <div class="topbar-right">
+      <button class="refresh-btn" onclick="refreshAll()">↺ Refresh</button>
+      <button class="refresh-btn" onclick="openConfig()">⚙ Setup</button>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main">
+    <!-- LEFT+MIDDLE: Google Calendar embed -->
+    <div class="cal-card">
+      <div class="card-title">Family calendar</div>
+      <div class="cal-iframe-wrap" id="cal-wrap">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="col">
+      <div class="card" style="flex:1">
+        <div class="card-title">Weekly dinners</div>
+        <ul class="dinner-list" id="dinner-list">
+          <li class="dinner-row"><span class="dinner-empty">Add your dinner plan in Setup ⚙</span></li>
+        </ul>
+      </div>
+      <div class="card" style="flex:1">
+        <div class="card-title">Boston scores</div>
+        <div class="scores-wrap" id="scores-wrap">
+          <div class="score-loading"><span class="spinner"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIG MODAL -->
+<div class="cfg-overlay" id="cfg-overlay">
+  <div class="cfg-modal">
+    <div class="cfg-title">Dashboard Setup</div>
+
+    <div class="cfg-section">
+      <div class="cfg-label">Google Calendar embed URL</div>
+      <div class="cfg-note">
+        In Google Calendar, go to <b>Settings → your calendar → Integrate calendar</b>, then copy the URL from the <b>"Embed code"</b> iframe src attribute. It looks like:<br>
+        <code>https://calendar.google.com/calendar/embed?src=you%40gmail.com&ctz=America%2FNew_York</code><br><br>
+        To show multiple calendars, add more <code>&src=...</code> parameters to the URL.
+      </div>
+      <input type="text" class="cfg-input" id="gcal-embed-url" placeholder="https://calendar.google.com/calendar/embed?src=...&ctz=America/New_York" style="margin-top:10px">
+    </div>
+
+    <div class="cfg-section">
+      <div class="cfg-label">Dinner plan (one per line, format: "Mon: Pasta")</div>
+      <textarea class="cfg-input cfg-textarea" id="dinner-input" placeholder="Fri: Pasta &amp; meatballs&#10;Sat: Grilled chicken&#10;Sun: Sunday roast&#10;Mon: Taco night&#10;Tue: Stir fry&#10;Wed: Pizza&#10;Thu: Leftovers"></textarea>
+    </div>
+
+    <div class="cfg-actions">
+      <button class="cfg-btn" onclick="closeConfig()">Cancel</button>
+      <button class="cfg-btn primary" onclick="saveConfig()">Save & refresh</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_CONFIG = {
+  calEmbedUrl: '',
+  dinners: [],
+};
+
+let config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+
+function loadConfig() {
+  try {
+    const saved = localStorage.getItem('famdash_config_v2');
+    if (saved) {
+      config = Object.assign(JSON.parse(JSON.stringify(DEFAULT_CONFIG)), JSON.parse(saved));
+    }
+  } catch(e) {}
+}
+
+function saveConfig() {
+  config.calEmbedUrl = document.getElementById('gcal-embed-url').value.trim();
+
+  const dinnerRaw = document.getElementById('dinner-input').value;
+  config.dinners = dinnerRaw.split('\n').map(s => s.trim()).filter(Boolean).map(line => {
+    const idx = line.indexOf(':');
+    return idx > -1 ? { day: line.slice(0,idx).trim(), meal: line.slice(idx+1).trim() } : { day: '', meal: line };
+  });
+
+  localStorage.setItem('famdash_config_v2', JSON.stringify(config));
+  closeConfig();
+  refreshAll();
+}
+
+function openConfig() {
+  document.getElementById('gcal-embed-url').value = config.calEmbedUrl || '';
+  document.getElementById('dinner-input').value = config.dinners.map(d => `${d.day}: ${d.meal}`).join('\n');
+  document.getElementById('cfg-overlay').classList.add('open');
+}
+function closeConfig() { document.getElementById('cfg-overlay').classList.remove('open'); }
+
+/* ---- CLOCK ---- */
+function tickClock() {
+  const now = new Date();
+  let h = now.getHours(), m = now.getMinutes();
+  const ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  document.getElementById('clock').textContent = `${h}:${String(m).padStart(2,'0')} ${ap}`;
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('datestr').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()} — Bronx, NY`;
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+/* ---- CALENDAR EMBED ---- */
+function renderCalendarEmbed() {
+  const wrap = document.getElementById('cal-wrap');
+  if (!config.calEmbedUrl) {
+    wrap.innerHTML = `
+      <div class="cal-placeholder">
+        <div class="icon">📅</div>
+        <div>Paste your Google Calendar embed URL in Setup to show your calendar here.</div>
+        <code>Settings → your calendar → Integrate calendar → copy the iframe src URL</code>
+      </div>
+    `;
+    return;
+  }
+
+  // Force week view & dark-friendly params
+  let url = config.calEmbedUrl;
+  try {
+    const u = new URL(url);
+    u.searchParams.set('mode', 'WEEK');
+    u.searchParams.set('showTitle', '0');
+    u.searchParams.set('showNav', '1');
+    u.searchParams.set('showDate', '1');
+    u.searchParams.set('showPrint', '0');
+    u.searchParams.set('showTabs', '0');
+    u.searchParams.set('showCalendars', '0');
+    u.searchParams.set('showTz', '0');
+    url = u.toString();
+  } catch(e) {}
+
+  wrap.innerHTML = `<iframe
+    src="${url}"
+    frameborder="0"
+    scrolling="no"
+    allowfullscreen
+    sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"
+    referrerpolicy="no-referrer-when-downgrade"
+  ></iframe>`;
+}
+
+/* ---- DINNERS ---- */
+function renderDinners() {
+  const el = document.getElementById('dinner-list');
+  if (!config.dinners.length) {
+    el.innerHTML = '<li class="dinner-row"><span class="dinner-empty">Add your dinner plan in Setup ⚙</span></li>';
+    return;
+  }
+  el.innerHTML = config.dinners.map(d => `
+    <li class="dinner-row">
+      <span class="dinner-day">${d.day.slice(0,3)}</span>
+      <div class="dinner-dot"></div>
+      <span class="dinner-meal">${d.meal}</span>
+    </li>
+  `).join('');
+}
+
+/* ---- SCORES ---- */
+async function fetchScores() {
+  const el = document.getElementById('scores-wrap');
+  el.innerHTML = '<div class="score-loading"><span class="spinner"></span></div>';
+  try {
+    const [soxRes, celticsRes] = await Promise.all([
+      fetch('https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/2/schedule?limit=5'),
+      fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/17/schedule?limit=5')
+    ]);
+    const soxData = await soxRes.json();
+    const celticsData = await celticsRes.json();
+
+    const soxGame = findRecentGame(soxData);
+    const celticsGame = findRecentGame(celticsData);
+
+    el.innerHTML = '';
+    if (soxGame) el.appendChild(buildScoreCard(soxGame, 'MLB — Red Sox', '#bd3039', '#0d2b4e'));
+    if (celticsGame) el.appendChild(buildScoreCard(celticsGame, 'NBA — Celtics', '#007a33', '#BA9A3C'));
+    if (!soxGame && !celticsGame) el.innerHTML = '<div class="score-loading">No recent games found</div>';
+  } catch(e) {
+    el.innerHTML = '<div class="score-loading">Unable to load scores</div>';
+  }
+}
+
+function findRecentGame(data) {
+  const events = data?.events || [];
+  const now = Date.now();
+  let best = null;
+  for (const evt of events) {
+    const t = new Date(evt.date).getTime();
+    if (!best || Math.abs(t - now) < Math.abs(new Date(best.date).getTime() - now)) best = evt;
+  }
+  return best;
+}
+
+function buildScoreCard(game, label, c1, c2) {
+  const comp = game.competitions?.[0];
+  const status = comp?.status?.type;
+  const competitors = comp?.competitors || [];
+  const home = competitors.find(c => c.homeAway === 'home');
+  const away = competitors.find(c => c.homeAway === 'away');
+
+  let statusLabel = '', statusClass = 'status-final';
+  if (status?.completed) { statusLabel = 'Final'; statusClass = 'status-final'; }
+  else if (status?.state === 'in') { statusLabel = 'Live · ' + (comp?.status?.displayClock || ''); statusClass = 'status-live'; }
+  else {
+    const d = new Date(game.date);
+    statusLabel = d.toLocaleDateString('en-US',{weekday:'short'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    statusClass = 'status-soon';
+  }
+
+  const t1 = away || competitors[0] || {};
+  const t2 = home || competitors[1] || {};
+  const s1 = parseInt(t1.score || 0), s2 = parseInt(t2.score || 0);
+  const done = status?.completed;
+  const n1 = t1.team?.abbreviation || t1.team?.shortDisplayName || 'TBD';
+  const n2 = t2.team?.abbreviation || t2.team?.shortDisplayName || 'TBD';
+
+  const card = document.createElement('div');
+  card.className = 'score-card';
+  card.innerHTML = `
+    <div class="score-meta">
+      <span class="score-league">${label}</span>
+      <span class="score-status ${statusClass}">${statusLabel}</span>
+    </div>
+    <div class="score-teams">
+      <div class="score-team">
+        <div class="team-info">
+          <div class="team-stripe" style="background:${c1}"></div>
+          <span class="team-name" style="color:${c1}">${n1}</span>
+        </div>
+        <span class="team-score-val ${done && s1 > s2 ? 'winner' : ''}">${done || status?.state === 'in' ? s1 : '—'}</span>
+      </div>
+      <div class="score-team">
+        <div class="team-info">
+          <div class="team-stripe" style="background:${c2}"></div>
+          <span class="team-name" style="color:${c2}">${n2}</span>
+        </div>
+        <span class="team-score-val ${done && s2 > s1 ? 'winner' : ''}">${done || status?.state === 'in' ? s2 : '—'}</span>
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+/* ---- MAIN ---- */
+async function refreshAll() {
+  renderCalendarEmbed();
+  renderDinners();
+  fetchScores();
+}
+
+loadConfig();
+refreshAll();
+setInterval(refreshAll, 15 * 60 * 1000);
+</script>
+</body>
+</html>
