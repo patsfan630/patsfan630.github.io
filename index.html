@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -151,7 +152,7 @@
   }
   .cal-placeholder .icon { font-size: 32px; opacity: 0.5; }
   .cal-error { color: var(--red); font-size: 12px; text-align: center; padding: 20px; line-height: 1.6; }
-  
+
   /* RIGHT COLUMN */
   .dinner-list { list-style: none; display: flex; flex-direction: column; }
   .dinner-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 0.5px solid var(--border); }
@@ -230,8 +231,8 @@
     <div class="cal-card">
       <div class="card-title">Family calendar</div>
       <div id="cal-container" style="display:flex;flex-direction:column;flex:1;min-height:0;">
-      <div style="display:flex;align-items:center;justify-content:center;flex:1"><span class="spinner"></span></div>
-    </div>
+        <div style="display:flex;align-items:center;justify-content:center;flex:1"><span class="spinner"></span></div>
+      </div>
     </div>
 
     <!-- RIGHT COLUMN -->
@@ -269,7 +270,7 @@
       <div class="cfg-label">Calendar IDs (one per line)</div>
       <div class="cfg-note">
         In Google Calendar, go to <b>Settings → your calendar → Integrate calendar</b> and copy the <b>Calendar ID</b>. One per line. Each calendar gets its own color automatically.<br>
-        Example: <code>you@gmail.com</code> or <code>abc123@group.calendar.google.com</code>
+        Example: <code><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="651c0a10250208040c094b060a08">[email&#160;protected]</a></code> or <code><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f0919293c1c2c3b097829f8580de93919c959e949182de979f9f979c95de939f9d">[email&#160;protected]</a></code>
       </div>
       <textarea class="cfg-input cfg-textarea" id="gcal-ids" placeholder="you@gmail.com&#10;family@group.calendar.google.com"></textarea>
     </div>
@@ -286,7 +287,7 @@
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const CAL_COLORS = ['#4f8ef7','#9b8ef5','#3ecfa6','#f5875a','#f5c842','#f06060','#5dca7a'];
 const DAY_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
@@ -364,7 +365,7 @@ async function fetchCalendar() {
     return;
   }
 
-  container.innerHTML = `<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center"><span class="spinner"></span></div>`;
+  container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;flex:1"><span class="spinner"></span></div>`;
 
   const days = get4Days();
   const timeMin = days[0].toISOString();
@@ -391,7 +392,7 @@ async function fetchCalendar() {
 
   const errors = results.filter(r => r.error);
   if (errors.length === config.calIds.length) {
-    container.innerHTML = `<div class="cal-error" style="grid-column:1/-1">⚠ ${errors[0].error}<br><small>Check your API key and Calendar IDs in Setup.</small></div>`;
+    container.innerHTML = `<div class="cal-error">⚠ ${errors[0].error}<br><small>Check your API key and Calendar IDs in Setup.</small></div>`;
     return;
   }
 
@@ -399,54 +400,132 @@ async function fetchCalendar() {
     r.items.map(item => ({ ...item, _color: r.color }))
   );
 
-  container.innerHTML = '';
+  const HOURS = 24; // render full day
+  const PX_PER_HOUR = 48;
+
+  const timeStr = dt => {
+    const d = new Date(dt), h = d.getHours(), m = d.getMinutes();
+    return `${h%12||12}${m?':'+String(m).padStart(2,'0'):''}${h<12?'a':'p'}`;
+  };
+
+  // Build header
+  const header = document.createElement('div');
+  header.className = 'cal-header';
+  header.innerHTML = `<div></div>` + days.map((day, di) => `
+    <div class="cal-day-head${di===0?' is-today':''}">
+      <div class="cal-day-name">${di===0?'Today':DAY_SHORT[day.getDay()]}</div>
+      <div class="cal-day-num">${day.getDate()}</div>
+    </div>
+  `).join('');
+
+  // Build all-day strip
+  const alldayRow = document.createElement('div');
+  alldayRow.className = 'cal-allday-row';
+  alldayRow.innerHTML = `<div class="cal-allday-gutter">all-day</div>`;
+  days.forEach((day, di) => {
+    const dayStart = day.getTime(), dayEnd = dayStart + 86400000;
+    const cell = document.createElement('div');
+    cell.className = 'cal-allday-cell';
+    const allDayEvts = allEvents.filter(e => {
+      if (!e.start?.date || e.start?.dateTime) return false;
+      const s = new Date(e.start.date + 'T00:00:00').getTime();
+      return s >= dayStart && s < dayEnd;
+    });
+    allDayEvts.forEach(e => {
+      const pill = document.createElement('div');
+      pill.className = 'allday-evt';
+      pill.style.background = e._color;
+      pill.textContent = e.summary || 'Event';
+      cell.appendChild(pill);
+    });
+    alldayRow.appendChild(cell);
+  });
+
+  // Build time grid body
+  const body = document.createElement('div');
+  body.className = 'cal-body';
+
+  // Time gutter
+  const gutter = document.createElement('div');
+  gutter.className = 'cal-time-gutter';
+  for (let h = 0; h < HOURS; h++) {
+    const label = document.createElement('div');
+    label.className = 'cal-time-label';
+    if (h > 0) {
+      const ampm = h < 12 ? 'am' : 'pm';
+      label.textContent = `${h%12||12}${ampm}`;
+    }
+    gutter.appendChild(label);
+  }
+  body.appendChild(gutter);
+
+  // Day columns
   days.forEach((day, di) => {
     const col = document.createElement('div');
-    col.className = 'day-col' + (di === 0 ? ' is-today' : '');
+    col.className = 'cal-day-col' + (di===0?' is-today':'');
 
-    const dayStart = day.getTime();
-    const dayEnd = dayStart + 86400000;
+    // Hour rows (background grid)
+    for (let h = 0; h < HOURS; h++) {
+      const row = document.createElement('div');
+      row.className = 'cal-hour-row';
+      col.appendChild(row);
+    }
 
-    const dayEvts = allEvents.filter(e => {
-      const start = e.start?.dateTime
-        ? new Date(e.start.dateTime)
-        : e.start?.date ? new Date(e.start.date + 'T00:00:00') : null;
-      if (!start) return false;
-      return start.getTime() >= dayStart && start.getTime() < dayEnd;
-    }).sort((a, b) => {
-      const ta = a.start?.dateTime ? new Date(a.start.dateTime) : new Date(a.start.date);
-      const tb = b.start?.dateTime ? new Date(b.start.dateTime) : new Date(b.start.date);
-      return ta - tb;
+    // Current time line (today only)
+    if (di === 0) {
+      const now = new Date();
+      const minuteOfDay = now.getHours() * 60 + now.getMinutes();
+      const pct = minuteOfDay / (HOURS * 60);
+      const top = pct * HOURS * PX_PER_HOUR;
+      const line = document.createElement('div');
+      line.className = 'cal-now-line';
+      line.style.top = top + 'px';
+      const dot = document.createElement('div');
+      dot.className = 'cal-now-dot';
+      line.appendChild(dot);
+      col.appendChild(line);
+    }
+
+    // Timed events
+    const dayStart = day.getTime(), dayEnd = dayStart + 86400000;
+    const timedEvts = allEvents.filter(e => {
+      if (!e.start?.dateTime) return false;
+      const s = new Date(e.start.dateTime).getTime();
+      return s >= dayStart && s < dayEnd;
     });
 
-    const timeStr = dt => {
-      const d = new Date(dt), h = d.getHours(), m = d.getMinutes();
-      return `${h%12||12}${m?':'+String(m).padStart(2,'0'):''}${h<12?'a':'p'}`;
-    };
+    timedEvts.forEach(e => {
+      const start = new Date(e.start.dateTime);
+      const end = e.end?.dateTime ? new Date(e.end.dateTime) : new Date(start.getTime() + 30*60000);
+      const startMin = start.getHours()*60 + start.getMinutes();
+      const endMin = end.getHours()*60 + end.getMinutes();
+      const durationMin = Math.max(endMin - startMin, 30);
 
-    col.innerHTML = `
-      <div class="day-head">${di === 0 ? 'Today' : DAY_SHORT[day.getDay()]}</div>
-      <div class="day-num">${day.getDate()}</div>
-      <div class="day-events" id="devts-${di}"></div>
-    `;
-    container.appendChild(col);
+      const top = (startMin / 60) * PX_PER_HOUR;
+      const height = Math.max((durationMin / 60) * PX_PER_HOUR, 18);
 
-    const evtContainer = col.querySelector(`#devts-${di}`);
-    if (!dayEvts.length) {
-      evtContainer.innerHTML = '<div class="evt-empty">Free day</div>';
-    } else {
-      dayEvts.slice(0, 7).forEach(e => {
-        const isAllDay = !!e.start?.date && !e.start?.dateTime;
-        const prefix = isAllDay ? '' : timeStr(e.start.dateTime) + ' ';
-        const div = document.createElement('div');
-        div.className = 'evt';
-        div.style.background = hexToRgba(e._color, 0.15);
-        div.style.color = e._color;
-        div.textContent = prefix + (e.summary || 'Event');
-        evtContainer.appendChild(div);
-      });
-    }
+      const pill = document.createElement('div');
+      pill.className = 'cal-evt';
+      pill.style.top = top + 'px';
+      pill.style.height = height + 'px';
+      pill.style.background = e._color;
+      pill.innerHTML = `
+        <div class="cal-evt-title">${e.summary || 'Event'}</div>
+        ${height > 28 ? `<div class="cal-evt-time">${timeStr(e.start.dateTime)}</div>` : ''}
+      `;
+      col.appendChild(pill);
+    });
+
+    body.appendChild(col);
   });
+
+  container.innerHTML = '';
+  container.appendChild(header);
+  container.appendChild(alldayRow);
+  container.appendChild(body);
+
+  // Scroll to 7am on load
+  requestAnimationFrame(() => { body.scrollTop = 7 * PX_PER_HOUR; });
 }
 
 /* ---- DINNERS ---- */
@@ -516,6 +595,7 @@ function buildScoreCard(game, label, league) {
     <div class="sc-header">
       <span class="sc-league">${label}</span>
       <span class="sc-status">${statusLabel}</span>
+    </ div>
     </div>
     <div class="sc-body">
       <div class="sc-team">
