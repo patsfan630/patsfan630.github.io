@@ -154,13 +154,7 @@
   .cal-error { color: var(--red); font-size: 12px; text-align: center; padding: 20px; line-height: 1.6; }
 
   /* RIGHT COLUMN */
-  .dinner-list { list-style: none; display: flex; flex-direction: column; }
-  .dinner-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 0.5px solid var(--border); }
-  .dinner-row:last-child { border-bottom: none; }
-  .dinner-day { font-size: 11px; color: var(--muted); width: 26px; flex-shrink: 0; }
-  .dinner-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); flex-shrink: 0; }
-  .dinner-meal { font-size: 13px; color: var(--text); }
-  .dinner-empty { font-size: 12px; color: var(--dim); font-style: italic; }
+
 
   /* SCORES */
   .scores-wrap { display: flex; flex-direction: column; gap: 10px; }
@@ -238,10 +232,10 @@
     <!-- RIGHT COLUMN -->
     <div class="col">
       <div class="card" style="flex:1">
-        <div class="card-title">Weekly dinners</div>
-        <ul class="dinner-list" id="dinner-list">
-          <li class="dinner-row"><span class="dinner-empty">Add your dinner plan in Setup ⚙</span></li>
-        </ul>
+        <div class="card-title">Weather — Bronx, NY</div>
+        <div id="wx-grid" style="display:flex;flex-direction:column;gap:6px;">
+          <div style="color:var(--muted);font-size:12px;text-align:center;padding:10px 0"><span class="spinner"></span></div>
+        </div>
       </div>
       <div class="card" style="flex:1">
         <div class="card-title">Boston scores</div>
@@ -275,11 +269,6 @@
       <textarea class="cfg-input cfg-textarea" id="gcal-ids" placeholder="you@gmail.com&#10;family@group.calendar.google.com"></textarea>
     </div>
 
-    <div class="cfg-section">
-      <div class="cfg-label">Dinner plan (one per line, format: "Mon: Pasta")</div>
-      <textarea class="cfg-input cfg-textarea" id="dinner-input" placeholder="Fri: Pasta &amp; meatballs&#10;Sat: Grilled chicken&#10;Sun: Sunday roast&#10;Mon: Taco night&#10;Tue: Stir fry&#10;Wed: Pizza&#10;Thu: Leftovers"></textarea>
-    </div>
-
     <div class="cfg-actions">
       <button class="cfg-btn" onclick="closeConfig()">Cancel</button>
       <button class="cfg-btn primary" onclick="saveConfig()">Save & refresh</button>
@@ -291,7 +280,7 @@
 const CAL_COLORS = ['#4f8ef7','#9b8ef5','#3ecfa6','#f5875a','#f5c842','#f06060','#5dca7a'];
 const DAY_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-const DEFAULT_CONFIG = { apiKey: '', calIds: [], dinners: [] };
+const DEFAULT_CONFIG = { apiKey: '', calIds: [], };
 let config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 
 function loadConfig() {
@@ -304,11 +293,6 @@ function loadConfig() {
 function saveConfig() {
   config.apiKey = document.getElementById('gcal-api-key').value.trim();
   config.calIds = document.getElementById('gcal-ids').value.split('\n').map(s => s.trim()).filter(Boolean);
-  const dinnerRaw = document.getElementById('dinner-input').value;
-  config.dinners = dinnerRaw.split('\n').map(s => s.trim()).filter(Boolean).map(line => {
-    const idx = line.indexOf(':');
-    return idx > -1 ? { day: line.slice(0,idx).trim(), meal: line.slice(idx+1).trim() } : { day: '', meal: line };
-  });
   localStorage.setItem('famdash_config_v3', JSON.stringify(config));
   closeConfig();
   refreshAll();
@@ -317,7 +301,6 @@ function saveConfig() {
 function openConfig() {
   document.getElementById('gcal-api-key').value = config.apiKey || '';
   document.getElementById('gcal-ids').value = config.calIds.join('\n');
-  document.getElementById('dinner-input').value = config.dinners.map(d => `${d.day}: ${d.meal}`).join('\n');
   document.getElementById('cfg-overlay').classList.add('open');
 }
 function closeConfig() { document.getElementById('cfg-overlay').classList.remove('open'); }
@@ -528,22 +511,6 @@ async function fetchCalendar() {
   requestAnimationFrame(() => { body.scrollTop = 7 * PX_PER_HOUR; });
 }
 
-/* ---- DINNERS ---- */
-function renderDinners() {
-  const el = document.getElementById('dinner-list');
-  if (!config.dinners.length) {
-    el.innerHTML = '<li class="dinner-row"><span class="dinner-empty">Add your dinner plan in Setup ⚙</span></li>';
-    return;
-  }
-  el.innerHTML = config.dinners.map(d => `
-    <li class="dinner-row">
-      <span class="dinner-day">${d.day.slice(0,3)}</span>
-      <div class="dinner-dot"></div>
-      <span class="dinner-meal">${d.meal}</span>
-    </li>
-  `).join('');
-}
-
 /* ---- SCORES ---- */
 async function fetchScores() {
   const el = document.getElementById('scores-wrap');
@@ -595,7 +562,6 @@ function buildScoreCard(game, label, league) {
     <div class="sc-header">
       <span class="sc-league">${label}</span>
       <span class="sc-status">${statusLabel}</span>
-    </ div>
     </div>
     <div class="sc-body">
       <div class="sc-team">
@@ -610,10 +576,44 @@ function buildScoreCard(game, label, league) {
   return card;
 }
 
+/* ---- WEATHER ---- */
+async function fetchWeather() {
+  const el = document.getElementById('wx-grid');
+  try {
+    const pointRes = await fetch('https://api.weather.gov/points/40.9001,-73.9120', { headers: { 'User-Agent': 'FamilyDashboard/1.0' } });
+    const pointData = await pointRes.json();
+    const fRes = await fetch(pointData.properties.forecast, { headers: { 'User-Agent': 'FamilyDashboard/1.0' } });
+    const fData = await fRes.json();
+    const periods = fData.properties.periods.filter(p => p.isDaytime).slice(0, 5);
+    const icons = desc => {
+      const d = desc.toLowerCase();
+      if (d.includes('thunder')) return '⛈';
+      if (d.includes('snow') || d.includes('blizzard')) return '❄';
+      if (d.includes('sleet') || d.includes('freezing')) return '🌨';
+      if (d.includes('rain') || d.includes('shower') || d.includes('drizzle')) return '🌧';
+      if (d.includes('fog') || d.includes('mist')) return '🌫';
+      if (d.includes('partly') || d.includes('mostly sunny')) return '⛅';
+      if (d.includes('cloud') || d.includes('overcast')) return '☁';
+      if (d.includes('sunny') || d.includes('clear')) return '☀';
+      return '⛅';
+    };
+    el.innerHTML = periods.map((p, i) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--border)">
+        <span style="font-size:11px;color:var(--muted);width:36px">${i === 0 ? 'Today' : p.name.slice(0,3)}</span>
+        <span style="font-size:18px;line-height:1">${icons(p.shortForecast)}</span>
+        <span style="font-size:12px;color:var(--text);flex:1;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.shortForecast.split(' ').slice(0,3).join(' ')}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:14px;color:var(--text)">${Math.round(p.temperature)}°</span>
+        ${(p.probabilityOfPrecipitation?.value || 0) > 20 ? `<span style="font-size:10px;color:var(--blue);margin-left:6px">💧${Math.round(p.probabilityOfPrecipitation.value)}%</span>` : ''}
+      </div>
+    `).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:10px">Unable to load weather</div>';
+  }
+}
+  
 /* ---- MAIN ---- */
 async function refreshAll() {
-  renderDinners();
-  await Promise.all([fetchCalendar(), fetchScores()]);
+  await Promise.all([fetchCalendar(), fetchScores(), fetchWeather()]);
 }
 
 loadConfig();
