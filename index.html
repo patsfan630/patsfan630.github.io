@@ -390,7 +390,7 @@ function renderCalendarEmbed() {
   let url = config.calEmbedUrl;
   try {
     const u = new URL(url);
-    u.searchParams.set('mode', 'WEEK');
+    u.searchParams.set('mode', 'AGENDA');
     u.searchParams.set('showTitle', '0');
     u.searchParams.set('showNav', '1');
     u.searchParams.set('showDate', '1');
