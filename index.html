@@ -170,22 +170,113 @@
   .dinner-meal { font-size: 13px; color: var(--text); }
   .dinner-empty { font-size: 12px; color: var(--dim); font-style: italic; }
 
-  .scores-wrap { display: flex; flex-direction: column; gap: 8px; }
-  .score-card { background: var(--surface2); border-radius: 8px; padding: 11px 13px; }
-  .score-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .score-league { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-  .score-status { font-size: 10px; padding: 2px 8px; border-radius: 4px; }
-  .status-final { background: rgba(255,255,255,0.05); color: var(--muted); }
-  .status-live { background: rgba(240,96,96,0.15); color: var(--red); }
-  .status-soon { background: rgba(79,142,247,0.12); color: var(--blue); }
-  .score-teams { display: flex; flex-direction: column; gap: 5px; }
-  .score-team { display: flex; justify-content: space-between; align-items: center; }
-  .team-info { display: flex; align-items: center; gap: 8px; }
-  .team-stripe { width: 4px; height: 16px; border-radius: 2px; flex-shrink: 0; }
-  .team-name { font-size: 13px; font-weight: 500; }
-  .team-score-val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--text); }
-  .team-score-val.winner { color: var(--green); }
-  .score-loading { font-size: 12px; color: var(--muted); text-align: center; padding: 10px 0; }
+.scores-wrap { display: flex; flex-direction: column; gap: 10px; }
+.score-loading { font-size: 12px; color: var(--muted); text-align: center; padding: 10px 0; }
+
+/* Shared card base */
+.score-card { border-radius: 10px; overflow: hidden; }
+
+/* MLB card — navy MLB.com style */
+.score-card.mlb {
+  background: #0a1e35;
+  border: 0.5px solid rgba(189,48,57,0.3);
+}
+.score-card.mlb .sc-header {
+  background: #bd3039;
+  padding: 5px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.score-card.mlb .sc-league {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.score-card.mlb .sc-status {
+  font-size: 10px;
+  color: rgba(255,255,255,0.75);
+  font-family: 'DM Mono', monospace;
+}
+.score-card.mlb .sc-body { padding: 10px 12px; }
+.score-card.mlb .sc-team {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 0.5px solid rgba(255,255,255,0.06);
+}
+.score-card.mlb .sc-team:last-child { border-bottom: none; }
+.score-card.mlb .sc-team-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #c8d8e8;
+}
+.score-card.mlb .sc-team-name .sc-abbr { color: #fff; }
+.score-card.mlb .sc-team-name .sc-record { font-size: 10px; color: #5a7a9a; font-weight: 400; }
+.score-card.mlb .sc-score {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  color: #8aaacc;
+}
+.score-card.mlb .sc-score.winner { color: #fff; }
+
+/* NBA card — NBA.com Celtics style */
+.score-card.nba {
+  background: #051e0f;
+  border: 0.5px solid rgba(0,122,51,0.4);
+}
+.score-card.nba .sc-header {
+  background: linear-gradient(90deg, #007a33 0%, #005a25 100%);
+  padding: 5px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.score-card.nba .sc-league {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #BA9A3C;
+}
+.score-card.nba .sc-status {
+  font-size: 10px;
+  color: rgba(255,255,255,0.8);
+  font-family: 'DM Mono', monospace;
+}
+.score-card.nba .sc-body { padding: 10px 12px; }
+.score-card.nba .sc-team {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 0.5px solid rgba(255,255,255,0.06);
+}
+.score-card.nba .sc-team:last-child { border-bottom: none; }
+.score-card.nba .sc-team-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #a8c8a8;
+}
+.score-card.nba .sc-team-name .sc-abbr { color: #fff; }
+.score-card.nba .sc-team-name .sc-record { font-size: 10px; color: #2a5a3a; font-weight: 400; }
+.score-card.nba .sc-score {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  color: #4a8a5a;
+}
+.score-card.nba .sc-score.winner { color: #BA9A3C; }
 
   /* CONFIG MODAL */
   .cfg-overlay {
@@ -443,8 +534,8 @@ async function fetchScores() {
     const celticsGame = findTeamGame(nbaData, 'BOS');
 
     el.innerHTML = '';
-    if (soxGame) el.appendChild(buildScoreCard(soxGame, 'MLB — Red Sox', '#bd3039', '#0d2b4e'));
-    if (celticsGame) el.appendChild(buildScoreCard(celticsGame, 'NBA — Celtics', '#007a33', '#BA9A3C'));
+    if (soxGame) el.appendChild(buildScoreCard(soxGame, 'MLB · Red Sox', 'mlb'));
+    if (celticsGame) el.appendChild(buildScoreCard(celticsGame, 'NBA · Celtics', 'nba'));
     if (!soxGame && !celticsGame) el.innerHTML = '<div class="score-loading">No games today</div>';
   } catch(e) {
     el.innerHTML = '<div class="score-loading">Unable to load scores</div>';
@@ -458,50 +549,57 @@ function findTeamGame(data, abbrev) {
   ) || null;
 }
   
-function buildScoreCard(game, label, c1, c2) {
+function buildScoreCard(game, label, league) {
   const comp = game.competitions?.[0];
   const status = comp?.status?.type;
   const competitors = comp?.competitors || [];
   const home = competitors.find(c => c.homeAway === 'home');
   const away = competitors.find(c => c.homeAway === 'away');
 
-  let statusLabel = '', statusClass = 'status-final';
-  if (status?.completed) { statusLabel = 'Final'; statusClass = 'status-final'; }
-  else if (status?.state === 'in') { statusLabel = 'Live · ' + (comp?.status?.displayClock || ''); statusClass = 'status-live'; }
-  else {
+  let statusLabel = '';
+  if (status?.completed) {
+    statusLabel = 'Final';
+  } else if (status?.state === 'in') {
+    statusLabel = comp?.status?.detail || 'Live';
+  } else {
     const d = new Date(game.date);
-    statusLabel = d.toLocaleDateString('en-US',{weekday:'short'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-    statusClass = 'status-soon';
+    statusLabel = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   }
 
   const t1 = away || competitors[0] || {};
   const t2 = home || competitors[1] || {};
-  const s1 = parseInt(t1.score || 0), s2 = parseInt(t2.score || 0);
+  const s1 = parseInt(t1.score || 0);
+  const s2 = parseInt(t2.score || 0);
   const done = status?.completed;
-  const n1 = t1.team?.abbreviation || t1.team?.shortDisplayName || 'TBD';
-  const n2 = t2.team?.abbreviation || t2.team?.shortDisplayName || 'TBD';
+  const inProgress = status?.state === 'in';
+  const showScore = done || inProgress;
+
+  const n1 = t1.team?.abbreviation || '—';
+  const n2 = t2.team?.abbreviation || '—';
+  const r1 = t1.records?.[0]?.summary || '';
+  const r2 = t2.records?.[0]?.summary || '';
 
   const card = document.createElement('div');
-  card.className = 'score-card';
+  card.className = `score-card ${league}`;
   card.innerHTML = `
-    <div class="score-meta">
-      <span class="score-league">${label}</span>
-      <span class="score-status ${statusClass}">${statusLabel}</span>
+    <div class="sc-header">
+      <span class="sc-league">${label}</span>
+      <span class="sc-status">${statusLabel}</span>
     </div>
-    <div class="score-teams">
-      <div class="score-team">
-        <div class="team-info">
-          <div class="team-stripe" style="background:${c1}"></div>
-          <span class="team-name" style="color:${c1}">${n1}</span>
+    <div class="sc-body">
+      <div class="sc-team">
+        <div class="sc-team-name">
+          <span class="sc-abbr">${n1}</span>
+          ${r1 ? `<span class="sc-record">${r1}</span>` : ''}
         </div>
-        <span class="team-score-val ${done && s1 > s2 ? 'winner' : ''}">${done || status?.state === 'in' ? s1 : '—'}</span>
+        <span class="sc-score ${done && s1 > s2 ? 'winner' : ''}">${showScore ? s1 : '—'}</span>
       </div>
-      <div class="score-team">
-        <div class="team-info">
-          <div class="team-stripe" style="background:${c2}"></div>
-          <span class="team-name" style="color:${c2}">${n2}</span>
+      <div class="sc-team">
+        <div class="sc-team-name">
+          <span class="sc-abbr">${n2}</span>
+          ${r2 ? `<span class="sc-record">${r2}</span>` : ''}
         </div>
-        <span class="team-score-val ${done && s2 > s1 ? 'winner' : ''}">${done || status?.state === 'in' ? s2 : '—'}</span>
+        <span class="sc-score ${done && s2 > s1 ? 'winner' : ''}">${showScore ? s2 : '—'}</span>
       </div>
     </div>
   `;
