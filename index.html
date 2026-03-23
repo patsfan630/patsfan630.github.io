@@ -745,6 +745,7 @@ async function refreshAll() {
 loadConfig();
 refreshAll();
 setInterval(refreshAll, 15 * 60 * 1000);
+setInterval(fetchScores, 30 * 1000);
 </script>
 </body>
 </html>
