@@ -109,7 +109,7 @@
   /* Header row: 4 day columns */
   .cal-header {
     display: grid;
-    grid-template-columns: 38px repeat(4, 1fr);
+    grid-template-columns: 38px repeat(7, 1fr);
     margin-bottom: 4px;
     flex-shrink: 0;
   }
@@ -124,13 +124,13 @@
   .cal-day-head.is-today .cal-day-num { background: var(--blue); color: #fff; font-weight: 500; }
 
   /* All-day strip */
-  .cal-allday-row { display: grid; grid-template-columns: 38px repeat(4, 1fr); min-height: 22px; margin-bottom: 4px; flex-shrink: 0; }
+  .cal-allday-row { display: grid; grid-template-columns: 38px repeat(7, 1fr); min-height: 22px; margin-bottom: 4px; flex-shrink: 0; }
   .cal-allday-gutter { font-size: 9px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 3px; }
   .cal-allday-cell { border-left: 1px solid var(--border); padding: 2px 3px; display: flex; flex-direction: column; gap: 2px; }
   .allday-evt { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
 
   /* Time grid */
-  .cal-body { display: grid; grid-template-columns: 38px repeat(4, 1fr); flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+  .cal-body { display: grid; grid-template-columns: 38px repeat(7, 1fr); flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
   .cal-body::-webkit-scrollbar { display: none; }
   .cal-time-gutter { display: flex; flex-direction: column; }
   .cal-time-label { height: 32px; flex-shrink: 0; font-size: 9px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 2px; font-family: 'DM Mono', monospace; }
@@ -231,13 +231,13 @@
 
     <!-- RIGHT COLUMN -->
     <div class="col">
-      <div class="card" style="flex:1">
+      <div class="card" style="flex:0 0 33%">
         <div class="card-title">Weather — Bronx, NY</div>
         <div id="wx-grid" style="display:flex;flex-direction:column;gap:6px;">
           <div style="color:var(--muted);font-size:12px;text-align:center;padding:10px 0"><span class="spinner"></span></div>
         </div>
       </div>
-      <div class="card" style="flex:1">
+    <div class="card" style="flex:0 0 64%;overflow-y:auto">
         <div class="card-title">Boston scores</div>
         <div class="scores-wrap" id="scores-wrap">
           <div class="score-loading"><span class="spinner"></span></div>
@@ -323,9 +323,11 @@ tickClock();
 function get4Days() {
   const days = [];
   const today = new Date(); today.setHours(0,0,0,0);
-  for (let i = 0; i < 4; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay()); // back to Sunday
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i);
     days.push(d);
   }
   return days;
@@ -394,13 +396,17 @@ async function fetchCalendar() {
   // Build header
   const header = document.createElement('div');
   header.className = 'cal-header';
-  header.innerHTML = `<div></div>` + days.map((day, di) => `
-    <div class="cal-day-head${di===0?' is-today':''}">
-      <div class="cal-day-name">${di===0?'Today':DAY_SHORT[day.getDay()]}</div>
-      <div class="cal-day-num">${day.getDate()}</div>
-    </div>
-  `).join('');
-
+  const todayTime = new Date(); todayTime.setHours(0,0,0,0);
+  header.innerHTML = `<div></div>` + days.map((day) => {
+  const isToday = day.getTime() === todayTime.getTime();
+    return `
+      <div class="cal-day-head${isToday?' is-today':''}">
+        <div class="cal-day-name">${DAY_SHORT[day.getDay()]}</div>
+        <div class="cal-day-num">${day.getDate()}</div>
+      </div>
+    `;
+  }).join('');
+  
   // Build all-day strip
   const alldayRow = document.createElement('div');
   alldayRow.className = 'cal-allday-row';
@@ -444,8 +450,9 @@ async function fetchCalendar() {
 
   // Day columns
   days.forEach((day, di) => {
+    const isToday = day.getTime() === todayTime.getTime();
     const col = document.createElement('div');
-    col.className = 'cal-day-col' + (di===0?' is-today':'');
+    col.className = 'cal-day-col' + (isToday?' is-today':'');
 
     // Hour rows (background grid)
     for (let h = 0; h < HOURS; h++) {
@@ -455,7 +462,7 @@ async function fetchCalendar() {
     }
 
     // Current time line (today only)
-    if (di === 0) {
+    if (isToday) { 
       const now = new Date();
       const minuteOfDay = now.getHours() * 60 + now.getMinutes();
       const pct = minuteOfDay / (HOURS * 60);
@@ -616,7 +623,7 @@ async function fetchWeather() {
     // Today daytime, tonight, then next 3 days (daytime only)
     const today = periods.find(p => p.isDaytime);
     const tonight = periods.find(p => !p.isDaytime && p.name.toLowerCase().includes('tonight'));
-    const futureDays = periods.filter(p => p.isDaytime && p.number > (today?.number || 0)).slice(0, 3);
+    const futureDays = periods.filter(p => p.isDaytime && p.number > (today?.number || 0)).slice(0, 1);
 
     const precipStr = p => (p.probabilityOfPrecipitation?.value || 0) > 20
       ? `<span style="color:var(--blue);font-size:10px">💧${Math.round(p.probabilityOfPrecipitation.value)}%</span>`
@@ -653,7 +660,7 @@ async function fetchWeather() {
       divider +
       (today ? forecastRow('Today', today) : '') +
       (tonight ? forecastRow('Tonight', tonight) : '') +
-      futureDays.map(p => forecastRow(p.name.slice(0, 1), p)).join('');
+      futureDays.map(p => forecastRow('Tomorrow', p)).join('');
 
   } catch(e) {
     el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:10px">Unable to load weather</div>';
