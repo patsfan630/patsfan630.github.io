@@ -500,8 +500,7 @@ async function fetchCalendar() {
       pill.style.height = height + 'px';
       pill.style.background = e._color;
       pill.innerHTML = `
-        <div class="cal-evt-title">${e.summary || 'Event'}</div>
-        ${height > 28 ? `<div class="cal-evt-time">${timeStr(e.start.dateTime)}</div>` : ''}
+        <div class="cal-evt-title">${timeStr(e.start.dateTime)} ${e.summary || 'Event'}</div>
       `;
       col.appendChild(pill);
     });
