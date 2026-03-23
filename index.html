@@ -386,6 +386,7 @@ async function fetchCalendar() {
   );
 
   const HOURS = 24; // render full day
+  const START_HOUR = 6;
   const PX_PER_HOUR = 32;
 
   const timeStr = dt => {
@@ -435,15 +436,12 @@ async function fetchCalendar() {
   body.className = 'cal-body';
 
   // Time gutter
-  const gutter = document.createElement('div');
+const gutter = document.createElement('div');
   gutter.className = 'cal-time-gutter';
-  for (let h = 0; h < HOURS; h++) {
+  for (let h = START_HOUR; h < HOURS; h++) {
     const label = document.createElement('div');
     label.className = 'cal-time-label';
-    if (h > 0) {
-      const ampm = h < 12 ? 'am' : 'pm';
-      label.textContent = `${h%12||12}${ampm}`;
-    }
+    label.textContent = `${h%12||12}${h<12?'am':'pm'}`;
     gutter.appendChild(label);
   }
   body.appendChild(gutter);
@@ -455,7 +453,7 @@ async function fetchCalendar() {
     col.className = 'cal-day-col' + (isToday?' is-today':'');
 
     // Hour rows (background grid)
-    for (let h = 0; h < HOURS; h++) {
+    for (let h = START_HOUR; h < HOURS; h++) {
       const row = document.createElement('div');
       row.className = 'cal-hour-row';
       col.appendChild(row);
@@ -466,7 +464,7 @@ async function fetchCalendar() {
       const now = new Date();
       const minuteOfDay = now.getHours() * 60 + now.getMinutes();
       const pct = minuteOfDay / (HOURS * 60);
-      const top = pct * HOURS * PX_PER_HOUR;
+      const top = ((minuteOfDay / 60) - START_HOUR) * PX_PER_HOUR;
       const line = document.createElement('div');
       line.className = 'cal-now-line';
       line.style.top = top + 'px';
@@ -490,8 +488,7 @@ async function fetchCalendar() {
       const startMin = start.getHours()*60 + start.getMinutes();
       const endMin = end.getHours()*60 + end.getMinutes();
       const durationMin = Math.max(endMin - startMin, 30);
-
-      const top = (startMin / 60) * PX_PER_HOUR;
+      const top = ((startMin / 60) - START_HOUR) * PX_PER_HOUR;
       const height = Math.max((durationMin / 60) * PX_PER_HOUR, 18);
 
       const pill = document.createElement('div');
@@ -512,9 +509,6 @@ async function fetchCalendar() {
   container.appendChild(header);
   container.appendChild(alldayRow);
   container.appendChild(body);
-
-  // Scroll to 7am on load
-  requestAnimationFrame(() => { body.scrollTop = 7 * PX_PER_HOUR; });
 }
 
 /* ---- SCORES ---- */
