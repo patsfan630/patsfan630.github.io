@@ -523,29 +523,27 @@ async function fetchScores() {
   el.innerHTML = '<div class="score-loading"><span class="spinner"></span></div>';
   try {
     const [mlbRes, nbaRes] = await Promise.all([
-      fetch('https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/2/schedule?limit=10'),
-      fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/17/schedule?limit=10')
+      fetch('https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard'),
+      fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard')
     ]);
     const mlbData = await mlbRes.json();
     const nbaData = await nbaRes.json();
-
+    const soxGame = findTeamGame(mlbData, 'BOS');
+    const celticsGame = findTeamGame(nbaData, 'BOS');
     el.innerHTML = '';
-    const soxGames = findRecentAndNext(mlbData);
-    const celticsGames = findRecentAndNext(nbaData);
-
-    if (soxGames.recent) el.appendChild(buildScoreCard(soxGames.recent, 'MLB · Red Sox', 'mlb'));
-    if (soxGames.next) el.appendChild(buildScoreCard(soxGames.next, 'MLB · Red Sox', 'mlb'));
-    if (celticsGames.recent) el.appendChild(buildScoreCard(celticsGames.recent, 'NBA · Celtics', 'nba'));
-    if (celticsGames.next) el.appendChild(buildScoreCard(celticsGames.next, 'NBA · Celtics', 'nba'));
-
-    if (!soxGames.recent && !soxGames.next && !celticsGames.recent && !celticsGames.next) {
-      el.innerHTML = '<div class="score-loading">No games found</div>';
-    }
+    if (soxGame) el.appendChild(buildScoreCard(soxGame, 'MLB · Red Sox', 'mlb'));
+    if (celticsGame) el.appendChild(buildScoreCard(celticsGame, 'NBA · Celtics', 'nba'));
+    if (!soxGame && !celticsGame) el.innerHTML = '<div class="score-loading">No games today</div>';
   } catch(e) {
     el.innerHTML = '<div class="score-loading">Unable to load scores</div>';
   }
 }
 
+function findTeamGame(data, abbrev) {
+  return (data?.events || []).find(evt =>
+    evt.competitions?.[0]?.competitors?.some(c => c.team?.abbreviation === abbrev)
+  ) || null;
+}
 function findRecentAndNext(data) {
   const events = data?.events || [];
   const now = Date.now();
