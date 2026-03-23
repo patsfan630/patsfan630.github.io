@@ -525,8 +525,8 @@ async function fetchScores() {
     const soxGame = findTeamGame(mlbData, 'BOS');
     const celticsGame = findTeamGame(nbaData, 'BOS');
     el.innerHTML = '';
-    if (soxGame) el.appendChild(buildScoreCard(soxGame, 'MLB · Red Sox', 'mlb'));
-    if (celticsGame) el.appendChild(buildScoreCard(celticsGame, 'NBA · Celtics', 'nba'));
+    if (soxGame) el.appendChild(await buildScoreCard(soxGame, 'MLB · Red Sox', 'mlb'));
+    if (celticsGame) el.appendChild(await buildScoreCard(celticsGame, 'NBA · Celtics', 'nba'));
     if (!soxGame && !celticsGame) el.innerHTML = '<div class="score-loading">No games today</div>';
   } catch(e) {
     el.innerHTML = '<div class="score-loading">Unable to load scores</div>';
@@ -560,16 +560,12 @@ function findRecentAndNext(data) {
   return { recent, next };
 }
 
-function buildScoreCard(game, label, league) {
+async function buildScoreCard(game, label, league) {
   const comp = game.competitions?.[0];
   const status = comp?.status?.type;
   const competitors = comp?.competitors || [];
   const home = competitors.find(c => c.homeAway === 'home');
   const away = competitors.find(c => c.homeAway === 'away');
-  let statusLabel = '';
-  if (status?.completed) statusLabel = 'Final';
-  else if (status?.state === 'in') statusLabel = comp?.status?.detail || 'Live';
-  else { const d = new Date(game.date); statusLabel = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); }
   const t1 = away || competitors[0] || {};
   const t2 = home || competitors[1] || {};
   const s1 = parseInt(t1.score || 0), s2 = parseInt(t2.score || 0);
@@ -577,6 +573,65 @@ function buildScoreCard(game, label, league) {
   const showScore = done || inProgress;
   const n1 = t1.team?.abbreviation || '—', n2 = t2.team?.abbreviation || '—';
   const r1 = t1.records?.[0]?.summary || '', r2 = t2.records?.[0]?.summary || '';
+
+  let statusLabel = '';
+  if (done) statusLabel = 'Final';
+  else if (inProgress) statusLabel = comp?.status?.detail || 'Live';
+  else { const d = new Date(game.date); statusLabel = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); }
+
+  // Fetch live detail if game is in progress
+  let liveHTML = '';
+  if (inProgress) {
+    try {
+      const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${league === 'mlb' ? 'baseball/mlb' : 'basketball/nba'}/summary?event=${game.id}`);
+      const data = await res.json();
+
+      if (league === 'mlb') {
+        const situation = data.situation || {};
+        const balls = situation.balls ?? '—';
+        const strikes = situation.strikes ?? '—';
+        const outs = situation.outs ?? '—';
+        const inning = comp?.status?.detail || '';
+        const batter = situation.batter?.athlete?.displayName || '—';
+        const pitcher = situation.pitcher?.athlete?.displayName || '—';
+
+        // Bases: 1=first, 2=second, 3=third
+        const onFirst  = situation.onFirst  ? '#4f8ef7' : 'var(--surface2)';
+        const onSecond = situation.onSecond ? '#4f8ef7' : 'var(--surface2)';
+        const onThird  = situation.onThird  ? '#4f8ef7' : 'var(--surface2)';
+
+        liveHTML = `
+          <div style="margin-top:8px;padding-top:8px;border-top:0.5px solid rgba(255,255,255,0.06)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:10px;color:var(--muted)">${inning}</span>
+              <span style="font-size:10px;color:var(--muted)">B${balls} S${strikes} O${outs}</span>
+              <!-- Base diamond -->
+              <div style="position:relative;width:28px;height:28px;flex-shrink:0">
+                <div style="position:absolute;top:0;left:50%;transform:translateX(-50%) rotate(45deg);width:9px;height:9px;background:${onSecond};border:1px solid #4f8ef7"></div>
+                <div style="position:absolute;top:50%;right:0;transform:translateY(-50%) rotate(45deg);width:9px;height:9px;background:${onFirst};border:1px solid #4f8ef7"></div>
+                <div style="position:absolute;top:50%;left:0;transform:translateY(-50%) rotate(45deg);width:9px;height:9px;background:${onThird};border:1px solid #4f8ef7"></div>
+                <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%) rotate(45deg);width:9px;height:9px;background:var(--surface2);border:1px solid #4f8ef7"></div>
+              </div>
+            </div>
+            <div style="font-size:10px;color:var(--muted)">🏏 <span style="color:var(--text)">${batter}</span></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">⚾ <span style="color:var(--text)">${pitcher}</span></div>
+          </div>
+        `;
+      } else if (league === 'nba') {
+        const period = comp?.status?.period || '—';
+        const clock = comp?.status?.displayClock || '—';
+        const periodLabel = period === 1 ? '1st' : period === 2 ? '2nd' : period === 3 ? '3rd' : period === 4 ? '4th' : `OT${period - 4}`;
+        liveHTML = `
+          <div style="margin-top:8px;padding-top:8px;border-top:0.5px solid rgba(255,255,255,0.06)">
+            <div style="font-size:11px;color:var(--muted);text-align:center">${periodLabel} &middot; ${clock}</div>
+          </div>
+        `;
+      }
+    } catch(e) {
+      // silently fail — live detail is best-effort
+    }
+  }
+
   const card = document.createElement('div');
   card.className = `score-card ${league}`;
   card.innerHTML = `
@@ -593,6 +648,7 @@ function buildScoreCard(game, label, league) {
         <div class="sc-team-name"><span class="sc-abbr">${n2}</span>${r2 ? `<span class="sc-record">${r2}</span>` : ''}</div>
         <span class="sc-score ${done && s2 > s1 ? 'winner' : ''}">${showScore ? s2 : '—'}</span>
       </div>
+      ${liveHTML}
     </div>`;
   return card;
 }
