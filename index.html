@@ -354,7 +354,7 @@ async function fetchCalendar() {
 
   const days = get4Days();
   const timeMin = days[0].toISOString();
-  const timeMax = new Date(days[3].getTime() + 86400000).toISOString();
+  const timeMax = new Date(days[6].getTime() + 86400000).toISOString();
 
   const results = await Promise.all(config.calIds.map(async (calId, idx) => {
     try {
