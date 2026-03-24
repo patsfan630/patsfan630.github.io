@@ -592,8 +592,14 @@ async function buildScoreCard(game, label, league) {
         const strikes = situation.strikes ?? '—';
         const outs = situation.outs ?? '—';
         const inning = comp?.status?.detail || '';
-        const batter = situation.batter?.athlete?.displayName || '—';
-        const pitcher = situation.pitcher?.athlete?.displayName || '—';
+const batter = situation.batter?.athlete?.displayName
+          || situation.batter?.displayName
+          || data.boxscore?.players?.flatMap(t => t.statistics || []).flatMap(s => s.athletes || []).find(a => a.athlete?.id === situation.batter?.id)?.athlete?.displayName
+          || '—';
+        const pitcher = situation.pitcher?.athlete?.displayName
+          || situation.pitcher?.displayName
+          || data.boxscore?.players?.flatMap(t => t.statistics || []).flatMap(s => s.athletes || []).find(a => a.athlete?.id === situation.pitcher?.id)?.athlete?.displayName
+          || '—';
 
         // Bases: 1=first, 2=second, 3=third
         const onFirst  = situation.onFirst  ? '#4f8ef7' : 'var(--surface2)';
