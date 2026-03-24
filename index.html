@@ -588,6 +588,7 @@ async function buildScoreCard(game, label, league) {
 
       if (league === 'mlb') {
         const situation = data.situation || {};
+        console.log('situation:', JSON.stringify(situation, null, 2));
         const balls = situation.balls ?? '—';
         const strikes = situation.strikes ?? '—';
         const outs = situation.outs ?? '—';
