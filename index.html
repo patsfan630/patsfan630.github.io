@@ -455,7 +455,7 @@ const gutter = document.createElement('div');
   for (let h = START_HOUR; h < END_HOUR; h++) {
     const label = document.createElement('div');
     label.className = 'cal-time-label';
-    label.textContent = `${h%12||12}${h<12?'am':'pm'}`;
+    label.textContent = h === START_HOUR ? '' : `${h%12||12}${h<12?'am':'pm'}`;
     gutter.appendChild(label);
   }
   body.appendChild(gutter);
