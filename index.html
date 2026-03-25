@@ -286,7 +286,11 @@ let config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 function loadConfig() {
   try {
     const saved = localStorage.getItem('famdash_config_v4');
-    if (saved) config = Object.assign(JSON.parse(JSON.stringify(DEFAULT_CONFIG)), JSON.parse(saved));
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      config = Object.assign(JSON.parse(JSON.stringify(DEFAULT_CONFIG)), parsed);
+      if (!parsed.calIds || !parsed.calIds.length) config.calIds = DEFAULT_CONFIG.calIds;
+    }
   } catch(e) {}
 }
 
