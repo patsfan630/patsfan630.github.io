@@ -503,7 +503,7 @@ const gutter = document.createElement('div');
       const endMin = end.getHours()*60 + end.getMinutes();
       const durationMin = Math.max(endMin - startMin, 30);
       const top = ((startMin / 60) - START_HOUR) * PX_PER_HOUR;
-      const height = Math.max((durationMin / 60) * PX_PER_HOUR, 18);
+      const height = (durationMin / 60) * PX_PER_HOUR;
 
       const pill = document.createElement('div');
       pill.className = 'cal-evt';
