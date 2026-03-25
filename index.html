@@ -443,13 +443,14 @@ async function fetchCalendar() {
   // Time gutter
 const gutter = document.createElement('div');
   gutter.className = 'cal-time-gutter';
-  for (let h = START_HOUR; h < HOURS; h++) {
-      const row = document.createElement('div');
-      row.className = 'cal-hour-row';
-      col.appendChild(row);
-    }
+  for (let h = START_HOUR; h < END_HOUR; h++) {
+    const label = document.createElement('div');
+    label.className = 'cal-time-label';
+    label.textContent = `${h%12||12}${h<12?'am':'pm'}`;
+    gutter.appendChild(label);
+  }
   body.appendChild(gutter);
-
+  
   // Day columns
   days.forEach((day, di) => {
     const isToday = day.getTime() === todayTime.getTime();
