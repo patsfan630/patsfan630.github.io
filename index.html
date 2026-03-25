@@ -109,7 +109,7 @@
   /* Header row: 4 day columns */
   .cal-header {
     display: grid;
-    grid-template-columns: 38px repeat(7, 1fr);
+    grid-template-columns: 2.8vw repeat(7, 1fr);
     margin-bottom: 4px;
     flex-shrink: 0;
   }
@@ -124,13 +124,13 @@
   .cal-day-head.is-today .cal-day-num { background: var(--blue); color: #fff; font-weight: 500; }
 
   /* All-day strip */
-  .cal-allday-row { display: grid; grid-template-columns: 38px repeat(7, 1fr); min-height: 22px; margin-bottom: 4px; flex-shrink: 0; }
+  .cal-allday-row { display: grid; grid-template-columns: 2.8vw repeat(7, 1fr); min-height: 22px; margin-bottom: 4px; flex-shrink: 0; }
   .cal-allday-gutter { font-size: 9px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 3px; }
   .cal-allday-cell { border-left: 1px solid var(--border); padding: 2px 3px; display: flex; flex-direction: column; gap: 2px; }
   .allday-evt { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
 
   /* Time grid */
-  .cal-body { display: grid; grid-template-columns: 38px repeat(7, 1fr); flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+  .cal-body { display: grid; grid-template-columns: 2.8vw repeat(7, 1fr); flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
   .cal-body::-webkit-scrollbar { display: none; }
   .cal-time-gutter { display: flex; flex-direction: column; }
   .cal-time-label { height: 5.6vh; flex-shrink: 0; font-size: 9px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 2px; font-family: 'DM Mono', monospace; }
