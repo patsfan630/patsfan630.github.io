@@ -74,7 +74,7 @@
   /* MAIN GRID */
   .main {
     display: grid;
-    grid-template-columns: 7fr 1fr;
+    grid-template-columns: 5fr 1fr;
     gap: 0.8vw;
     min-height: 0;
   }
@@ -133,10 +133,10 @@
   .cal-body { display: grid; grid-template-columns: 38px repeat(7, 1fr); flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
   .cal-body::-webkit-scrollbar { display: none; }
   .cal-time-gutter { display: flex; flex-direction: column; }
-  .cal-time-label { height: 2.4vh; flex-shrink: 0; font-size: 9px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 2px; font-family: 'DM Mono', monospace; }
+  .cal-time-label { height: 5.6vh; flex-shrink: 0; font-size: 9px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 2px; font-family: 'DM Mono', monospace; }
   .cal-day-col { border-left: 1px solid var(--border); position: relative; display: flex; flex-direction: column; }
   .cal-day-col.is-today { background: rgba(79,142,247,0.03); }
-  .cal-hour-row { height: 2.4vh; flex-shrink: 0; border-top: 1px solid var(--border); }
+  .cal-hour-row { height: 5.6vh; flex-shrink: 0; border-top: 1px solid var(--border); }
   .cal-hour-row:first-child { border-top: none; }
   .cal-evt { position: absolute; left: 3px; right: 3px; border-radius: 4px; padding: 2px 5px; font-size: 10px; font-weight: 500; color: #fff; overflow: hidden; line-height: 1.3; min-height: 18px; }
   .cal-evt-title { white-space: normal; overflow: hidden; overflow-wrap: break-word; }
@@ -386,8 +386,9 @@ async function fetchCalendar() {
   );
 
   const HOURS = 24; // render full day
-  const START_HOUR = 6;
-  const PX_PER_HOUR = window.innerHeight * 0.024;
+  const START_HOUR = 7;
+  const END_HOUR = 22;
+  const PX_PER_HOUR = window.innerHeight * 0.056;
   
   const timeStr = dt => {
     const d = new Date(dt), h = d.getHours(), m = d.getMinutes();
@@ -439,11 +440,10 @@ async function fetchCalendar() {
 const gutter = document.createElement('div');
   gutter.className = 'cal-time-gutter';
   for (let h = START_HOUR; h < HOURS; h++) {
-    const label = document.createElement('div');
-    label.className = 'cal-time-label';
-    label.textContent = `${h%12||12}${h<12?'am':'pm'}`;
-    gutter.appendChild(label);
-  }
+      const row = document.createElement('div');
+      row.className = 'cal-hour-row';
+      col.appendChild(row);
+    }
   body.appendChild(gutter);
 
   // Day columns
@@ -453,7 +453,7 @@ const gutter = document.createElement('div');
     col.className = 'cal-day-col' + (isToday?' is-today':'');
 
     // Hour rows (background grid)
-    for (let h = START_HOUR; h < HOURS; h++) {
+    for (let h = START_HOUR; h < END_HOUR; h++) {
       const row = document.createElement('div');
       row.className = 'cal-hour-row';
       col.appendChild(row);
