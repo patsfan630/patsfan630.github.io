@@ -292,7 +292,7 @@ function loadConfig() {
 
 function saveConfig() {
   config.apiKey = document.getElementById('gcal-api-key').value.trim();
-  config.calIds = document.getElementById('gcal-ids').value.split('\n').map(s => s.trim()).filter(Boolean);
+  config.calIds = document.getElementById('gcal-ids').value.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
   localStorage.setItem('famdash_config_v3', JSON.stringify(config));
   closeConfig();
   refreshAll();
