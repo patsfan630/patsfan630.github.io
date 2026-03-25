@@ -142,7 +142,7 @@
   .cal-body { display: grid; grid-template-columns: 2.8vw repeat(7, 1fr); flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; min-width: 0; width: 100%; }
   .cal-body::-webkit-scrollbar { display: none; }
   .cal-time-gutter { display: flex; flex-direction: column; }
-  .cal-time-label { height: 4vh; flex-shrink: 0; font-size: 9px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 2px; font-family: 'DM Mono', monospace; }
+  .cal-time-label { height: 4vh; flex-shrink: 0; font-size: 9px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 0; margin-top: -0.6em; font-family: 'DM Mono', monospace; }
   .cal-day-col { border-left: 1px solid var(--border); position: relative; display: flex; flex-direction: column; }
   .cal-day-col.is-today { background: rgba(79,142,247,0.03); }
   .cal-hour-row { height: 4vh; flex-shrink: 0; border-top: 1px solid var(--border); }
@@ -455,7 +455,7 @@ const gutter = document.createElement('div');
   for (let h = START_HOUR; h < END_HOUR; h++) {
     const label = document.createElement('div');
     label.className = 'cal-time-label';
-    label.textContent = h === START_HOUR ? '' : `${h%12||12}${h<12?'am':'pm'}`;
+    label.textContent = `${h%12||12}${h<12?'am':'pm'}`;
     gutter.appendChild(label);
   }
   body.appendChild(gutter);
