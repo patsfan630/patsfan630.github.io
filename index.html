@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,7 +27,7 @@
     background: var(--bg);
     font-family: 'DM Sans', sans-serif;
     color: var(--text);
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.4;
   }
 
@@ -47,7 +46,7 @@
     grid-template-columns: 1fr auto;
     align-items: center;
   }
-  .clock-block { display: flex; flex-direction: column; }
+  .clock-block { display: flex; align-items: baseline; gap: 0.8vw; }
   .clock {
     font-family: 'DM Mono', monospace;
     font-size: 2.2vw;
@@ -56,14 +55,14 @@
     letter-spacing: -1px;
     line-height: 1;
   }
-  .clock-sub { font-size: 0.8vw; color: var(--muted); margin-top: 2px; }
+  .clock-sub { font-family: 'DM Mono', monospace; font-size: 2.2vw; font-weight: 400; color: #fff; letter-spacing: -1px; line-height: 1; }
   .topbar-right { display: flex; align-items: center; gap: 6px; }
   .refresh-btn {
     background: var(--surface2);
     border: 0.5px solid var(--border);
     border-radius: 6px;
     color: var(--muted);
-    font-size: 0.7vw;
+    font-size: 0.85vw;
     padding: 0.3vw 0.7vw;
     cursor: pointer;
     font-family: 'DM Sans', sans-serif;
@@ -88,7 +87,7 @@
     overflow: hidden;
   }
   .card-title {
-    font-size: 0.65vw;
+    font-size: 0.8vw;
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -111,7 +110,7 @@
     width: 100%;
   }
   
-  /* Header row: 4 day columns */
+  /* Header row: 7 day columns */
   .cal-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -127,29 +126,29 @@
     border-bottom: 1px solid var(--border);
   }
   
-  .cal-day-name { font-size: 0.7vw; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 4px; }
-  .cal-day-num { width: 2vw; height: 2vw; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2vw; font-weight: 400; color: var(--text); }
+  .cal-day-name { font-size: 0.85vw; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 4px; }
+  .cal-day-num { width: 2.2vw; height: 2.2vw; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.35vw; font-weight: 400; color: var(--text); }
   .cal-day-head.is-today .cal-day-name { color: var(--blue); }
   .cal-day-head.is-today .cal-day-num { background: var(--blue); color: #fff; font-weight: 500; }
 
   /* All-day strip */
   .cal-allday-row { display: grid; grid-template-columns: repeat(7, 1fr); min-height: 2vh; margin-bottom: 4px; flex-shrink: 0; min-width: 0; width: 100%; }
-  .cal-allday-gutter { font-size: 9px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 3px; }
+  .cal-allday-gutter { font-size: 11px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 3px; }
   .cal-allday-cell { border-left: 1px solid var(--border); padding: 2px 3px; display: flex; flex-direction: column; gap: 2px; }
-  .allday-evt { font-size: 9px; font-weight: 500; padding: 2px 6px; border-radius: 3px; white-space: normal; overflow: hidden; overflow-wrap: break-word; color: #fff; }
+  .allday-evt { font-size: 11px; font-weight: 500; padding: 2px 6px; border-radius: 3px; white-space: normal; overflow: hidden; overflow-wrap: break-word; color: #fff; }
 
   /* Time grid */
   .cal-body { display: grid; grid-template-columns: repeat(7, 1fr); flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; min-width: 0; width: 100%; }
   .cal-body::-webkit-scrollbar { display: none; }
   .cal-time-gutter { display: flex; flex-direction: column; }
-  .cal-time-label { height: 4vh; flex-shrink: 0; font-size: 9px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 0; display: flex; align-items: flex-end; justify-content: flex-end; padding-bottom: 2px; font-family: 'DM Mono', monospace; }
+  .cal-time-label { height: 4vh; flex-shrink: 0; font-size: 11px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 0; display: flex; align-items: flex-end; justify-content: flex-end; padding-bottom: 2px; font-family: 'DM Mono', monospace; }
   .cal-day-col { border-left: 1px solid var(--border); position: relative; display: flex; flex-direction: column; }
   .cal-day-col.is-today { background: rgba(79,142,247,0.03); }
   .cal-hour-row { height: 4vh; flex-shrink: 0; border-top: 1px solid var(--border); }
   .cal-hour-row:first-child { border-top: 1px solid var(--border); }
-  .cal-evt { position: absolute; left: 3px; right: 3px; border-radius: 4px; padding: 2px 5px; font-size: 9px; font-weight: 500; color: #fff; overflow: visible; line-height: 1.3; min-height: 18px; z-index: 1; }
+  .cal-evt { position: absolute; left: 3px; right: 3px; border-radius: 4px; padding: 3px 6px; font-size: 11px; font-weight: 500; color: #fff; overflow: visible; line-height: 1.3; min-height: 20px; z-index: 1; }
   .cal-evt-title { white-space: normal; overflow-wrap: break-word; }
-  .cal-evt-time { font-size: 9px; opacity: 0.85; white-space: nowrap; }
+  .cal-evt-time { font-size: 11px; opacity: 0.85; white-space: nowrap; }
   .cal-now-line { position: absolute; left: 0; right: 0; height: 2px; background: var(--red); z-index: 10; pointer-events: none; }
   .cal-now-dot { position: absolute; left: -4px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--red); }
 
@@ -157,57 +156,54 @@
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 10px;
     background: var(--surface2); border-radius: 8px;
-    color: var(--muted); font-size: 13px; text-align: center; padding: 24px;
+    color: var(--muted); font-size: 15px; text-align: center; padding: 24px;
   }
-  .cal-placeholder .icon { font-size: 32px; opacity: 0.5; }
-  .cal-error { color: var(--red); font-size: 12px; text-align: center; padding: 20px; line-height: 1.6; }
-
-  /* RIGHT COLUMN */
-
+  .cal-placeholder .icon { font-size: 36px; opacity: 0.5; }
+  .cal-error { color: var(--red); font-size: 14px; text-align: center; padding: 20px; line-height: 1.6; }
 
   /* SCORES */
   .scores-wrap { display: flex; flex-direction: column; gap: 10px; }
-  .score-loading { font-size: 12px; color: var(--muted); text-align: center; padding: 10px 0; }
+  .score-loading { font-size: 14px; color: var(--muted); text-align: center; padding: 10px 0; }
   .score-card { border-radius: 10px; overflow: hidden; }
   .score-card.mlb { background: #0a1e35; border: 0.5px solid rgba(189,48,57,0.3); }
-  .score-card.mlb .sc-header { background: #bd3039; padding: 5px 12px; display: flex; justify-content: space-between; align-items: center; }
-  .score-card.mlb .sc-league { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; }
-  .score-card.mlb .sc-status { font-size: 10px; color: rgba(255,255,255,0.75); font-family: 'DM Mono', monospace; }
+  .score-card.mlb .sc-header { background: #bd3039; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; }
+  .score-card.mlb .sc-league { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; }
+  .score-card.mlb .sc-status { font-size: 12px; color: rgba(255,255,255,0.75); font-family: 'DM Mono', monospace; }
   .score-card.mlb .sc-body { padding: 10px 12px; }
-  .score-card.mlb .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 0.5px solid rgba(255,255,255,0.06); }
+  .score-card.mlb .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 0.5px solid rgba(255,255,255,0.06); }
   .score-card.mlb .sc-team:last-child { border-bottom: none; }
-  .score-card.mlb .sc-team-name { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #c8d8e8; }
+  .score-card.mlb .sc-team-name { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; color: #c8d8e8; }
   .score-card.mlb .sc-abbr { color: #fff; }
-  .score-card.mlb .sc-record { font-size: 10px; color: #5a7a9a; font-weight: 400; }
-  .score-card.mlb .sc-score { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: #8aaacc; }
+  .score-card.mlb .sc-record { font-size: 12px; color: #5a7a9a; font-weight: 400; }
+  .score-card.mlb .sc-score { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: #8aaacc; }
   .score-card.mlb .sc-score.winner { color: #fff; }
   .score-card.nba { background: #051e0f; border: 0.5px solid rgba(0,122,51,0.4); }
-  .score-card.nba .sc-header { background: linear-gradient(90deg, #007a33 0%, #005a25 100%); padding: 5px 12px; display: flex; justify-content: space-between; align-items: center; }
-  .score-card.nba .sc-league { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #BA9A3C; }
-  .score-card.nba .sc-status { font-size: 10px; color: rgba(255,255,255,0.8); font-family: 'DM Mono', monospace; }
+  .score-card.nba .sc-header { background: linear-gradient(90deg, #007a33 0%, #005a25 100%); padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; }
+  .score-card.nba .sc-league { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #BA9A3C; }
+  .score-card.nba .sc-status { font-size: 12px; color: rgba(255,255,255,0.8); font-family: 'DM Mono', monospace; }
   .score-card.nba .sc-body { padding: 10px 12px; }
-  .score-card.nba .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 0.5px solid rgba(255,255,255,0.06); }
+  .score-card.nba .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 0.5px solid rgba(255,255,255,0.06); }
   .score-card.nba .sc-team:last-child { border-bottom: none; }
-  .score-card.nba .sc-team-name { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #a8c8a8; }
+  .score-card.nba .sc-team-name { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; color: #a8c8a8; }
   .score-card.nba .sc-abbr { color: #fff; }
-  .score-card.nba .sc-record { font-size: 10px; color: #2a5a3a; font-weight: 400; }
-  .score-card.nba .sc-score { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: #4a8a5a; }
+  .score-card.nba .sc-record { font-size: 12px; color: #2a5a3a; font-weight: 400; }
+  .score-card.nba .sc-score { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: #4a8a5a; }
   .score-card.nba .sc-score.winner { color: #BA9A3C; }
 
   /* CONFIG MODAL */
   .cfg-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
   .cfg-overlay.open { display: flex; }
   .cfg-modal { background: var(--surface); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 24px; width: 560px; max-height: 88vh; overflow-y: auto; }
-  .cfg-title { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 18px; }
+  .cfg-title { font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 18px; }
   .cfg-section { margin-bottom: 16px; }
-  .cfg-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
-  .cfg-input { width: 100%; background: var(--surface2); border: 0.5px solid var(--border); border-radius: 7px; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; padding: 8px 10px; margin-bottom: 6px; outline: none; }
+  .cfg-label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .cfg-input { width: 100%; background: var(--surface2); border: 0.5px solid var(--border); border-radius: 7px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; padding: 8px 10px; margin-bottom: 6px; outline: none; }
   .cfg-input:focus { border-color: var(--blue); }
   .cfg-textarea { min-height: 80px; resize: vertical; }
-  .cfg-note { font-size: 11px; color: var(--dim); line-height: 1.6; margin-top: 4px; }
-  .cfg-note code { font-family: 'DM Mono', monospace; color: var(--blue); background: var(--bg); padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+  .cfg-note { font-size: 13px; color: var(--dim); line-height: 1.6; margin-top: 4px; }
+  .cfg-note code { font-family: 'DM Mono', monospace; color: var(--blue); background: var(--bg); padding: 1px 5px; border-radius: 3px; font-size: 12px; }
   .cfg-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
-  .cfg-btn { background: var(--surface2); border: 0.5px solid var(--border); border-radius: 7px; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; padding: 8px 16px; cursor: pointer; }
+  .cfg-btn { background: var(--surface2); border: 0.5px solid var(--border); border-radius: 7px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; padding: 8px 16px; cursor: pointer; }
   .cfg-btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
 
   .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; }
@@ -230,7 +226,7 @@
 
   <!-- MAIN GRID -->
   <div class="main">
-    <!-- LEFT: Native 4-day calendar -->
+    <!-- LEFT: Native 7-day calendar -->
     <div class="cal-card">
       <div class="card-title">Family calendar</div>
       <div id="cal-container" style="display:flex;flex-direction:column;flex:1;min-height:0;">
@@ -243,10 +239,10 @@
       <div class="card" style="flex:1">
         <div class="card-title">Weather — Bronx, NY</div>
         <div id="wx-grid" style="display:flex;flex-direction:column;gap:6px;">
-          <div style="color:var(--muted);font-size:12px;text-align:center;padding:10px 0"><span class="spinner"></span></div>
+          <div style="color:var(--muted);font-size:14px;text-align:center;padding:10px 0"><span class="spinner"></span></div>
         </div>
       </div>
-    <div class="card" style="flex:1;overflow-y:auto">
+      <div class="card" style="flex:1;overflow-y:auto">
         <div class="card-title">Boston scores</div>
         <div class="scores-wrap" id="scores-wrap">
           <div class="score-loading"><span class="spinner"></span></div>
@@ -273,7 +269,7 @@
       <div class="cfg-label">Calendar IDs (one per line)</div>
       <div class="cfg-note">
         In Google Calendar, go to <b>Settings → your calendar → Integrate calendar</b> and copy the <b>Calendar ID</b>. One per line. Each calendar gets its own color automatically.<br>
-        Example: <code><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="651c0a10250208040c094b060a08">[email&#160;protected]</a></code> or <code><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f0919293c1c2c3b097829f8580de93919c959e949182de979f9f979c95de939f9d">[email&#160;protected]</a></code>
+        Example: <code>you@gmail.com</code> or <code>family@group.calendar.google.com</code>
       </div>
       <textarea class="cfg-input cfg-textarea" id="gcal-ids" placeholder="you@gmail.com&#10;family@group.calendar.google.com"></textarea>
     </div>
@@ -285,7 +281,7 @@
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 const CAL_COLORS = ['#4f8ef7','#9b8ef5','#3ecfa6','#f5875a','#f5c842','#f06060','#5dca7a'];
 const DAY_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
@@ -327,7 +323,7 @@ function tickClock() {
   document.getElementById('clock').textContent = `${h}:${String(m).padStart(2,'0')} ${ap}`;
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('datestr').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()} — Bronx, NY`;
+  document.getElementById('datestr').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
 }
 setInterval(tickClock, 1000);
 tickClock();
@@ -398,7 +394,7 @@ async function fetchCalendar() {
     r.items.map(item => ({ ...item, _color: r.color }))
   );
 
-  const HOURS = 24; // render full day
+  const HOURS = 24;
   const START_HOUR = 7;
   const END_HOUR = 22;
   const PX_PER_HOUR = window.innerHeight * 0.04;
@@ -413,7 +409,7 @@ async function fetchCalendar() {
   header.className = 'cal-header';
   const todayTime = new Date(); todayTime.setHours(0,0,0,0);
   header.innerHTML = days.map((day) => {
-  const isToday = day.getTime() === todayTime.getTime();
+    const isToday = day.getTime() === todayTime.getTime();
     return `
       <div class="cal-day-head${isToday?' is-today':''}">
         <div class="cal-day-name">${DAY_SHORT[day.getDay()]}</div>
@@ -425,7 +421,6 @@ async function fetchCalendar() {
   // Build all-day strip
   const alldayRow = document.createElement('div');
   alldayRow.className = 'cal-allday-row';
-  alldayRow.innerHTML = ``;
   days.forEach((day, di) => {
     const dayStart = day.getTime(), dayEnd = dayStart + 86400000;
     const cell = document.createElement('div');
@@ -449,26 +444,20 @@ async function fetchCalendar() {
   const body = document.createElement('div');
   body.className = 'cal-body';
 
-  // No time gutter
-  
-  // Day columns
   days.forEach((day, di) => {
     const isToday = day.getTime() === todayTime.getTime();
     const col = document.createElement('div');
     col.className = 'cal-day-col' + (isToday?' is-today':'');
 
-    // Hour rows (background grid)
     for (let h = START_HOUR; h < END_HOUR; h++) {
       const row = document.createElement('div');
       row.className = 'cal-hour-row';
       col.appendChild(row);
     }
 
-    // Current time line (today only)
     if (isToday) { 
       const now = new Date();
       const minuteOfDay = now.getHours() * 60 + now.getMinutes();
-      const pct = minuteOfDay / (HOURS * 60);
       const top = ((minuteOfDay / 60) - START_HOUR) * PX_PER_HOUR;
       const line = document.createElement('div');
       line.className = 'cal-now-line';
@@ -479,7 +468,6 @@ async function fetchCalendar() {
       col.appendChild(line);
     }
 
-    // Timed events
     const dayStart = day.getTime(), dayEnd = dayStart + 86400000;
     const timedEvts = allEvents.filter(e => {
       if (!e.start?.dateTime) return false;
@@ -543,27 +531,6 @@ function findTeamGame(data, abbrev) {
     evt.competitions?.[0]?.competitors?.some(c => c.team?.abbreviation === abbrev)
   ) || null;
 }
-function findRecentAndNext(data) {
-  const events = data?.events || [];
-  const now = Date.now();
-
-  // Separate into completed/live and upcoming
-  const completed = events.filter(e => {
-    const status = e.competitions?.[0]?.status?.type;
-    return status?.completed || status?.state === 'in';
-  });
-  const upcoming = events.filter(e => {
-    const status = e.competitions?.[0]?.status?.type;
-    return !status?.completed && status?.state !== 'in';
-  });
-
-  // Most recent completed/live = last in completed list
-  const recent = completed.length ? completed[completed.length - 1] : null;
-  // Next upcoming = first future game
-  const next = upcoming.length ? upcoming[0] : null;
-
-  return { recent, next };
-}
 
 async function buildScoreCard(game, label, league) {
   const comp = game.competitions?.[0];
@@ -584,7 +551,6 @@ async function buildScoreCard(game, label, league) {
   else if (inProgress) statusLabel = comp?.status?.detail || 'Live';
   else { const d = new Date(game.date); statusLabel = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); }
 
-  // Fetch live detail if game is in progress
   let liveHTML = '';
   if (inProgress) {
     try {
@@ -602,7 +568,6 @@ async function buildScoreCard(game, label, league) {
         const batter = findName(situation.batter?.playerId);
         const pitcher = findName(situation.pitcher?.playerId);
 
-        // Bases: 1=first, 2=second, 3=third
         const onFirst  = situation.onFirst  ? '#4f8ef7' : 'var(--surface2)';
         const onSecond = situation.onSecond ? '#4f8ef7' : 'var(--surface2)';
         const onThird  = situation.onThird  ? '#4f8ef7' : 'var(--surface2)';
@@ -610,9 +575,8 @@ async function buildScoreCard(game, label, league) {
         liveHTML = `
           <div style="margin-top:8px;padding-top:8px;border-top:0.5px solid rgba(255,255,255,0.06)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-              <span style="font-size:10px;color:var(--muted)">${inning}</span>
-              <span style="font-size:10px;color:var(--muted)">B${balls} S${strikes} O${outs}</span>
-              <!-- Base diamond -->
+              <span style="font-size:12px;color:var(--muted)">${inning}</span>
+              <span style="font-size:12px;color:var(--muted)">B${balls} S${strikes} O${outs}</span>
               <div style="position:relative;width:28px;height:28px;flex-shrink:0">
                 <div style="position:absolute;top:0;left:50%;transform:translateX(-50%) rotate(45deg);width:9px;height:9px;background:${onSecond};border:1px solid #4f8ef7"></div>
                 <div style="position:absolute;top:50%;right:0;transform:translateY(-50%) rotate(45deg);width:9px;height:9px;background:${onFirst};border:1px solid #4f8ef7"></div>
@@ -620,8 +584,8 @@ async function buildScoreCard(game, label, league) {
                 <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%) rotate(45deg);width:9px;height:9px;background:var(--surface2);border:1px solid #4f8ef7"></div>
               </div>
             </div>
-            <div style="font-size:10px;color:var(--muted)">🏏 <span style="color:var(--text)">${batter}</span></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:2px">⚾ <span style="color:var(--text)">${pitcher}</span></div>
+            <div style="font-size:12px;color:var(--muted)">🏏 <span style="color:var(--text)">${batter}</span></div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">⚾ <span style="color:var(--text)">${pitcher}</span></div>
           </div>
         `;
       } else if (league === 'nba') {
@@ -630,13 +594,11 @@ async function buildScoreCard(game, label, league) {
         const periodLabel = period === 1 ? '1st' : period === 2 ? '2nd' : period === 3 ? '3rd' : period === 4 ? '4th' : `OT${period - 4}`;
         liveHTML = `
           <div style="margin-top:8px;padding-top:8px;border-top:0.5px solid rgba(255,255,255,0.06)">
-            <div style="font-size:11px;color:var(--muted);text-align:center">${periodLabel} &middot; ${clock}</div>
+            <div style="font-size:13px;color:var(--muted);text-align:center">${periodLabel} &middot; ${clock}</div>
           </div>
         `;
       }
-    } catch(e) {
-      // silently fail — live detail is best-effort
-    }
+    } catch(e) {}
   }
 
   const card = document.createElement('div');
@@ -690,45 +652,43 @@ async function fetchWeather() {
       return '⛅';
     };
 
-    // Current conditions from most recent hourly period
     const current = hourly[0];
     const currentTemp = Math.round(current.temperature);
     const currentDesc = current.shortForecast;
     const currentHumidity = current.relativeHumidity?.value ? Math.round(current.relativeHumidity.value) + '%' : '—';
     const currentWind = current.windSpeed + ' ' + current.windDirection;
 
-    // Today daytime, tonight, then next 3 days (daytime only)
     const today = periods.find(p => p.isDaytime);
     const tonight = periods.find(p => !p.isDaytime && p.name.toLowerCase().includes('tonight'));
-    const futureDays = periods.filter(p => p.isDaytime && p.number > (today?.number || 0)).slice(0, 1);
+    const futureDays = periods.filter(p => p.isDaytime && p.number > (today?.number || 0)).slice(0, 2);
 
     const precipStr = p => (p.probabilityOfPrecipitation?.value || 0) > 20
-      ? `<span style="color:var(--blue);font-size:10px">💧${Math.round(p.probabilityOfPrecipitation.value)}%</span>`
+      ? `<span style="color:var(--blue);font-size:12px">💧${Math.round(p.probabilityOfPrecipitation.value)}%</span>`
       : '';
 
     const divider = `<div style="height:0.5px;background:var(--border);margin:4px 0"></div>`;
 
     const currentBlock = `
       <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
-        <span style="font-size:32px;line-height:1">${wxIcon(currentDesc)}</span>
+        <span style="font-size:36px;line-height:1">${wxIcon(currentDesc)}</span>
         <div style="flex:1">
-          <div style="font-size:28px;font-weight:400;font-family:'DM Mono',monospace;color:#fff;line-height:1">${currentTemp}°</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${currentDesc}</div>
+          <div style="font-size:32px;font-weight:400;font-family:'DM Mono',monospace;color:#fff;line-height:1">${currentTemp}°</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px">${currentDesc}</div>
         </div>
-        <div style="text-align:right;font-size:10px;color:var(--muted);line-height:1.7">
+        <div style="text-align:right;font-size:12px;color:var(--muted);line-height:1.7">
           <div>Humidity: ${currentHumidity}</div>
           <div>Wind: ${currentWind}</div>
         </div>
       </div>
     `;
 
-    const forecastRow = (label, p, showLo = false) => `
+    const forecastRow = (label, p) => `
       <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border)">
-        <span style="font-size:11px;color:var(--muted);width:52px;flex-shrink:0">${label}</span>
-        <span style="font-size:16px;line-height:1">${wxIcon(p.shortForecast)}</span>
-        <span style="font-size:11px;color:var(--text);flex:1;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.shortForecast.split(' ').slice(0,4).join(' ')}</span>
+        <span style="font-size:13px;color:var(--muted);width:58px;flex-shrink:0">${label}</span>
+        <span style="font-size:18px;line-height:1">${wxIcon(p.shortForecast)}</span>
+        <span style="font-size:13px;color:var(--text);flex:1;padding:0 6px;white-space:normal;line-height:1.4">${p.shortForecast}</span>
         ${precipStr(p)}
-        <span style="font-family:'DM Mono',monospace;font-size:14px;color:var(--text);margin-left:4px">${Math.round(p.temperature)}°</span>
+        <span style="font-family:'DM Mono',monospace;font-size:16px;color:var(--text);margin-left:4px">${Math.round(p.temperature)}°</span>
       </div>
     `;
 
@@ -737,10 +697,10 @@ async function fetchWeather() {
       divider +
       (today ? forecastRow('Today', today) : '') +
       (tonight ? forecastRow('Tonight', tonight) : '') +
-      futureDays.map(p => forecastRow('Tomorrow', p)).join('');
+      futureDays.map((p, i) => forecastRow(i === 0 ? 'Tomorrow' : p.name, p)).join('');
 
   } catch(e) {
-    el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:10px">Unable to load weather</div>';
+    el.innerHTML = '<div style="color:var(--muted);font-size:14px;text-align:center;padding:10px">Unable to load weather</div>';
   }
 }
   
