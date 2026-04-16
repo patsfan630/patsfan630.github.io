@@ -146,7 +146,7 @@
   .cal-day-col.is-today { background: rgba(37,99,235,0.04); }
   .cal-hour-row { height: 4vh; flex-shrink: 0; border-top: 1px solid var(--border); }
   .cal-hour-row:first-child { border-top: 1px solid var(--border); }
-  .cal-evt { position: absolute; left: 3px; right: 3px; border-radius: 4px; padding: 3px 6px; font-size: 13px; font-weight: 500; color: #fff; overflow: visible; line-height: 1.3; min-height: 22px; z-index: 1; }
+  .cal-evt { position: absolute; border-radius: 4px; padding: 3px 6px; font-size: 13px; font-weight: 500; color: #fff; overflow: visible; line-height: 1.3; min-height: 22px; z-index: 1; }
   .cal-evt-title { white-space: normal; overflow-wrap: break-word; }
   .cal-evt-time { font-size: 13px; opacity: 0.85; white-space: nowrap; }
   .cal-now-line { position: absolute; left: 0; right: 0; height: 2px; background: var(--red); z-index: 10; pointer-events: none; }
@@ -470,25 +470,40 @@ async function fetchCalendar() {
       if (!e.start?.dateTime) return false;
       const s = new Date(e.start.dateTime).getTime();
       return s >= dayStart && s < dayEnd;
-    });
-
-    timedEvts.forEach(e => {
+    }).map(e => {
       const start = new Date(e.start.dateTime);
       const end = e.end?.dateTime ? new Date(e.end.dateTime) : new Date(start.getTime() + 30*60000);
       const startMin = start.getHours()*60 + start.getMinutes();
-      const endMin = end.getHours()*60 + end.getMinutes();
-      const durationMin = Math.max(endMin - startMin, 30);
-      const top = ((startMin / 60) - START_HOUR) * PX_PER_HOUR;
-      const height = (durationMin / 60) * PX_PER_HOUR;
+      const endMin = Math.max(end.getHours()*60 + end.getMinutes(), startMin + 30);
+      return { ...e, startMin, endMin };
+    }).sort((a, b) => a.startMin - b.startMin);
+
+    // Assign each event a column slot so overlapping events sit side-by-side
+    const slots = []; // slots[i] = endMin of last event placed there
+    timedEvts.forEach(e => {
+      let slot = slots.findIndex(endMin => endMin <= e.startMin);
+      if (slot === -1) { slot = slots.length; slots.push(0); }
+      slots[slot] = e.endMin;
+      e._slot = slot;
+    });
+    const totalSlots = Math.max(slots.length, 1);
+
+    timedEvts.forEach(e => {
+      // Count how many slots are active during this event to determine width
+      const concurrent = timedEvts.filter(o => o.startMin < e.endMin && o.endMin > e.startMin);
+      const maxSlot = Math.max(...concurrent.map(o => o._slot)) + 1;
+      const colW = 100 / maxSlot;
+      const top = ((e.startMin / 60) - START_HOUR) * PX_PER_HOUR;
+      const height = ((e.endMin - e.startMin) / 60) * PX_PER_HOUR;
 
       const pill = document.createElement('div');
       pill.className = 'cal-evt';
       pill.style.top = top + 'px';
       pill.style.minHeight = height + 'px';
+      pill.style.left = `calc(${e._slot * colW}% + 2px)`;
+      pill.style.right = `calc(${100 - (e._slot + 1) * colW}% + 2px)`;
       pill.style.background = e._color;
-      pill.innerHTML = `
-        <div class="cal-evt-title">${timeStr(e.start.dateTime)} ${e.summary || 'Event'}</div>
-      `;
+      pill.innerHTML = `<div class="cal-evt-title">${timeStr(e.start.dateTime)} ${e.summary || 'Event'}</div>`;
       col.appendChild(pill);
     });
 
