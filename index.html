@@ -141,14 +141,14 @@
   .cal-body { display: grid; grid-template-columns: repeat(7, 1fr); flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; min-width: 0; width: 100%; }
   .cal-body::-webkit-scrollbar { display: none; }
   .cal-time-gutter { display: flex; flex-direction: column; }
-  .cal-time-label { height: 4vh; flex-shrink: 0; font-size: 13px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 0; display: flex; align-items: flex-end; justify-content: flex-end; padding-bottom: 2px; font-family: 'DM Mono', monospace; }
+  .cal-time-label { height: 4vh; flex-shrink: 0; font-size: 12px; color: var(--muted); text-align: right; padding-right: 8px; padding-top: 0; display: flex; align-items: flex-end; justify-content: flex-end; padding-bottom: 2px; font-family: 'DM Mono', monospace; }
   .cal-day-col { border-left: 1px solid var(--border); position: relative; display: flex; flex-direction: column; }
   .cal-day-col.is-today { background: rgba(37,99,235,0.04); }
-  .cal-hour-row { height: 4vh; flex-shrink: 0; border-top: 1px solid var(--border); }
+  .cal-hour-row { flex: 1; min-height: 0; border-top: 1px solid var(--border); }
   .cal-hour-row:first-child { border-top: 1px solid var(--border); }
-  .cal-evt { position: absolute; border-radius: 4px; padding: 3px 6px; font-size: 13px; font-weight: 500; color: #fff; overflow: visible; line-height: 1.3; min-height: 22px; z-index: 1; }
+  .cal-evt { position: absolute; border-radius: 4px; padding: 3px 6px; font-size: 12px; font-weight: 500; color: #fff; overflow: visible; line-height: 1.3; min-height: 20px; z-index: 1; }
   .cal-evt-title { white-space: normal; overflow-wrap: break-word; }
-  .cal-evt-time { font-size: 13px; opacity: 0.85; white-space: nowrap; }
+  .cal-evt-time { font-size: 12px; opacity: 0.85; white-space: nowrap; }
   .cal-now-line { position: absolute; left: 0; right: 0; height: 2px; background: var(--red); z-index: 10; pointer-events: none; }
   .cal-now-dot { position: absolute; left: -4px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--red); }
 
@@ -394,7 +394,7 @@ async function fetchCalendar() {
   const HOURS = 24;
   const START_HOUR = 7;
   const END_HOUR = 22;
-  const PX_PER_HOUR = window.innerHeight * 0.04;
+  const NUM_HOURS = END_HOUR - START_HOUR;
   
   const timeStr = dt => {
     const d = new Date(dt), h = d.getHours(), m = d.getMinutes();
@@ -455,10 +455,9 @@ async function fetchCalendar() {
     if (isToday) { 
       const now = new Date();
       const minuteOfDay = now.getHours() * 60 + now.getMinutes();
-      const top = ((minuteOfDay / 60) - START_HOUR) * PX_PER_HOUR;
       const line = document.createElement('div');
       line.className = 'cal-now-line';
-      line.style.top = top + 'px';
+      line.dataset.minute = minuteOfDay;
       const dot = document.createElement('div');
       dot.className = 'cal-now-dot';
       line.appendChild(dot);
@@ -479,27 +478,23 @@ async function fetchCalendar() {
     }).sort((a, b) => a.startMin - b.startMin);
 
     // Assign each event a column slot so overlapping events sit side-by-side
-    const slots = []; // slots[i] = endMin of last event placed there
+    const slots = [];
     timedEvts.forEach(e => {
       let slot = slots.findIndex(endMin => endMin <= e.startMin);
       if (slot === -1) { slot = slots.length; slots.push(0); }
       slots[slot] = e.endMin;
       e._slot = slot;
     });
-    const totalSlots = Math.max(slots.length, 1);
 
     timedEvts.forEach(e => {
-      // Count how many slots are active during this event to determine width
       const concurrent = timedEvts.filter(o => o.startMin < e.endMin && o.endMin > e.startMin);
       const maxSlot = Math.max(...concurrent.map(o => o._slot)) + 1;
       const colW = 100 / maxSlot;
-      const top = ((e.startMin / 60) - START_HOUR) * PX_PER_HOUR;
-      const height = ((e.endMin - e.startMin) / 60) * PX_PER_HOUR;
 
       const pill = document.createElement('div');
       pill.className = 'cal-evt';
-      pill.style.top = top + 'px';
-      pill.style.minHeight = height + 'px';
+      pill.dataset.startMin = e.startMin;
+      pill.dataset.endMin = e.endMin;
       pill.style.left = `calc(${e._slot * colW}% + 2px)`;
       pill.style.right = `calc(${100 - (e._slot + 1) * colW}% + 2px)`;
       pill.style.background = e._color;
@@ -514,6 +509,25 @@ async function fetchCalendar() {
   container.appendChild(header);
   container.appendChild(alldayRow);
   container.appendChild(body);
+
+  // After DOM is rendered, measure actual row height and position events in pixels
+  requestAnimationFrame(() => {
+    const firstRow = body.querySelector('.cal-hour-row');
+    if (!firstRow) return;
+    const pxPerHour = firstRow.getBoundingClientRect().height;
+
+    body.querySelectorAll('.cal-evt').forEach(pill => {
+      const startMin = parseFloat(pill.dataset.startMin);
+      const endMin = parseFloat(pill.dataset.endMin);
+      pill.style.top = ((startMin / 60) - START_HOUR) * pxPerHour + 'px';
+      pill.style.minHeight = ((endMin - startMin) / 60) * pxPerHour + 'px';
+    });
+
+    body.querySelectorAll('.cal-now-line').forEach(line => {
+      const min = parseFloat(line.dataset.minute);
+      line.style.top = ((min / 60) - START_HOUR) * pxPerHour + 'px';
+    });
+  });
 }
 
 /* ---- SCORES ---- */
