@@ -324,6 +324,16 @@
     </div>
 
     <div class="cfg-section">
+      <div class="cfg-label">Display Override</div>
+      <div class="cfg-note" style="margin-bottom:10px">Manually override the current display mode. The schedule will resume automatically at the next scheduled transition.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="cfg-btn" id="override-light-btn" onclick="overrideMode('light')">☀ Light mode</button>
+        <button class="cfg-btn" id="override-dark-btn" onclick="overrideMode('dark')">🌙 Dark mode</button>
+        <button class="cfg-btn" onclick="overrideMode('screensaver')">💤 Screensaver</button>
+      </div>
+    </div>
+
+    <div class="cfg-section">
       <div class="cfg-label">Calendar IDs (one per line)</div>
       <div class="cfg-note">
         In Google Calendar, go to <b>Settings → your calendar → Integrate calendar</b> and copy the <b>Calendar ID</b>. One per line. Each calendar gets its own color automatically.<br>
@@ -374,9 +384,42 @@ function saveConfig() {
 function openConfig() {
   document.getElementById('gcal-api-key').value = config.apiKey || '';
   document.getElementById('gcal-ids').value = config.calIds.join('\n');
+  // Highlight the currently active mode button
+  const currentMode = _lastMode || getMode(new Date());
+  document.getElementById('override-light-btn').style.background = currentMode === 'light' ? 'var(--blue)' : '';
+  document.getElementById('override-light-btn').style.color = currentMode === 'light' ? '#fff' : '';
+  document.getElementById('override-dark-btn').style.background = currentMode === 'dark' ? 'var(--blue)' : '';
+  document.getElementById('override-dark-btn').style.color = currentMode === 'dark' ? '#fff' : '';
   document.getElementById('cfg-overlay').classList.add('open');
 }
 function closeConfig() { document.getElementById('cfg-overlay').classList.remove('open'); }
+
+function overrideMode(mode) {
+  // Force a mode change by resetting _lastMode so checkMode applies it
+  _lastMode = null;
+  const html = document.documentElement;
+  const ss = document.getElementById('screensaver');
+
+  if (mode === 'screensaver') {
+    html.classList.add('dark-mode');
+    ss.classList.add('active');
+    _lastMode = 'screensaver';
+    closeConfig();
+  } else if (mode === 'dark') {
+    ss.classList.remove('active');
+    html.classList.add('dark-mode');
+    _lastMode = 'dark';
+  } else {
+    ss.classList.remove('active');
+    html.classList.remove('dark-mode');
+    _lastMode = 'light';
+  }
+  // Update button highlights
+  document.getElementById('override-light-btn').style.background = mode === 'light' ? 'var(--blue)' : '';
+  document.getElementById('override-light-btn').style.color = mode === 'light' ? '#fff' : '';
+  document.getElementById('override-dark-btn').style.background = mode === 'dark' ? 'var(--blue)' : '';
+  document.getElementById('override-dark-btn').style.color = mode === 'dark' ? '#fff' : '';
+}
 
 /* ---- CLOCK ---- */
 function getMode(now) {
@@ -392,21 +435,25 @@ function getMode(now) {
 }
 
 let _lastMode = null;
+let _lastScheduledMode = null;
 function checkMode() {
   const now = new Date();
-  const mode = getMode(now);
-  if (mode === _lastMode) return;
-  _lastMode = mode;
+  const scheduledMode = getMode(now);
+
+  // Only apply the schedule if the scheduled mode has changed — this lets manual overrides persist
+  if (scheduledMode === _lastScheduledMode) return;
+  _lastScheduledMode = scheduledMode;
+  _lastMode = scheduledMode;
 
   const html = document.documentElement;
   const ss = document.getElementById('screensaver');
 
-  if (mode === 'screensaver') {
+  if (scheduledMode === 'screensaver') {
     html.classList.add('dark-mode');
     ss.classList.add('active');
   } else {
     ss.classList.remove('active');
-    if (mode === 'dark') {
+    if (scheduledMode === 'dark') {
       html.classList.add('dark-mode');
     } else {
       html.classList.remove('dark-mode');
