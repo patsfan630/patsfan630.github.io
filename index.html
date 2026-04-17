@@ -21,6 +21,65 @@
     --red: #dc2626;
     --green: #16a34a;
   }
+
+  /* DARK MODE — applied via class on <html> */
+  html.dark-mode {
+    --bg: #0c0e14;
+    --surface: #13161f;
+    --surface2: #1a1e2a;
+    --border: rgba(255,255,255,0.07);
+    --text: #e2e5f0;
+    --muted: #565c72;
+    --dim: #363c50;
+    --blue: #4f8ef7;
+    --blue-dim: rgba(79,142,247,0.12);
+    --coral: #f5875a;
+    --red: #f06060;
+    --green: #5dca7a;
+  }
+  html.dark-mode .clock,
+  html.dark-mode .clock-sub { color: #e2e5f0; }
+  html.dark-mode .score-card.mlb { background: #0a1e35; border-color: rgba(189,48,57,0.3); }
+  html.dark-mode .score-card.mlb .sc-team-name { color: #c8d8e8; }
+  html.dark-mode .score-card.mlb .sc-abbr { color: #fff; }
+  html.dark-mode .score-card.mlb .sc-record { color: #5a7a9a; }
+  html.dark-mode .score-card.mlb .sc-score { color: #8aaacc; }
+  html.dark-mode .score-card.mlb .sc-score.winner { color: #fff; }
+  html.dark-mode .score-card.nba { background: #051e0f; border-color: rgba(0,122,51,0.4); }
+  html.dark-mode .score-card.nba .sc-team-name { color: #a8c8a8; }
+  html.dark-mode .score-card.nba .sc-abbr { color: #fff; }
+  html.dark-mode .score-card.nba .sc-record { color: #2a5a3a; }
+  html.dark-mode .score-card.nba .sc-score { color: #4a8a5a; }
+  html.dark-mode .score-card.nba .sc-score.winner { color: #BA9A3C; }
+
+  /* SCREENSAVER */
+  #screensaver {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer;
+  }
+  #screensaver.active { display: flex; }
+  #ss-clock {
+    font-family: 'DM Mono', monospace;
+    font-size: 12vw;
+    font-weight: 300;
+    color: rgba(255,255,255,0.15);
+    letter-spacing: -4px;
+    line-height: 1;
+  }
+  #ss-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 2vw;
+    color: rgba(255,255,255,0.08);
+    letter-spacing: 0;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { width: 100%; height: 100%; overflow: hidden; }
   body {
@@ -280,6 +339,12 @@
   </div>
 </div>
 
+<!-- SCREENSAVER -->
+<div id="screensaver" onclick="exitScreensaver()">
+  <div id="ss-clock">--:-- --</div>
+  <div id="ss-date"></div>
+</div>
+
 <script>
 const CAL_COLORS = ['#4f8ef7','#9b8ef5','#3ecfa6','#f5875a','#f5c842','#f06060','#5dca7a'];
 const DAY_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -314,15 +379,71 @@ function openConfig() {
 function closeConfig() { document.getElementById('cfg-overlay').classList.remove('open'); }
 
 /* ---- CLOCK ---- */
+function getMode(now) {
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const mins = h * 60 + m;
+  // 7:00 – 19:59 → light
+  // 20:00 – 22:29 → dark
+  // 22:30 – 06:59 → screensaver
+  if (mins >= 7 * 60 && mins < 20 * 60) return 'light';
+  if (mins >= 20 * 60 && mins < 22 * 60 + 30) return 'dark';
+  return 'screensaver';
+}
+
+let _lastMode = null;
+function checkMode() {
+  const now = new Date();
+  const mode = getMode(now);
+  if (mode === _lastMode) return;
+  _lastMode = mode;
+
+  const html = document.documentElement;
+  const ss = document.getElementById('screensaver');
+
+  if (mode === 'screensaver') {
+    html.classList.add('dark-mode');
+    ss.classList.add('active');
+  } else {
+    ss.classList.remove('active');
+    if (mode === 'dark') {
+      html.classList.add('dark-mode');
+    } else {
+      html.classList.remove('dark-mode');
+    }
+  }
+}
+
+function exitScreensaver() {
+  // Tapping the screensaver wakes the screen temporarily until the next mode check
+  const ss = document.getElementById('screensaver');
+  ss.classList.remove('active');
+  // Re-engage after 5 minutes if still in screensaver hours
+  setTimeout(() => {
+    if (getMode(new Date()) === 'screensaver') {
+      ss.classList.add('active');
+    }
+  }, 5 * 60 * 1000);
+}
+
 function tickClock() {
   const now = new Date();
   let h = now.getHours(), m = now.getMinutes();
   const ap = h >= 12 ? 'PM' : 'AM';
   h = h % 12 || 12;
-  document.getElementById('clock').textContent = `${h}:${String(m).padStart(2,'0')} ${ap}`;
+  const timeStr = `${h}:${String(m).padStart(2,'0')} ${ap}`;
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('datestr').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+  const dateStr = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+
+  document.getElementById('clock').textContent = timeStr;
+  document.getElementById('datestr').textContent = dateStr;
+
+  // Update screensaver clock too
+  document.getElementById('ss-clock').textContent = timeStr;
+  document.getElementById('ss-date').textContent = dateStr;
+
+  checkMode();
 }
 setInterval(tickClock, 1000);
 tickClock();
