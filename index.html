@@ -332,10 +332,8 @@ async function fetchScores() {
       if (game) {
         carouselCards[idx] = await buildScoreCard(game, team.label, team.league);
       } else {
-        const el = document.createElement('div');
-        el.className = 'score-loading'; el.dataset.noGame = '1';
-        el.textContent = 'No game today';
-        carouselCards[idx] = el;
+        // No game today — fetch last and next games
+        carouselCards[idx] = await buildNoGameCard(team);
       }
     } catch(e) {
       const el = document.createElement('div');
@@ -346,12 +344,112 @@ async function fetchScores() {
 
   showSlide(carouselIndex);
 
-  // If current slide has no game, jump to one that does
-  const hasGame = i => carouselCards[i] && carouselCards[i].dataset.noGame !== '1' && carouselCards[i].className !== 'score-loading';
-  if (!hasGame(carouselIndex)) {
-    const first = TEAMS.findIndex((_, i) => hasGame(i));
-    if (first >= 0) showSlide(first);
+  // If current slide has no game today, still show it (it has last/next info now)
+}
+
+async function buildNoGameCard(team) {
+  const wrap = document.createElement('div');
+  wrap.dataset.noGame = '1';
+
+  try {
+    // Fetch last completed game and next scheduled game in parallel
+    const [lastRes, nextRes] = await Promise.all([
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/teams/${team.abbrev}/schedule?season=2025`),
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard?limit=3&dates=${nextWeekRange()}`)
+    ]);
+
+    // Use the team schedule endpoint to find last & next
+    const schedRes = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard?limit=10&dates=${pastWeekRange()}`);
+    const schedData = await schedRes.json();
+    const pastGames = (schedData?.events || []).filter(evt =>
+      evt.competitions?.[0]?.competitors?.some(c => c.team?.abbreviation === team.abbrev) &&
+      evt.competitions?.[0]?.status?.type?.completed
+    );
+    const lastGame = pastGames[pastGames.length - 1] || null;
+
+    const futureRes = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard?limit=10&dates=${nextWeekRange()}`);
+    const futureData = await futureRes.json();
+    const futureGames = (futureData?.events || []).filter(evt =>
+      evt.competitions?.[0]?.competitors?.some(c => c.team?.abbreviation === team.abbrev) &&
+      !evt.competitions?.[0]?.status?.type?.completed
+    );
+    const nextGame = futureGames[0] || null;
+
+    const makeGameRow = (game, sectionLabel) => {
+      if (!game) return '';
+      const comp = game.competitions?.[0];
+      const competitors = comp?.competitors || [];
+      const home = competitors.find(c => c.homeAway === 'home');
+      const away = competitors.find(c => c.homeAway === 'away');
+      const t1 = away || competitors[0] || {}, t2 = home || competitors[1] || {};
+      const s1 = parseInt(t1.score || 0), s2 = parseInt(t2.score || 0);
+      const done = comp?.status?.type?.completed;
+      const n1 = t1.team?.abbreviation || '—', n2 = t2.team?.abbreviation || '—';
+      const gameDate = new Date(game.date);
+      const dateLabel = gameDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const timeLabel = done ? 'Final' : gameDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+      const leagueClass = team.league;
+      const winColor = leagueClass === 'mlb' ? '#bd3039' : leagueClass === 'nba' ? '#007a33' : '#162b5e';
+
+      const scoreOrTime = done
+        ? `<div style="display:flex;gap:10px;align-items:center">
+            <span style="font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:${done&&s1>s2?winColor:'var(--muted)'}">${s1}</span>
+            <span style="font-size:11px;color:var(--dim)">–</span>
+            <span style="font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:${done&&s2>s1?winColor:'var(--muted)'}">${s2}</span>
+           </div>`
+        : `<span style="font-size:12px;color:var(--blue);font-family:'DM Mono',monospace">${timeLabel}</span>`;
+
+      return `
+        <div style="padding:8px 0;${sectionLabel==='Last game'?'border-bottom:0.5px solid var(--border)':''}">
+          <div style="font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim);margin-bottom:5px">${sectionLabel} &middot; ${dateLabel}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:14px;font-weight:500;color:var(--text)">${n1} <span style="font-size:11px;color:var(--muted)">away</span></div>
+              <div style="font-size:14px;font-weight:500;color:var(--text)">${n2} <span style="font-size:11px;color:var(--muted)">home</span></div>
+            </div>
+            ${scoreOrTime}
+          </div>
+        </div>`;
+    };
+
+    const headerColor = team.league === 'mlb' ? '#bd3039' : team.league === 'nba' ? 'linear-gradient(90deg,#007a33,#005a25)' : 'linear-gradient(90deg,#162b5e,#0d1e42)';
+    const headerBg = team.league === 'mlb' ? `background:#bd3039` : team.league === 'nba' ? `background:linear-gradient(90deg,#007a33,#005a25)` : `background:linear-gradient(90deg,#162b5e,#0d1e42)`;
+    const accentColor = team.league === 'nba' ? '#BA9A3C' : team.league === 'nhl' ? '#fcb514' : '#fff';
+
+    wrap.className = `score-card ${team.league}`;
+    wrap.dataset.noGame = '1';
+    wrap.innerHTML = `
+      <div class="sc-header" style="${headerBg}">
+        <span class="sc-league">${team.label}</span>
+        <span class="sc-status" style="color:${accentColor};font-size:11px">No game today</span>
+      </div>
+      <div class="sc-body">
+        ${makeGameRow(lastGame, 'Last game')}
+        ${makeGameRow(nextGame, 'Next game')}
+        ${!lastGame && !nextGame ? '<div style="font-size:13px;color:var(--muted);text-align:center;padding:10px 0">No recent games found</div>' : ''}
+      </div>`;
+  } catch(e) {
+    wrap.innerHTML = '<div class="score-loading">Unable to load</div>';
   }
+  return wrap;
+}
+
+function pastWeekRange() {
+  const end = new Date(); end.setDate(end.getDate() - 1);
+  const start = new Date(); start.setDate(start.getDate() - 14);
+  return fmtDateRange(start, end);
+}
+
+function nextWeekRange() {
+  const start = new Date(); start.setDate(start.getDate() + 1);
+  const end = new Date(); end.setDate(end.getDate() + 14);
+  return fmtDateRange(start, end);
+}
+
+function fmtDateRange(start, end) {
+  const fmt = d => d.toISOString().slice(0,10).replace(/-/g,'');
+  return `${fmt(start)}-${fmt(end)}`;
 }
 
 async function buildScoreCard(game, label, league) {
