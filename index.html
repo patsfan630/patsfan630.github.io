@@ -186,16 +186,15 @@ overflow: hidden;
 width: 100%;
 }
 
-/* Header row: gutter + 5 day columns */
+/* Header row: 5 day columns */
 .cal-header {
 display: grid;
-grid-template-columns: 38px repeat(5, 1fr);
+grid-template-columns: repeat(5, 1fr);
 margin-bottom: 0.3vh;
 flex-shrink: 0;
 min-width: 0;
 width: 100%;
 }
-.cal-header-gutter { /* empty corner cell */ }
 
 .cal-day-head {
 display: flex; flex-direction: column; align-items: center;
@@ -209,72 +208,20 @@ border-bottom: 1px solid var(–border);
 .cal-day-head.is-today .cal-day-num { background: var(–blue); color: #fff; font-weight: 500; }
 
 /* All-day strip */
-.cal-allday-row {
-display: grid;
-grid-template-columns: 38px repeat(5, 1fr);
-min-height: 2vh;
-margin-bottom: 4px;
-flex-shrink: 0;
-min-width: 0;
-width: 100%;
-}
-.cal-allday-gutter {
-font-size: 11px;
-color: var(–muted);
-text-align: right;
-padding-right: 6px;
-padding-top: 3px;
-font-family: ‘DM Mono’, monospace;
-}
+.cal-allday-row { display: grid; grid-template-columns: repeat(5, 1fr); min-height: 2vh; margin-bottom: 4px; flex-shrink: 0; min-width: 0; width: 100%; }
+.cal-allday-gutter { font-size: 13px; color: var(–muted); text-align: right; padding-right: 8px; padding-top: 3px; }
 .cal-allday-cell { border-left: 1px solid var(–border); padding: 2px 3px; display: flex; flex-direction: column; gap: 2px; }
 .allday-evt { font-size: 13px; font-weight: 500; padding: 3px 6px; border-radius: 3px; white-space: normal; overflow: hidden; overflow-wrap: break-word; color: #fff; }
 
-/* Time grid wrapper: gutter + day columns side by side */
-.cal-body-wrap {
-display: flex;
-flex: 1;
-min-height: 0;
-overflow: hidden;
-width: 100%;
-}
-
-/* Time gutter */
-.cal-time-gutter {
-width: 38px;
-flex-shrink: 0;
-display: flex;
-flex-direction: column;
-overflow: hidden;
-}
-.cal-time-label {
-height: 4vh;
-flex-shrink: 0;
-font-size: 11px;
-color: var(–muted);
-text-align: right;
-padding-right: 6px;
-display: flex;
-align-items: flex-end;
-justify-content: flex-end;
-padding-bottom: 2px;
-font-family: ‘DM Mono’, monospace;
-line-height: 1;
-}
-
-/* Day columns */
-.cal-body {
-display: grid;
-grid-template-columns: repeat(5, 1fr);
-flex: 1;
-min-height: 0;
-overflow-y: auto;
-scrollbar-width: none;
-min-width: 0;
-}
+/* Time grid */
+.cal-body { display: grid; grid-template-columns: repeat(5, 1fr); flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; min-width: 0; width: 100%; }
 .cal-body::-webkit-scrollbar { display: none; }
+.cal-time-gutter { display: flex; flex-direction: column; }
+.cal-time-label { height: 4vh; flex-shrink: 0; font-size: 12px; color: var(–muted); text-align: right; padding-right: 8px; padding-top: 0; display: flex; align-items: flex-end; justify-content: flex-end; padding-bottom: 2px; font-family: ‘DM Mono’, monospace; }
 .cal-day-col { border-left: 1px solid var(–border); position: relative; display: flex; flex-direction: column; }
 .cal-day-col.is-today { background: rgba(37,99,235,0.04); }
-.cal-hour-row { flex: 1; min-height: 0; border-top: 1px solid var(–border); height: 4vh; flex-shrink: 0; }
+.cal-hour-row { flex: 1; min-height: 0; border-top: 1px solid var(–border); }
+.cal-hour-row:first-child { border-top: 1px solid var(–border); }
 .cal-evt { position: absolute; border-radius: 4px; padding: 3px 6px; font-size: 12px; font-weight: 500; color: #fff; overflow: visible; line-height: 1.3; min-height: 20px; z-index: 1; }
 .cal-evt-title { white-space: normal; overflow-wrap: break-word; }
 .cal-evt-time { font-size: 12px; opacity: 0.85; white-space: nowrap; }
@@ -625,7 +572,7 @@ setInterval(tickClock, 1000);
 tickClock();
 
 /* ---- CALENDAR ---- */
-function get5Days() {
+function get4Days() {
   const days = [];
   const today = new Date(); today.setHours(0,0,0,0);
   for (let i = 0; i <= 4; i++) {
@@ -648,7 +595,7 @@ async function fetchCalendar() {
   }
   container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;flex:1"><span class="spinner"></span></div>`;
 
-  const days = get5Days();
+  const days = get4Days();
   const timeMin = days[0].toISOString();
   const timeMax = new Date(days[days.length - 1].getTime() + 86400000).toISOString();
 
@@ -681,48 +628,43 @@ async function fetchCalendar() {
     r.items.map(item => ({ ...item, _color: r.color }))
   );
 
+  const HOURS = 24;
   const START_HOUR = 7;
   const END_HOUR = 22;
-  const HR_PX = '4vh'; // each hour row height (matches CSS)
+  const NUM_HOURS = END_HOUR - START_HOUR;
 
   const timeStr = dt => {
     const d = new Date(dt), h = d.getHours(), m = d.getMinutes();
     return `${h%12||12}${m?':'+String(m).padStart(2,'0'):''}${h<12?'a':'p'}`;
   };
 
-  const todayTime = new Date(); todayTime.setHours(0,0,0,0);
-
-  // Header (gutter + 5 day heads)
+  // Build header
   const header = document.createElement('div');
   header.className = 'cal-header';
-  const gutterHead = document.createElement('div');
-  gutterHead.className = 'cal-header-gutter';
-  header.appendChild(gutterHead);
-  days.forEach(day => {
+  const todayTime = new Date(); todayTime.setHours(0,0,0,0);
+  header.innerHTML = days.map((day) => {
     const isToday = day.getTime() === todayTime.getTime();
-    const cell = document.createElement('div');
-    cell.className = 'cal-day-head' + (isToday ? ' is-today' : '');
-    cell.innerHTML = `<div class="cal-day-name">${DAY_SHORT[day.getDay()]}</div>
-                      <div class="cal-day-num">${day.getDate()}</div>`;
-    header.appendChild(cell);
-  });
+    return `
+      <div class="cal-day-head${isToday?' is-today':''}">
+        <div class="cal-day-name">${DAY_SHORT[day.getDay()]}</div>
+        <div class="cal-day-num">${day.getDate()}</div>
+      </div>
+    `;
+  }).join('');
 
-  // All-day strip (gutter + 5 cells)
+  // Build all-day strip
   const alldayRow = document.createElement('div');
   alldayRow.className = 'cal-allday-row';
-  const adGutter = document.createElement('div');
-  adGutter.className = 'cal-allday-gutter';
-  adGutter.textContent = 'all-day';
-  alldayRow.appendChild(adGutter);
-  days.forEach(day => {
+  days.forEach((day, di) => {
     const dayStart = day.getTime(), dayEnd = dayStart + 86400000;
     const cell = document.createElement('div');
     cell.className = 'cal-allday-cell';
-    allEvents.filter(e => {
+    const allDayEvts = allEvents.filter(e => {
       if (!e.start?.date || e.start?.dateTime) return false;
       const s = new Date(e.start.date + 'T00:00:00').getTime();
       return s >= dayStart && s < dayEnd;
-    }).forEach(e => {
+    });
+    allDayEvts.forEach(e => {
       const pill = document.createElement('div');
       pill.className = 'allday-evt';
       pill.style.background = e._color;
@@ -732,29 +674,14 @@ async function fetchCalendar() {
     alldayRow.appendChild(cell);
   });
 
-  // Body wrapper: time gutter + scrollable day columns
-  const bodyWrap = document.createElement('div');
-  bodyWrap.className = 'cal-body-wrap';
-
-  // Time gutter
-  const timeGutter = document.createElement('div');
-  timeGutter.className = 'cal-time-gutter';
-  for (let h = START_HOUR; h < END_HOUR; h++) {
-    const label = document.createElement('div');
-    label.className = 'cal-time-label';
-    const disp = h === 0 ? '12a' : h < 12 ? `${h}a` : h === 12 ? '12p' : `${h-12}p`;
-    label.textContent = disp;
-    timeGutter.appendChild(label);
-  }
-
-  // Day columns grid (scrollable)
+  // Build time grid body
   const body = document.createElement('div');
   body.className = 'cal-body';
 
-  days.forEach(day => {
+  days.forEach((day, di) => {
     const isToday = day.getTime() === todayTime.getTime();
     const col = document.createElement('div');
-    col.className = 'cal-day-col' + (isToday ? ' is-today' : '');
+    col.className = 'cal-day-col' + (isToday?' is-today':'');
 
     for (let h = START_HOUR; h < END_HOUR; h++) {
       const row = document.createElement('div');
@@ -785,7 +712,7 @@ async function fetchCalendar() {
       const startMin = start.getHours()*60 + start.getMinutes();
       const endMin = Math.max(end.getHours()*60 + end.getMinutes(), startMin + 30);
       return { ...e, startMin, endMin };
-    }).sort((a,b) => a.startMin - b.startMin);
+    }).sort((a, b) => a.startMin - b.startMin);
 
     const slots = [];
     timedEvts.forEach(e => {
@@ -799,6 +726,7 @@ async function fetchCalendar() {
       const concurrent = timedEvts.filter(o => o.startMin < e.endMin && o.endMin > e.startMin);
       const maxSlot = Math.max(...concurrent.map(o => o._slot)) + 1;
       const colW = 100 / maxSlot;
+
       const pill = document.createElement('div');
       pill.className = 'cal-evt';
       pill.dataset.startMin = e.startMin;
@@ -813,19 +741,12 @@ async function fetchCalendar() {
     body.appendChild(col);
   });
 
-  bodyWrap.appendChild(timeGutter);
-  bodyWrap.appendChild(body);
-
   container.innerHTML = '';
   container.appendChild(header);
   container.appendChild(alldayRow);
-  container.appendChild(bodyWrap);
+  container.appendChild(body);
 
-  // Sync gutter scroll with body scroll
-  body.addEventListener('scroll', () => {
-    timeGutter.scrollTop = body.scrollTop;
-  });
-
+  // After DOM is rendered, measure actual row height and position events in pixels
   requestAnimationFrame(() => {
     const firstRow = body.querySelector('.cal-hour-row');
     if (!firstRow) return;
@@ -842,12 +763,6 @@ async function fetchCalendar() {
       const min = parseFloat(line.dataset.minute);
       line.style.top = ((min / 60) - START_HOUR) * pxPerHour + 'px';
     });
-
-    // Scroll to current time (or 8am default)
-    const now = new Date();
-    const scrollToMin = Math.max(now.getHours() * 60 + now.getMinutes() - 60, START_HOUR * 60);
-    body.scrollTop = ((scrollToMin / 60) - START_HOUR) * pxPerHour;
-    timeGutter.scrollTop = body.scrollTop;
   });
 }
 
