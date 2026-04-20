@@ -356,17 +356,16 @@ async function buildNoGameCard(team) {
     // The ESPN scoreboard date-range endpoint returns ALL game types (regular + playoffs)
     // when queried by date — seasontype filtering is not needed.
     const now = new Date();
-
-    const pastStart = new Date(now); pastStart.setDate(now.getDate() - 60);
-    const pastEnd   = new Date(now); pastEnd.setDate(now.getDate() - 1);
-    const futStart  = new Date(now); futStart.setDate(now.getDate() + 1);
-    const futEnd    = new Date(now); futEnd.setDate(now.getDate() + 30);
-
     const fmt = d => d.toISOString().slice(0,10).replace(/-/g,'');
 
+    const pastEnd   = new Date(now); pastEnd.setDate(now.getDate() - 1);
+    const pastStart = new Date(now); pastStart.setDate(now.getDate() - 14);
+    const futStart  = new Date(now); futStart.setDate(now.getDate() + 1);
+    const futEnd    = new Date(now); futEnd.setDate(now.getDate() + 14);
+
     const [pastData, futData] = await Promise.all([
-      fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard?limit=100&dates=${fmt(pastStart)}-${fmt(pastEnd)}`).then(r=>r.json()).catch(()=>({})),
-      fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard?limit=100&dates=${fmt(futStart)}-${fmt(futEnd)}`).then(r=>r.json()).catch(()=>({})),
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard?limit=10&dates=${fmt(pastStart)}-${fmt(pastEnd)}`).then(r=>r.json()).catch(()=>({})),
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard?limit=10&dates=${fmt(futStart)}-${fmt(futEnd)}`).then(r=>r.json()).catch(()=>({})),
     ]);
 
     const teamGames = evts => (evts?.events || []).filter(e =>
@@ -376,7 +375,6 @@ async function buildNoGameCard(team) {
     const pastGames = teamGames(pastData).filter(e => e.competitions?.[0]?.status?.type?.completed);
     const futureGames = teamGames(futData).filter(e => !e.competitions?.[0]?.status?.type?.completed);
 
-    // Sort past games descending, take most recent
     pastGames.sort((a,b) => new Date(b.date) - new Date(a.date));
     futureGames.sort((a,b) => new Date(a.date) - new Date(b.date));
 
