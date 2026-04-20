@@ -352,44 +352,35 @@ async function buildNoGameCard(team) {
   wrap.dataset.noGame = '1';
 
   try {
-    // Use the team schedule endpoint — it includes regular season + playoffs
-    // We fetch a generous window around today and walk backward/forward
-    const teamRes = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/teams/${team.abbrev}/schedule?season=2025&seasontype=3`);
-    const teamData = await teamRes.json();
-    let events = (teamData?.events || []);
+    // Search up to 60 days back and 30 days forward using date-range scoreboard.
+    // The ESPN scoreboard date-range endpoint returns ALL game types (regular + playoffs)
+    // when queried by date — seasontype filtering is not needed.
+    const now = new Date();
 
-    // If playoff schedule is empty, fall back to full season schedule (seasontype=2)
-    if (!events.length) {
-      const regRes = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/teams/${team.abbrev}/schedule?season=2025&seasontype=2`);
-      const regData = await regRes.json();
-      events = regData?.events || [];
-    }
+    const pastStart = new Date(now); pastStart.setDate(now.getDate() - 60);
+    const pastEnd   = new Date(now); pastEnd.setDate(now.getDate() - 1);
+    const futStart  = new Date(now); futStart.setDate(now.getDate() + 1);
+    const futEnd    = new Date(now); futEnd.setDate(now.getDate() + 30);
 
-    // Also try the scoreboard date-range approach as a supplement
-    const [pastSb, futureSb] = await Promise.all([
-      fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard?limit=10&dates=${pastWeekRange()}`).then(r=>r.json()).catch(()=>({})),
-      fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard?limit=10&dates=${nextWeekRange()}`).then(r=>r.json()).catch(()=>({})),
+    const fmt = d => d.toISOString().slice(0,10).replace(/-/g,'');
+
+    const [pastData, futData] = await Promise.all([
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard?limit=100&dates=${fmt(pastStart)}-${fmt(pastEnd)}`).then(r=>r.json()).catch(()=>({})),
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard?limit=100&dates=${fmt(futStart)}-${fmt(futEnd)}`).then(r=>r.json()).catch(()=>({})),
     ]);
 
-    // Merge scoreboard events into the schedule events, deduplicated by id
-    const sbEvents = [
-      ...(pastSb?.events || []),
-      ...(futureSb?.events || []),
-    ].filter(evt => evt.competitions?.[0]?.competitors?.some(c => c.team?.abbreviation === team.abbrev));
-
-    const evtMap = new Map();
-    [...events, ...sbEvents].forEach(e => evtMap.set(e.id, e));
-    const allEvents = Array.from(evtMap.values()).sort((a,b) => new Date(a.date) - new Date(b.date));
-
-    const now = new Date();
-    const pastGames = allEvents.filter(e =>
-      new Date(e.date) < now && (e.competitions?.[0]?.status?.type?.completed || e.status?.type?.completed)
-    );
-    const futureGames = allEvents.filter(e =>
-      new Date(e.date) >= now && !(e.competitions?.[0]?.status?.type?.completed || e.status?.type?.completed)
+    const teamGames = evts => (evts?.events || []).filter(e =>
+      e.competitions?.[0]?.competitors?.some(c => c.team?.abbreviation === team.abbrev)
     );
 
-    const lastGame = pastGames[pastGames.length - 1] || null;
+    const pastGames = teamGames(pastData).filter(e => e.competitions?.[0]?.status?.type?.completed);
+    const futureGames = teamGames(futData).filter(e => !e.competitions?.[0]?.status?.type?.completed);
+
+    // Sort past games descending, take most recent
+    pastGames.sort((a,b) => new Date(b.date) - new Date(a.date));
+    futureGames.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+    const lastGame = pastGames[0] || null;
     const nextGame = futureGames[0] || null;
 
     const makeGameRow = (game, sectionLabel) => {
@@ -450,23 +441,6 @@ async function buildNoGameCard(team) {
     wrap.innerHTML = '<div class="score-loading">Unable to load</div>';
   }
   return wrap;
-}
-
-function pastWeekRange() {
-  const end = new Date(); end.setDate(end.getDate() - 1);
-  const start = new Date(); start.setDate(start.getDate() - 14);
-  return fmtDateRange(start, end);
-}
-
-function nextWeekRange() {
-  const start = new Date(); start.setDate(start.getDate() + 1);
-  const end = new Date(); end.setDate(end.getDate() + 14);
-  return fmtDateRange(start, end);
-}
-
-function fmtDateRange(start, end) {
-  const fmt = d => d.toISOString().slice(0,10).replace(/-/g,'');
-  return `${fmt(start)}-${fmt(end)}`;
 }
 
 async function buildScoreCard(game, label, league) {
