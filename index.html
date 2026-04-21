@@ -88,6 +88,10 @@
   .cal-iframe-wrap { flex: 1; min-height: 0; border-radius: 6px; overflow: hidden; }
   .cal-iframe-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
 
+  /* Weather widget container */
+  .wx-widget-wrap { width: 100%; height: 100%; overflow: hidden; }
+  .wx-widget-wrap > div { width: 100% !important; height: 100% !important; }
+
   /* SCORES */
   .score-loading { font-size: 14px; color: var(--muted); text-align: center; padding: 10px 0; }
   .score-card { border-radius: 10px; overflow: hidden; }
@@ -165,13 +169,15 @@
   <div class="main">
     <div class="cal-card">
       <div class="cal-iframe-wrap">
-        <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FNew_York&showPrint=0&mode=WEEK&showTitle=0&showDate=0&showTabs=0&showTz=0&src=bWFyY2psZXJtYW5AZ21haWwuY29t&src=ZmFtaWx5MDYwNzE3Njg5ODMyNzQzNDE1NTVAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=M2xtZWw0aTlzNDk4NnNvcnBla2cyc3Q4ZWtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=bmhsXy1tLTBqMnpqXyU0Mm9zdG9uKyU0MnJ1aW5zI3Nwb3J0c0Bncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20&src=bmJhXy1tLTBid2pqXyU0Mm9zdG9uKyU0M2VsdGljcyNzcG9ydHNAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=bWxiXy1tLTAxZDV6XyU0Mm9zdG9uKyU1MmVkKyU1M294I3Nwb3J0c0Bncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20&src=Z3F2dWJoMzMwcHNnNjNvaGZhZXFkZWxiczA0bGxhY3JAaW1wb3J0LmNhbGVuZGFyLmdvb2dsZS5jb20&src=ZW4udXNhI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=bmZsXy1tLTA1ZzNiXyU0ZWV3KyU0NW5nbGFuZCslNTBhdHJpb3RzI3Nwb3J0c0Bncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y19mYWY5OTAwZjdhZmRjZmU2NjY3MTQ1Y2MxMjZlNWY5YmQ1NmY5NmRjZTg2NmU3NTE0MzJmZWExMTIwMzUwMzY4QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=c2hvc2hkYXZpc0BnbWFpbC5jb20&color=%234285f4&color=%237986cb&color=%238e24aa&color=%23f6bf26&color=%230b8043&color=%23d50000&color=%233f51b5&color=%237cb342&color=%233f51b5&color=%23ad1457&color=%23d81b60" style="border-width:0" width="800" height="600" frameborder="0" scrolling="no"></iframe>      </div>
+        <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FNew_York&showPrint=0&mode=WEEK&showTitle=0&showDate=0&showTabs=0&showTz=0&src=bWFyY2psZXJtYW5AZ21haWwuY29t&src=ZmFtaWx5MDYwNzE3Njg5ODMyNzQzNDE1NTVAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=M2xtZWw0aTlzNDk4NnNvcnBla2cyc3Q4ZWtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=bmhsXy1tLTBqMnpqXyU0Mm9zdG9uKyU0MnJ1aW5zI3Nwb3J0c0Bncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20&src=bmJhXy1tLTBid2pqXyU0Mm9zdG9uKyU0M2VsdGljcyNzcG9ydHNAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=bWxiXy1tLTAxZDV6XyU0Mm9zdG9uKyU1MnJlZCslNTNveClzcG9ydHNAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=Z3F2dWJoMzMwcHNnNjNvaGZhZXFkZWxiczA0bGxhY3JAaW1wb3J0LmNhbGVuZGFyLmdvb2dsZS5jb20&src=ZW4udXNhI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=bmZsXy1tLTA1ZzNiXyU0ZWV3KyU0NW5nbGFuZCslNTBhdHJpb3RzI3Nwb3J0c0Bncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20&src=Y19mYWY5OTAwZjdhZmRjZmU2NjY3MTQ1Y2MxMjZlNWY5YmQ1NmY5NmRjZTg2NmU3NTE0MzJmZWExMTIwMzUwMzY4QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=c2hvc2hkYXZpc0BnbWFpbC5jb20&color=%234285f4&color=%237986cb&color=%238e24aa&color=%23f6bf26&color=%230b8043&color=%23d50000&color=%233f51b5&color=%237cb342&color=%233f51b5&color=%23ad1457&color=%23d81b60" style="border-width:0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+      </div>
     </div>
 
     <div class="col">
-      <div class="card" style="flex:1">
-        <div id="wx-grid" style="display:flex;flex-direction:column;gap:6px;">
-          <div style="color:var(--muted);font-size:14px;text-align:center;padding:10px 0"><span class="spinner"></span></div>
+      <div class="card" style="flex:1;overflow:hidden;">
+        <div class="wx-widget-wrap">
+          <div id="ww_e92a818d62ca" v='1.3' loc='auto' a='{"t":"responsive","lang":"en","sl_lpl":1,"ids":[],"font":"Arial","sl_ics":"one_a","sl_sot":"fahrenheit","cl_bkg":"image","cl_font":"#FFFFFF","cl_cloud":"#FFFFFF","cl_persp":"#81D4FA","cl_sun":"#FFC107","cl_moon":"#FFC107","cl_thund":"#FF5722","sl_tof":"5","el_nme":3}'></div>
+          <script async src="https://app3.weatherwidget.org/js/?id=ww_e92a818d62ca"></script>
         </div>
       </div>
 
@@ -429,76 +435,10 @@ async function buildScoreCard(game, label, league) {
   return card;
 }
 
-/* ---- WEATHER ---- */
-async function fetchWeather() {
-  const el = document.getElementById('wx-grid');
-  try {
-    const pointRes = await fetch('https://api.weather.gov/points/40.9001,-73.9120', { headers: { 'User-Agent': 'FamilyDashboard/1.0' } });
-    const pointData = await pointRes.json();
-    const [fRes, fHourlyRes] = await Promise.all([
-      fetch(pointData.properties.forecast, { headers: { 'User-Agent': 'FamilyDashboard/1.0' } }),
-      fetch(pointData.properties.forecastHourly, { headers: { 'User-Agent': 'FamilyDashboard/1.0' } })
-    ]);
-    const fData = await fRes.json(), fHourly = await fHourlyRes.json();
-    const periods = fData.properties.periods, hourly = fHourly.properties.periods;
-
-    const wxIcon = desc => {
-      const d = desc.toLowerCase();
-      if (d.includes('thunder')) return '&#9928;';
-      if (d.includes('snow')||d.includes('blizzard')) return '&#10052;';
-      if (d.includes('sleet')||d.includes('freezing')) return '&#127784;';
-      if (d.includes('rain')||d.includes('shower')||d.includes('drizzle')) return '&#127783;';
-      if (d.includes('fog')||d.includes('mist')) return '&#127787;';
-      if (d.includes('partly')||d.includes('mostly sunny')) return '&#9925;';
-      if (d.includes('cloud')||d.includes('overcast')) return '&#9729;';
-      if (d.includes('sunny')||d.includes('clear')) return '&#9728;';
-      return '&#9925;';
-    };
-
-    const cur = hourly[0];
-    const curTemp = Math.round(cur.temperature);
-    const curDesc = cur.shortForecast;
-    const curHumidity = cur.relativeHumidity?.value ? Math.round(cur.relativeHumidity.value)+'%' : '—';
-    const curWind = cur.windSpeed + ' ' + cur.windDirection;
-    const today = periods.find(p => p.isDaytime);
-    const tonight = periods.find(p => !p.isDaytime && p.name.toLowerCase().includes('tonight'));
-    const future = periods.filter(p => p.isDaytime && p.number > (today?.number||0)).slice(0, 2);
-
-    const precip = p => (p.probabilityOfPrecipitation?.value||0) > 20
-      ? `<span style="color:var(--blue);font-size:12px">&#128167;${Math.round(p.probabilityOfPrecipitation.value)}%</span>` : '';
-    const divider = `<div style="height:0.5px;background:var(--border);margin:4px 0"></div>`;
-    const curBlock = `<div style="display:flex;align-items:center;gap:10px;padding:6px 0">
-      <span style="font-size:36px;line-height:1">${wxIcon(curDesc)}</span>
-      <div style="flex:1">
-        <div style="font-size:22px;font-weight:400;font-family:'DM Mono',monospace;color:var(--text);line-height:1">${curTemp}&deg;</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:2px">${curDesc}</div>
-      </div>
-      <div style="text-align:right;font-size:12px;color:var(--muted);line-height:1.7">
-        <div>Humidity: ${curHumidity}</div>
-        <div>Wind: ${curWind}</div>
-      </div>
-    </div>`;
-    const row = (lbl, p) => `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border)">
-      <span style="font-size:13px;color:var(--muted);width:58px;flex-shrink:0">${lbl}</span>
-      <span style="font-size:18px;line-height:1">${wxIcon(p.shortForecast)}</span>
-      <span style="font-size:13px;color:var(--text);flex:1;padding:0 6px;white-space:normal;line-height:1.4">${p.shortForecast}</span>
-      ${precip(p)}
-      <span style="font-family:'DM Mono',monospace;font-size:16px;color:var(--text);margin-left:4px">${Math.round(p.temperature)}&deg;</span>
-    </div>`;
-
-    el.innerHTML = curBlock + divider
-      + (today ? row('Today', today) : '')
-      + (tonight ? row('Tonight', tonight) : '')
-      + future.map((p, i) => row(i === 0 ? 'Tomorrow' : p.name, p)).join('');
-  } catch(e) {
-    el.innerHTML = '<div style="color:var(--muted);font-size:14px;text-align:center;padding:10px">Unable to load weather</div>';
-  }
-}
-
 /* ---- MAIN ---- */
 async function refreshAll() {
   renderDots();
-  await Promise.all([fetchScores(), fetchWeather()]);
+  await fetchScores();
 }
 
 resetAutoAdvance();
