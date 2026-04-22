@@ -436,6 +436,24 @@ async function buildScoreCard(game, label, league) {
   return card;
 }
 
+/* ---- WEATHER REFRESH ---- */
+function refreshWeather() {
+  const wrap = document.querySelector('.wx-widget-wrap');
+  const existing = wrap.querySelector('a.weatherwidget-io');
+  if (existing) existing.remove();
+  const a = document.createElement('a');
+  a.className = 'weatherwidget-io';
+  a.href = 'https://forecast7.com/en/40d88n73d91/10463/?unit=us';
+  a.dataset.label_1 = 'BRONX';
+  a.dataset.label_2 = 'WEATHER';
+  a.dataset.days = '5';
+  a.dataset.theme = 'weather_one';
+  a.textContent = 'BRONX WEATHER';
+  wrap.insertBefore(a, wrap.querySelector('script'));
+  if (window.__weatherwidget_init) window.__weatherwidget_init();
+}
+
+
 /* ---- MAIN ---- */
 async function refreshAll() {
   renderDots();
@@ -446,6 +464,7 @@ resetAutoAdvance();
 refreshAll();
 setInterval(refreshAll, 15 * 60 * 1000);
 setInterval(fetchScores, 30 * 1000);
+setInterval(refreshWeather, 30 * 60 * 1000);
 </script>
 </body>
 </html>
