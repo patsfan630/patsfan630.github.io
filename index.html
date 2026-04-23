@@ -218,10 +218,15 @@
   .wx-detail-pill svg { opacity: 0.75; flex-shrink: 0; }
 
   /* Divider */
+  .wx-divider-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+  }
   .wx-divider {
     height: 0.5px;
     background: rgba(255,255,255,0.15);
-    margin-bottom: 6px;
     flex-shrink: 0;
   }
 
@@ -594,6 +599,33 @@ function wxSVG(id, size=28) {
 function c2f(c) { return Math.round(c * 9/5 + 32); }
 
 let _wxLastUpdated = null;
+let _wxForecastView = 0; // 0 = 3-day, 1 = hourly
+let _wxRotateTimer = null;
+
+function wxRotateForecast() {
+  const daily = document.getElementById('wx-forecast-daily');
+  const hourly = document.getElementById('wx-forecast-hourly');
+  const dot0 = document.getElementById('wx-dot-0');
+  const dot1 = document.getElementById('wx-dot-1');
+  if (!daily || !hourly) return;
+  _wxForecastView = 1 - _wxForecastView;
+  if (_wxForecastView === 0) {
+    daily.style.opacity  = '1';  daily.style.transform  = 'translateY(0)';
+    hourly.style.opacity = '0';  hourly.style.transform = 'translateY(6px)';
+    if (dot0) { dot0.style.background = 'rgba(255,255,255,0.8)'; dot0.style.width = '14px'; }
+    if (dot1) { dot1.style.background = 'rgba(255,255,255,0.3)'; dot1.style.width = '6px'; }
+  } else {
+    daily.style.opacity  = '0';  daily.style.transform  = 'translateY(-6px)';
+    hourly.style.opacity = '1';  hourly.style.transform = 'translateY(0)';
+    if (dot0) { dot0.style.background = 'rgba(255,255,255,0.3)'; dot0.style.width = '6px'; }
+    if (dot1) { dot1.style.background = 'rgba(255,255,255,0.8)'; dot1.style.width = '14px'; }
+  }
+}
+
+function wxStartRotation() {
+  if (_wxRotateTimer) clearInterval(_wxRotateTimer);
+  _wxRotateTimer = setInterval(wxRotateForecast, 15000);
+}
 
 async function fetchWeather() {
   const inner = document.getElementById('wx-inner');
@@ -601,6 +633,7 @@ async function fetchWeather() {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${WX_LAT}&longitude=${WX_LON}`
       + `&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m`
       + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max`
+      + `&hourly=temperature_2m,weather_code,precipitation_probability`
       + `&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FNew_York&forecast_days=4`;
 
     const res = await fetch(url);
@@ -608,6 +641,7 @@ async function fetchWeather() {
 
     const cur = data.current;
     const daily = data.daily;
+    const hourly = data.hourly;
 
     const tempNow   = Math.round(cur.temperature_2m);
     const feelsLike = Math.round(cur.apparent_temperature);
@@ -617,10 +651,11 @@ async function fetchWeather() {
     const code      = cur.weather_code;
     const condInfo  = wmo(code);
 
-    // forecast days 1-3 (skip today = index 0)
-    const days = [];
+    // 3-day forecast (skip today = index 0)
     const DAY_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const days = [];
     for (let i = 1; i <= 3; i++) {
+      if (!daily.time[i]) break;
       const d = new Date(daily.time[i] + 'T12:00:00');
       days.push({
         name: DAY_SHORT[d.getDay()],
@@ -631,9 +666,57 @@ async function fetchWeather() {
       });
     }
 
+    // Hourly: every-other-hour from now until end of today (midnight)
     const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10); // YYYY-MM-DD
+    const currentHour = now.getHours();
+    const hourSlots = [];
+    hourly.time.forEach((t, i) => {
+      if (!t.startsWith(todayStr)) return; // today only
+      const h = parseInt(t.slice(11, 13));
+      if (h < currentHour) return;         // past hours
+      if ((h - currentHour) % 2 !== 0) return; // every other hour
+      let label;
+      if (h === 0 || h === 24) label = '12am';
+      else if (h < 12) label = `${h}am`;
+      else if (h === 12) label = '12pm';
+      else label = `${h-12}pm`;
+      hourSlots.push({
+        label,
+        temp: Math.round(hourly.temperature_2m[i]),
+        code: hourly.weather_code[i],
+        precip: hourly.precipitation_probability[i] || 0,
+      });
+    });
+
     const updStr = `${String(now.getHours()%12||12)}:${String(now.getMinutes()).padStart(2,'0')} ${now.getHours()>=12?'PM':'AM'}`;
     _wxLastUpdated = updStr;
+
+    // Build daily forecast HTML
+    const dailyHTML = days.map(d => {
+      const di = wmo(d.code);
+      return `<div class="wx-day">
+        <div class="wx-day-name">${d.name}</div>
+        <div class="wx-day-icon">${wxSVG(di.svg, 22)}</div>
+        ${d.precip > 20 ? `<div class="wx-precip"><svg width="8" height="8" viewBox="0 0 10 10"><path d="M5 1 Q6.5 4 6.5 6 A1.5 1.5 0 0 1 3.5 6 Q3.5 4 5 1Z" fill="rgba(130,200,255,0.9)"/></svg>${d.precip}%</div>` : ''}
+        <div class="wx-day-hi">${d.hi}°</div>
+        <div class="wx-day-lo">${d.lo}°</div>
+      </div>`;
+    }).join('');
+
+    // Build hourly forecast HTML
+    const hourlyHTML = hourSlots.map(h => {
+      const hi = wmo(h.code);
+      return `<div class="wx-day">
+        <div class="wx-day-name">${h.label}</div>
+        <div class="wx-day-icon">${wxSVG(hi.svg, 22)}</div>
+        ${h.precip > 20 ? `<div class="wx-precip"><svg width="8" height="8" viewBox="0 0 10 10"><path d="M5 1 Q6.5 4 6.5 6 A1.5 1.5 0 0 1 3.5 6 Q3.5 4 5 1Z" fill="rgba(130,200,255,0.9)"/></svg>${h.precip}%</div>` : ''}
+        <div class="wx-day-hi">${h.temp}°</div>
+      </div>`;
+    }).join('');
+
+    // Reset to daily view on refresh
+    _wxForecastView = 0;
 
     inner.innerHTML = `
       <div class="wx-location-row">
@@ -664,21 +747,26 @@ async function fetchWeather() {
         </div>
       </div>
 
-      <div class="wx-divider"></div>
+      <div class="wx-divider-row">
+        <div class="wx-divider" style="flex:1"></div>
+        <div style="display:flex;align-items:center;gap:4px;padding:0 6px;flex-shrink:0">
+          <div id="wx-dot-0" style="height:6px;width:14px;border-radius:3px;background:rgba(255,255,255,0.8);transition:all 0.4s ease"></div>
+          <div id="wx-dot-1" style="height:6px;width:6px;border-radius:3px;background:rgba(255,255,255,0.3);transition:all 0.4s ease"></div>
+        </div>
+        <div class="wx-divider" style="flex:1"></div>
+      </div>
 
-      <div class="wx-forecast">
-        ${days.map(d => {
-          const di = wmo(d.code);
-          return `<div class="wx-day">
-            <div class="wx-day-name">${d.name}</div>
-            <div class="wx-day-icon">${wxSVG(di.svg, 22)}</div>
-            ${d.precip > 20 ? `<div class="wx-precip"><svg width="8" height="8" viewBox="0 0 10 10"><path d="M5 1 Q6.5 4 6.5 6 A1.5 1.5 0 0 1 3.5 6 Q3.5 4 5 1Z" fill="rgba(130,200,255,0.9)"/></svg>${d.precip}%</div>` : ''}
-            <div class="wx-day-hi">${d.hi}°</div>
-            <div class="wx-day-lo">${d.lo}°</div>
-          </div>`;
-        }).join('')}
+      <div style="position:relative;flex:1;min-height:0;">
+        <div id="wx-forecast-daily" class="wx-forecast" style="position:absolute;inset:0;transition:opacity 0.5s ease,transform 0.5s ease;opacity:1;transform:translateY(0)">
+          ${dailyHTML}
+        </div>
+        <div id="wx-forecast-hourly" class="wx-forecast" style="position:absolute;inset:0;transition:opacity 0.5s ease,transform 0.5s ease;opacity:0;transform:translateY(6px);overflow-x:auto;flex-wrap:nowrap;">
+          ${hourlyHTML || '<div style="color:rgba(255,255,255,0.4);font-size:0.8vw;margin:auto">No more hours today</div>'}
+        </div>
       </div>
     `;
+
+    wxStartRotation();
   } catch(e) {
     inner.innerHTML = `<div class="wx-loading" style="flex-direction:column;gap:4px">
       <span style="font-size:1.2vw">⚠</span>
