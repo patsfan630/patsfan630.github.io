@@ -748,10 +748,7 @@ async function fetchScores() {
       if (game) {
         carouselCards[idx] = await buildScoreCard(game, team.label, team.league);
       } else {
-        const el = document.createElement('div');
-        el.className = 'score-loading';
-        el.textContent = 'No game today';
-        carouselCards[idx] = el;
+        carouselCards[idx] = buildEmptyCard(team.label, team.league);
       }
     } catch(e) {
       const el = document.createElement('div');
@@ -760,6 +757,23 @@ async function fetchScores() {
     }
   }));
   showSlide(carouselIndex);
+}
+
+function buildEmptyCard(label, league) {
+  const [leaguePart, teamPart] = label.split(' · ');
+  const card = document.createElement('div');
+  card.className = `score-card ${league}`;
+  card.innerHTML = `
+    <div class="sc-header">
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <span class="sc-team-label">${teamPart || label}</span>
+        <span class="sc-league">${leaguePart}</span>
+      </div>
+    </div>
+    <div class="sc-body">
+      <div style="padding:10px 0;text-align:center;font-size:13px;color:var(--muted)">No game today</div>
+    </div>`;
+  return card;
 }
 
 async function buildScoreCard(game, label, league) {
