@@ -88,9 +88,224 @@
   .cal-iframe-wrap { flex: 1; min-height: 0; border-radius: 6px; overflow: hidden; }
   .cal-iframe-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
 
-  /* Weather widget container */
-  .wx-widget-wrap { width: 100%; height: 100%; overflow: hidden; }
-  .wx-widget-wrap > div { width: 100% !important; height: 100% !important; }
+  /* ===================== ACCUWEATHER-STYLE WIDGET ===================== */
+  .wx-card {
+    flex: 1;
+    border-radius: 0.8vw;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border: 0.5px solid rgba(255,255,255,0.18);
+    background: linear-gradient(160deg, #1a3a5c 0%, #1e4a7a 35%, #2a5fa0 65%, #1b3a62 100%);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  }
+
+  /* Subtle cloud texture overlay */
+  .wx-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 120% 60% at 80% 20%, rgba(255,255,255,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 80% 40% at 10% 80%, rgba(100,160,255,0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wx-inner {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px 8px;
+    min-height: 0;
+  }
+
+  /* Location row */
+  .wx-location-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+  .wx-location {
+    font-size: 0.72vw;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .wx-location svg { opacity: 0.65; }
+  .wx-updated {
+    font-size: 0.6vw;
+    color: rgba(255,255,255,0.35);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Main temp + icon row */
+  .wx-main-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+  .wx-temp-block { display: flex; flex-direction: column; }
+  .wx-temp {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 3.4vw;
+    font-weight: 300;
+    color: #fff;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 1px;
+  }
+  .wx-temp sup {
+    font-size: 1.1vw;
+    font-weight: 400;
+    letter-spacing: 0;
+    vertical-align: super;
+    margin-left: 1px;
+  }
+  .wx-condition {
+    font-size: 0.78vw;
+    color: rgba(255,255,255,0.85);
+    font-weight: 400;
+    margin-top: 2px;
+    line-height: 1.2;
+  }
+  .wx-feels {
+    font-size: 0.68vw;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+  }
+
+  /* Weather icon */
+  .wx-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3vw;
+    height: 3vw;
+    flex-shrink: 0;
+  }
+  .wx-icon-wrap svg, .wx-icon-wrap img {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Details row (humidity, wind) */
+  .wx-details-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .wx-detail-pill {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 2px 7px;
+    font-size: 0.62vw;
+    color: rgba(255,255,255,0.8);
+  }
+  .wx-detail-pill svg { opacity: 0.75; flex-shrink: 0; }
+
+  /* Divider */
+  .wx-divider {
+    height: 0.5px;
+    background: rgba(255,255,255,0.15);
+    margin-bottom: 6px;
+    flex-shrink: 0;
+  }
+
+  /* 3-day forecast */
+  .wx-forecast {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    min-height: 0;
+  }
+  .wx-day {
+    flex: 1;
+    background: rgba(255,255,255,0.07);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 4px;
+    gap: 2px;
+    border: 0.5px solid rgba(255,255,255,0.1);
+  }
+  .wx-day-name {
+    font-size: 0.6vw;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.6);
+  }
+  .wx-day-icon {
+    width: 1.5vw;
+    height: 1.5vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .wx-day-icon svg { width: 100%; height: 100%; }
+  .wx-day-hi {
+    font-size: 0.8vw;
+    font-weight: 500;
+    color: #fff;
+    line-height: 1;
+  }
+  .wx-day-lo {
+    font-size: 0.68vw;
+    font-weight: 400;
+    color: rgba(255,255,255,0.45);
+    line-height: 1;
+  }
+
+  /* Precip bar */
+  .wx-precip {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.58vw;
+    color: rgba(130,200,255,0.85);
+  }
+  .wx-precip svg { flex-shrink: 0; }
+
+  /* Loading / error state */
+  .wx-loading {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.75vw;
+    gap: 8px;
+  }
+  .wx-spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.15);
+    border-top-color: rgba(255,255,255,0.6);
+    border-radius: 50%;
+    animation: wxspin 0.8s linear infinite;
+  }
+  @keyframes wxspin { to { transform: rotate(360deg); } }
+
+  /* Dark mode: slightly adjust gradient */
+  html.dark-mode .wx-card {
+    background: linear-gradient(160deg, #0f2540 0%, #143560 35%, #1c4a80 65%, #0e2440 100%);
+  }
+  /* ===================== END WEATHER WIDGET ===================== */
 
   /* SCORES */
   .score-loading { font-size: 14px; color: var(--muted); text-align: center; padding: 10px 0; }
@@ -174,14 +389,14 @@
     </div>
 
     <div class="col">
-      <div class="card" style="flex:1;overflow:hidden;">
-        <div class="wx-widget-wrap">
-          <a class="weatherwidget-io" href="https://forecast7.com/en/40d88n73d91/10463/?unit=us" data-label_1="BRONX" data-label_2="WEATHER" data-days="4" data-theme="weather_one">BRONX WEATHER</a>
-          <script>
-          !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
-          </script>
+
+      <!-- ===================== WEATHER CARD ===================== -->
+      <div class="wx-card">
+        <div class="wx-inner" id="wx-inner">
+          <div class="wx-loading"><div class="wx-spinner"></div><span>Loading weather…</span></div>
         </div>
       </div>
+      <!-- =================== END WEATHER CARD =================== -->
 
       <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-shrink:0;">
@@ -224,7 +439,9 @@
 </div>
 
 <script>
-/* ---- CLOCK / MODE ---- */
+/* ================================================================
+   CLOCK / MODE
+   ================================================================ */
 function getMode(now) {
   const mins = now.getHours() * 60 + now.getMinutes();
   if (mins >= 7*60 && mins < 20*60) return 'light';
@@ -282,7 +499,200 @@ function tickClock() {
 setInterval(tickClock, 1000);
 tickClock();
 
-/* ---- CAROUSEL ---- */
+/* ================================================================
+   ACCUWEATHER-STYLE WIDGET
+   Bronx, NY  lat=40.88  lon=-73.91
+   Uses Open-Meteo (free, no key) with WMO weather codes
+   ================================================================ */
+const WX_LAT = 40.88;
+const WX_LON = -73.91;
+const WX_LABEL = 'Bronx, NY';
+
+/* WMO weather code → { label, svgId } */
+const WMO = {
+  0:  { l:'Clear',           svg:'sun'         },
+  1:  { l:'Mostly Clear',    svg:'sun'         },
+  2:  { l:'Partly Cloudy',   svg:'partly'      },
+  3:  { l:'Overcast',        svg:'cloud'       },
+  45: { l:'Foggy',           svg:'fog'         },
+  48: { l:'Icy Fog',         svg:'fog'         },
+  51: { l:'Light Drizzle',   svg:'drizzle'     },
+  53: { l:'Drizzle',         svg:'drizzle'     },
+  55: { l:'Heavy Drizzle',   svg:'drizzle'     },
+  61: { l:'Light Rain',      svg:'rain'        },
+  63: { l:'Rain',            svg:'rain'        },
+  65: { l:'Heavy Rain',      svg:'rain'        },
+  71: { l:'Light Snow',      svg:'snow'        },
+  73: { l:'Snow',            svg:'snow'        },
+  75: { l:'Heavy Snow',      svg:'snow'        },
+  77: { l:'Snow Grains',     svg:'snow'        },
+  80: { l:'Light Showers',   svg:'showers'     },
+  81: { l:'Showers',         svg:'showers'     },
+  82: { l:'Heavy Showers',   svg:'showers'     },
+  85: { l:'Snow Showers',    svg:'snow'        },
+  86: { l:'Heavy Snow Showers', svg:'snow'     },
+  95: { l:'Thunderstorms',   svg:'thunder'     },
+  96: { l:'Hail Storm',      svg:'thunder'     },
+  99: { l:'Heavy Hail Storm',svg:'thunder'     },
+};
+
+function wmo(code) { return WMO[code] || { l:'Unknown', svg:'cloud' }; }
+
+/* SVG icons (white outlines, AccuWeather-ish style) */
+function wxSVG(id, size=28) {
+  const s = size;
+  const icons = {
+    sun: `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none">
+      <circle cx="16" cy="16" r="6.5" fill="rgba(255,210,60,0.95)" stroke="rgba(255,230,100,0.5)" stroke-width="0.5"/>
+      ${[0,45,90,135,180,225,270,315].map(a=>{const r=a*Math.PI/180,x1=16+9*Math.cos(r),y1=16+9*Math.sin(r),x2=16+11.5*Math.cos(r),y2=16+11.5*Math.sin(r);return`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="rgba(255,210,60,0.85)" stroke-width="1.8" stroke-linecap="round"/>`;}).join('')}
+    </svg>`,
+    partly: `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none">
+      <circle cx="13" cy="13" r="5.5" fill="rgba(255,210,60,0.9)"/>
+      ${[0,60,120,180,240,300].map(a=>{const r=a*Math.PI/180,x1=13+8*Math.cos(r),y1=13+8*Math.sin(r),x2=13+10*Math.cos(r),y2=13+10*Math.sin(r);return`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="rgba(255,210,60,0.8)" stroke-width="1.5" stroke-linecap="round"/>`;}).join('')}
+      <path d="M10 21 Q10 17 14 17 Q14 14 18 14 Q22 14 22 18 Q24 18 24 21 Z" fill="rgba(255,255,255,0.92)" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+    </svg>`,
+    cloud: `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none">
+      <path d="M6 22 Q6 17 11 17 Q11 13 16 13 Q21 13 21 17 Q24 17 24 20 Q24 22 22 22 Z" fill="rgba(255,255,255,0.88)" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
+    </svg>`,
+    fog: `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none">
+      <path d="M5 14 Q10 12 16 14 Q22 16 27 14" stroke="rgba(255,255,255,0.7)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M7 18 Q12 16 18 18 Q23 20 26 18" stroke="rgba(255,255,255,0.5)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M5 22 Q11 20 17 22 Q22 24 27 22" stroke="rgba(255,255,255,0.35)" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>`,
+    drizzle: `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none">
+      <path d="M7 16 Q7 11 12 11 Q12 8 17 8 Q22 8 22 12 Q25 12 25 16 Q25 18 23 18 H9 Q7 18 7 16Z" fill="rgba(255,255,255,0.85)"/>
+      <line x1="13" y1="21" x2="11" y2="25" stroke="rgba(130,200,255,0.9)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="18" y1="21" x2="16" y2="25" stroke="rgba(130,200,255,0.9)" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>`,
+    rain: `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none">
+      <path d="M6 15 Q6 10 11 10 Q11 7 16 7 Q21 7 21 11 Q24 11 24 15 Q24 17 22 17 H8 Q6 17 6 15Z" fill="rgba(255,255,255,0.82)"/>
+      <line x1="11" y1="21" x2="9" y2="26" stroke="rgba(130,200,255,0.95)" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="16" y1="21" x2="14" y2="26" stroke="rgba(130,200,255,0.95)" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="21" y1="21" x2="19" y2="26" stroke="rgba(130,200,255,0.95)" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>`,
+    snow: `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none">
+      <path d="M7 15 Q7 10 12 10 Q12 7 16 7 Q21 7 21 11 Q24 11 24 15 Q24 17 22 17 H9 Q7 17 7 15Z" fill="rgba(255,255,255,0.8)"/>
+      <text x="11" y="27" font-size="11" fill="rgba(200,230,255,0.95)" font-family="sans-serif" letter-spacing="3">❄</text>
+    </svg>`,
+    showers: `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none">
+      <circle cx="10" cy="11" r="4" fill="rgba(255,210,60,0.75)"/>
+      <path d="M13 16 Q13 13 17 13 Q17 10 21 10 Q25 10 25 14 Q27 14 27 17 Q27 19 25 19 H15 Q13 19 13 17Z" fill="rgba(255,255,255,0.82)"/>
+      <line x1="17" y1="22" x2="15" y2="27" stroke="rgba(130,200,255,0.9)" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="22" y1="22" x2="20" y2="27" stroke="rgba(130,200,255,0.9)" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>`,
+    thunder: `<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none">
+      <path d="M5 15 Q5 10 10 10 Q10 7 15 7 Q20 7 20 11 Q23 11 23 15 Q23 17 21 17 H7 Q5 17 5 15Z" fill="rgba(255,255,255,0.82)"/>
+      <path d="M15 18 L12 24 L15 24 L13 30 L19 22 L16 22 Z" fill="rgba(255,220,50,0.95)"/>
+    </svg>`,
+  };
+  return icons[id] || icons['cloud'];
+}
+
+function c2f(c) { return Math.round(c * 9/5 + 32); }
+
+let _wxLastUpdated = null;
+
+async function fetchWeather() {
+  const inner = document.getElementById('wx-inner');
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${WX_LAT}&longitude=${WX_LON}`
+      + `&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m`
+      + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max`
+      + `&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FNew_York&forecast_days=4`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const cur = data.current;
+    const daily = data.daily;
+
+    const tempNow   = Math.round(cur.temperature_2m);
+    const feelsLike = Math.round(cur.apparent_temperature);
+    const humidity  = Math.round(cur.relative_humidity_2m);
+    const windSpd   = Math.round(cur.wind_speed_10m);
+    const windDir   = windDirLabel(cur.wind_direction_10m);
+    const code      = cur.weather_code;
+    const condInfo  = wmo(code);
+
+    // forecast days 1-3 (skip today = index 0)
+    const days = [];
+    const DAY_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    for (let i = 1; i <= 3; i++) {
+      const d = new Date(daily.time[i] + 'T12:00:00');
+      days.push({
+        name: DAY_SHORT[d.getDay()],
+        hi: Math.round(daily.temperature_2m_max[i]),
+        lo: Math.round(daily.temperature_2m_min[i]),
+        code: daily.weather_code[i],
+        precip: daily.precipitation_probability_max[i] || 0,
+      });
+    }
+
+    const now = new Date();
+    const updStr = `${String(now.getHours()%12||12)}:${String(now.getMinutes()).padStart(2,'0')} ${now.getHours()>=12?'PM':'AM'}`;
+    _wxLastUpdated = updStr;
+
+    inner.innerHTML = `
+      <div class="wx-location-row">
+        <div class="wx-location">
+          <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M6 1a3.5 3.5 0 0 1 3.5 3.5C9.5 7.5 6 11 6 11S2.5 7.5 2.5 4.5A3.5 3.5 0 0 1 6 1z" fill="rgba(255,255,255,0.6)"/><circle cx="6" cy="4.5" r="1.2" fill="rgba(30,60,110,0.6)"/></svg>
+          ${WX_LABEL}
+        </div>
+        <div class="wx-updated">Updated ${updStr}</div>
+      </div>
+
+      <div class="wx-main-row">
+        <div class="wx-temp-block">
+          <div class="wx-temp">${tempNow}<sup>°F</sup></div>
+          <div class="wx-condition">${condInfo.l}</div>
+          <div class="wx-feels">Feels like ${feelsLike}°</div>
+        </div>
+        <div class="wx-icon-wrap">${wxSVG(condInfo.svg, 52)}</div>
+      </div>
+
+      <div class="wx-details-row">
+        <div class="wx-detail-pill">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 2 Q7.5 5 7.5 7 A1.5 1.5 0 0 1 4.5 7 Q4.5 5 6 2Z" fill="rgba(130,200,255,0.9)"/></svg>
+          ${humidity}% Humidity
+        </div>
+        <div class="wx-detail-pill">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6 L10 6 M7 3 L10 6 L7 9" stroke="rgba(255,255,255,0.8)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          ${windSpd} mph ${windDir}
+        </div>
+      </div>
+
+      <div class="wx-divider"></div>
+
+      <div class="wx-forecast">
+        ${days.map(d => {
+          const di = wmo(d.code);
+          return `<div class="wx-day">
+            <div class="wx-day-name">${d.name}</div>
+            <div class="wx-day-icon">${wxSVG(di.svg, 22)}</div>
+            ${d.precip > 20 ? `<div class="wx-precip"><svg width="8" height="8" viewBox="0 0 10 10"><path d="M5 1 Q6.5 4 6.5 6 A1.5 1.5 0 0 1 3.5 6 Q3.5 4 5 1Z" fill="rgba(130,200,255,0.9)"/></svg>${d.precip}%</div>` : ''}
+            <div class="wx-day-hi">${d.hi}°</div>
+            <div class="wx-day-lo">${d.lo}°</div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  } catch(e) {
+    inner.innerHTML = `<div class="wx-loading" style="flex-direction:column;gap:4px">
+      <span style="font-size:1.2vw">⚠</span>
+      <span>Weather unavailable</span>
+    </div>`;
+  }
+}
+
+function windDirLabel(deg) {
+  if (deg == null) return '';
+  const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+  return dirs[Math.round(deg / 45) % 8];
+}
+
+/* ================================================================
+   CAROUSEL / SCORES
+   ================================================================ */
 const TEAMS = [
   { label: 'MLB · Red Sox',  league: 'mlb', abbrev: 'BOS', sport: 'baseball/mlb' },
   { label: 'NBA · Celtics',  league: 'nba', abbrev: 'BOS', sport: 'basketball/nba' },
@@ -321,12 +731,9 @@ function carouselPrev() { goToSlide(carouselIndex - 1); }
 
 function resetAutoAdvance() {
   if (carouselAutoTimer) clearInterval(carouselAutoTimer);
-  carouselAutoTimer = setInterval(() => {
-    showSlide(carouselIndex + 1);
-  }, 8000);
+  carouselAutoTimer = setInterval(() => showSlide(carouselIndex + 1), 8000);
 }
 
-/* ---- SCORES ---- */
 async function fetchScores() {
   await Promise.all(TEAMS.map(async (team, idx) => {
     try {
@@ -340,7 +747,6 @@ async function fetchScores() {
       } else {
         const el = document.createElement('div');
         el.className = 'score-loading';
-        el.dataset.noGame = '1';
         el.textContent = 'No game today';
         carouselCards[idx] = el;
       }
@@ -436,35 +842,18 @@ async function buildScoreCard(game, label, league) {
   return card;
 }
 
-/* ---- WEATHER REFRESH ---- */
-function refreshWeather() {
-  const wrap = document.querySelector('.wx-widget-wrap');
-  const existing = wrap.querySelector('a.weatherwidget-io');
-  if (existing) existing.remove();
-  const a = document.createElement('a');
-  a.className = 'weatherwidget-io';
-  a.href = 'https://forecast7.com/en/40d88n73d91/10463/?unit=us';
-  a.dataset.label_1 = 'BRONX';
-  a.dataset.label_2 = 'WEATHER';
-  a.dataset.days = '5';
-  a.dataset.theme = 'weather_one';
-  a.textContent = 'BRONX WEATHER';
-  wrap.insertBefore(a, wrap.querySelector('script'));
-  if (window.__weatherwidget_init) window.__weatherwidget_init();
-}
-
-
-/* ---- MAIN ---- */
+/* ================================================================
+   MAIN REFRESH
+   ================================================================ */
 async function refreshAll() {
   renderDots();
-  await fetchScores();
+  await Promise.all([fetchWeather(), fetchScores()]);
 }
 
 resetAutoAdvance();
 refreshAll();
-setInterval(refreshAll, 15 * 60 * 1000);
-setInterval(fetchScores, 30 * 1000);
-setInterval(refreshWeather, 30 * 60 * 1000);
+setInterval(refreshAll, 15 * 60 * 1000);   // full refresh every 15 min
+setInterval(fetchScores, 30 * 1000);         // scores refresh every 30 sec
 </script>
 </body>
 </html>
