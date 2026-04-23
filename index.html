@@ -131,7 +131,7 @@
     margin-bottom: 2px;
   }
   .wx-location {
-    font-size: 0.72vw;
+    font-size: 0.92vw;
     font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -142,7 +142,7 @@
   }
   .wx-location svg { opacity: 0.65; }
   .wx-updated {
-    font-size: 0.6vw;
+    font-size: 0.78vw;
     color: rgba(255,255,255,0.35);
     font-family: 'DM Mono', monospace;
   }
@@ -157,7 +157,7 @@
   .wx-temp-block { display: flex; flex-direction: column; }
   .wx-temp {
     font-family: 'DM Sans', sans-serif;
-    font-size: 3.4vw;
+    font-size: 4.2vw;
     font-weight: 300;
     color: #fff;
     letter-spacing: -2px;
@@ -165,21 +165,21 @@
     margin-bottom: 1px;
   }
   .wx-temp sup {
-    font-size: 1.1vw;
+    font-size: 1.4vw;
     font-weight: 400;
     letter-spacing: 0;
     vertical-align: super;
     margin-left: 1px;
   }
   .wx-condition {
-    font-size: 0.78vw;
+    font-size: 1.0vw;
     color: rgba(255,255,255,0.85);
     font-weight: 400;
     margin-top: 2px;
     line-height: 1.2;
   }
   .wx-feels {
-    font-size: 0.68vw;
+    font-size: 0.88vw;
     color: rgba(255,255,255,0.5);
     margin-top: 2px;
   }
@@ -211,8 +211,8 @@
     gap: 3px;
     background: rgba(255,255,255,0.1);
     border-radius: 20px;
-    padding: 2px 7px;
-    font-size: 0.62vw;
+    padding: 3px 9px;
+    font-size: 0.82vw;
     color: rgba(255,255,255,0.8);
   }
   .wx-detail-pill svg { opacity: 0.75; flex-shrink: 0; }
@@ -245,28 +245,28 @@
     border: 0.5px solid rgba(255,255,255,0.1);
   }
   .wx-day-name {
-    font-size: 0.6vw;
+    font-size: 0.8vw;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: rgba(255,255,255,0.6);
   }
   .wx-day-icon {
-    width: 1.5vw;
-    height: 1.5vw;
+    width: 1.9vw;
+    height: 1.9vw;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .wx-day-icon svg { width: 100%; height: 100%; }
   .wx-day-hi {
-    font-size: 0.8vw;
+    font-size: 1.05vw;
     font-weight: 500;
     color: #fff;
     line-height: 1;
   }
   .wx-day-lo {
-    font-size: 0.68vw;
+    font-size: 0.88vw;
     font-weight: 400;
     color: rgba(255,255,255,0.45);
     line-height: 1;
@@ -277,7 +277,7 @@
     display: flex;
     align-items: center;
     gap: 3px;
-    font-size: 0.58vw;
+    font-size: 0.76vw;
     color: rgba(130,200,255,0.85);
   }
   .wx-precip svg { flex-shrink: 0; }
@@ -313,7 +313,8 @@
 
   .score-card.mlb { background: #fef2f2; border: 0.5px solid rgba(189,48,57,0.25); }
   .score-card.mlb .sc-header { background: #bd3039; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; }
-  .score-card.mlb .sc-league { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; }
+  .score-card.mlb .sc-team-label { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; color: #fff; line-height: 1.1; }
+  .score-card.mlb .sc-league { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.65); }
   .score-card.mlb .sc-status { font-size: 12px; color: rgba(255,255,255,0.85); font-family: 'DM Mono', monospace; }
   .score-card.mlb .sc-body { padding: 10px 12px; }
   .score-card.mlb .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
@@ -326,7 +327,8 @@
 
   .score-card.nba { background: #f0faf4; border: 0.5px solid rgba(0,122,51,0.25); }
   .score-card.nba .sc-header { background: linear-gradient(90deg, #007a33 0%, #005a25 100%); padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; }
-  .score-card.nba .sc-league { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #BA9A3C; }
+  .score-card.nba .sc-team-label { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; color: #BA9A3C; line-height: 1.1; }
+  .score-card.nba .sc-league { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
   .score-card.nba .sc-status { font-size: 12px; color: rgba(255,255,255,0.9); font-family: 'DM Mono', monospace; }
   .score-card.nba .sc-body { padding: 10px 12px; }
   .score-card.nba .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
@@ -339,7 +341,8 @@
 
   .score-card.nhl { background: #f0f2ff; border: 0.5px solid rgba(22,43,94,0.2); }
   .score-card.nhl .sc-header { background: linear-gradient(90deg, #162b5e 0%, #0d1e42 100%); padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; }
-  .score-card.nhl .sc-league { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #fcb514; }
+  .score-card.nhl .sc-team-label { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; color: #fcb514; line-height: 1.1; }
+  .score-card.nhl .sc-league { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
   .score-card.nhl .sc-status { font-size: 12px; color: rgba(255,255,255,0.9); font-family: 'DM Mono', monospace; }
   .score-card.nhl .sc-body { padding: 10px 12px; }
   .score-card.nhl .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
@@ -823,9 +826,13 @@ async function buildScoreCard(game, label, league) {
 
   const card = document.createElement('div');
   card.className = `score-card ${league}`;
+  const [leaguePart, teamPart] = label.split(' · ');
   card.innerHTML = `
     <div class="sc-header">
-      <span class="sc-league">${label}</span>
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <span class="sc-team-label">${teamPart || label}</span>
+        <span class="sc-league">${leaguePart}</span>
+      </div>
       <span class="sc-status">${statusLabel}</span>
     </div>
     <div class="sc-body">
