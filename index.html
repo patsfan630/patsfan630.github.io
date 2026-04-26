@@ -686,12 +686,19 @@ function parseICS(text, color) {
     const title = (getVal('SUMMARY') || '(No title)')
       .replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\n/g, ' ').replace(/\\\\/g, '\\');
 
-    // Dedup key = UID + DTSTART value. This correctly handles:
-    //  - true duplicates (same UID, same start → skip)
-    //  - recurring instances (same UID, different DTSTART → keep each)
-    //  - overridden instances (RECURRENCE-ID present, unique DTSTART → keep)
-    const uid      = getVal('UID') || '';
-    const dtRaw    = getVal('DTSTART') || '';
+    const uid          = getVal('UID') || '';
+    const hasRrule     = !!getVal('RRULE');
+    const recurrenceId = getVal('RECURRENCE-ID') || '';
+    const dtRaw        = getVal('DTSTART') || '';
+
+    // Skip master recurring templates — Google sends these alongside the
+    // already-expanded individual instances, so keeping them causes duplicates.
+    if (hasRrule) continue;
+
+    // For all remaining events, deduplicate by UID + DTSTART.
+    // Two events with the same UID and same DTSTART are true duplicates.
+    // Overriding instances have a RECURRENCE-ID but a *different* DTSTART
+    // from the base, so they get their own key and are kept.
     const dedupKey = uid + '|' + dtRaw;
     if (uid && seenUIDs.has(dedupKey)) continue;
     if (uid) seenUIDs.add(dedupKey);
