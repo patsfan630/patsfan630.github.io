@@ -658,11 +658,20 @@ async function loadICSFeeds() {
 function unfold(text) { return text.replace(/\r\n[ \t]/g,'').replace(/\n[ \t]/g,''); }
 
 function parseICS(text, color) {
-  // Two-pass approach to correctly handle recurring events and duplicates.
-  // Google Calendar ICS feeds send BOTH a master VEVENT with RRULE (template)
-  // AND individual expanded VEVENTs for each occurrence. We need the instances,
-  // not the master. But if a recurring event has NO expanded instances in the
-  // feed window, we keep the master so it isn't silently dropped.
+  // Google Calendar ICS feeds work like this:
+  // - Non-recurring events: one VEVENT per event.
+  // - Recurring events: one master VEVENT with RRULE (defines the pattern),
+  //   plus one extra VEVENT per edited instance (has RECURRENCE-ID).
+  //   Unedited instances are NOT expanded — they must be generated from RRULE.
+  //
+  // Strategy:
+  // 1. Parse all blocks.
+  // 2. Collect edited instance dates per UID (RECURRENCE-ID values).
+  // 3. Expand RRULE masters ourselves (simple daily/weekly/monthly).
+  // 4. For each expansion, skip dates covered by an edited instance.
+  // 5. Keep edited instances (RECURRENCE-ID blocks) as-is.
+  // 6. Keep non-recurring events as-is.
+  // 7. Deduplicate everything by UID+start.
 
   const getLine = (block, k) => {
     const m = block.match(new RegExp('^' + k + '[;:][^\r\n]*', 'mi'));
@@ -676,58 +685,185 @@ function parseICS(text, color) {
   const rawBlocks = text.split(/BEGIN:VEVENT/i);
   rawBlocks.shift();
 
-  // Pass 1: parse metadata for every block
   const parsed = rawBlocks.map(b => {
     const u = unfold(b);
+    const dtStartLine = getLine(u, 'DTSTART');
+    const dtEndLine   = getLine(u, 'DTEND');
+    const dtStartVal  = dtStartLine ? dtStartLine.replace(/^[^:]*:/, '').trim() : '';
+    const recIdLine   = getLine(u, 'RECURRENCE-ID');
+    const recIdVal    = recIdLine ? recIdLine.replace(/^[^:]*:/, '').trim() : '';
     return {
       u,
-      uid      : getVal(u, 'UID')     || '',
-      dtRaw    : getVal(u, 'DTSTART') || '',
-      hasRrule : !!getVal(u, 'RRULE'),
-      status   : (getVal(u, 'STATUS') || '').toUpperCase(),
+      uid         : getVal(u, 'UID')    || '',
+      dtStartLine, dtEndLine, dtStartVal,
+      recIdVal,
+      rrule       : getVal(u, 'RRULE') || '',
+      status      : (getVal(u, 'STATUS') || '').toUpperCase(),
+      summary     : (getVal(u, 'SUMMARY') || '(No title)')
+                      .replace(/\\,/g,',').replace(/\\;/g,';')
+                      .replace(/\\n/g,' ').replace(/\\\\/g,'\\'),
     };
   });
 
-  // UIDs that have at least one concrete instance (no RRULE) in this feed
-  const instanceUIDs = new Set(
-    parsed.filter(p => !p.hasRrule && p.uid).map(p => p.uid)
-  );
+  // Map of uid -> Set of DTSTART strings that have an override (RECURRENCE-ID)
+  const overrides = {};
+  for (const p of parsed) {
+    if (p.recIdVal && p.uid) {
+      if (!overrides[p.uid]) overrides[p.uid] = new Set();
+      overrides[p.uid].add(p.recIdVal.replace(/Z$/, '').slice(0, 15)); // normalize
+    }
+  }
 
-  // Pass 2: filter and deduplicate
-  const seen = new Set();
+  // Simple RRULE expander — handles FREQ=DAILY/WEEKLY/MONTHLY/YEARLY + INTERVAL + COUNT + UNTIL
+  // Returns array of {start:Date, end:Date} for occurrences within a ±6 week window
+  function expandRRule(rruleStr, dtStartLine, dtEndLine) {
+    const masterStart = parseICSDate(dtStartLine);
+    const masterEnd   = dtEndLine ? parseICSDate(dtEndLine) : new Date(masterStart.getTime() + 3600000);
+    if (!masterStart) return [];
+    const duration = masterEnd - masterStart;
+
+    const params = {};
+    rruleStr.split(';').forEach(part => {
+      const [k, v] = part.split('=');
+      if (k && v) params[k.toUpperCase()] = v;
+    });
+
+    const freq     = params['FREQ'] || 'WEEKLY';
+    const interval = parseInt(params['INTERVAL'] || '1', 10);
+    const count    = params['COUNT'] ? parseInt(params['COUNT'], 10) : 200;
+    let   until    = null;
+    if (params['UNTIL']) until = parseICSDate('UNTIL:' + params['UNTIL']);
+
+    // By-day filter for WEEKLY (e.g. BYDAY=MO,WE,FR)
+    const bydayDays = params['BYDAY']
+      ? params['BYDAY'].split(',').map(d => ['SU','MO','TU','WE','TH','FR','SA'].indexOf(d.replace(/[+-\d]/g,'')))
+      : null;
+
+    // Window: show events in a wide range so navigation works (±8 weeks from today)
+    const now      = new Date();
+    const winStart = new Date(now); winStart.setDate(winStart.getDate() - 60);
+    const winEnd   = new Date(now); winEnd.setDate(winEnd.getDate() + 60);
+
+    const results = [];
+    let cur = new Date(masterStart);
+    let n   = 0;
+
+    while (n < count) {
+      if (until && cur > until) break;
+      if (cur > winEnd) break;
+
+      if (cur >= winStart) {
+        // For WEEKLY with BYDAY, emit each matching weekday in this week
+        if (freq === 'WEEKLY' && bydayDays) {
+          // week anchor: go to Sunday of cur's week
+          const weekSun = new Date(cur);
+          weekSun.setDate(cur.getDate() - cur.getDay());
+          for (const wd of bydayDays) {
+            const d = new Date(weekSun);
+            d.setDate(weekSun.getDate() + wd);
+            d.setHours(masterStart.getHours(), masterStart.getMinutes(), masterStart.getSeconds(), 0);
+            if (d >= masterStart && d >= winStart && d <= winEnd) {
+              results.push({ start: d, end: new Date(d.getTime() + duration) });
+            }
+          }
+        } else {
+          results.push({ start: new Date(cur), end: new Date(cur.getTime() + duration) });
+        }
+      }
+
+      // Advance
+      const next = new Date(cur);
+      if (freq === 'DAILY')        next.setDate(cur.getDate() + interval);
+      else if (freq === 'WEEKLY')  next.setDate(cur.getDate() + 7 * interval);
+      else if (freq === 'MONTHLY') next.setMonth(cur.getMonth() + interval);
+      else if (freq === 'YEARLY')  next.setFullYear(cur.getFullYear() + interval);
+      else                         next.setDate(cur.getDate() + 7); // fallback
+
+      if (next.getTime() === cur.getTime()) break; // safety
+      cur = next;
+      n++;
+    }
+
+    return results;
+  }
+
+  const seen   = new Set();
   const events = [];
+
+  const addEvent = (title, start, end, allDay) => {
+    if (!start || isNaN(start.getTime())) return;
+    if (!end   || isNaN(end.getTime()))   end = new Date(start.getTime() + 3600000);
+    events.push({ title, start, end, allDay, color });
+  };
 
   for (const p of parsed) {
     if (p.status === 'CANCELLED') continue;
+    if (!p.dtStartLine) continue;
 
-    // Drop RRULE master only when concrete instances exist for that UID.
-    // If no instances exist (event far in future/past), keep the master.
-    if (p.hasRrule && instanceUIDs.has(p.uid)) continue;
+    const allDay = p.dtStartVal.length === 8;
 
-    // Deduplicate: same UID + same DTSTART = exact same occurrence
-    const key = p.uid + '|' + p.dtRaw;
-    if (p.uid && seen.has(key)) continue;
-    if (p.uid) seen.add(key);
+    if (p.rrule) {
+      // Recurring master: expand occurrences
+      const occurrences = expandRRule(p.rrule, p.dtStartLine, p.dtEndLine);
+      for (const occ of occurrences) {
+        // Normalize to compare against override keys
+        const dtKey = p.dtStartVal.slice(0,8) === occ.start.toISOString().slice(0,10).replace(/-/g,'')
+          ? p.dtStartVal.slice(0,15) // allDay
+          : (() => {
+              const d = occ.start;
+              return [
+                d.getFullYear(),
+                String(d.getMonth()+1).padStart(2,'0'),
+                String(d.getDate()).padStart(2,'0'),
+                'T',
+                String(d.getHours()).padStart(2,'0'),
+                String(d.getMinutes()).padStart(2,'0'),
+                String(d.getSeconds()).padStart(2,'0'),
+              ].join('');
+            })();
 
-    const { u } = p;
-    const title = (getVal(u, 'SUMMARY') || '(No title)')
-      .replace(/\\,/g, ',').replace(/\\;/g, ';')
-      .replace(/\\n/g, ' ').replace(/\\\\/g, '\\');
+        // Skip if this date has an edited override
+        const uidOverrides = overrides[p.uid];
+        if (uidOverrides) {
+          const occDateStr = [
+            occ.start.getFullYear(),
+            String(occ.start.getMonth()+1).padStart(2,'0'),
+            String(occ.start.getDate()).padStart(2,'0'),
+          ].join('');
+          // Check if any override key starts with this date
+          let hasOverride = false;
+          for (const ovk of uidOverrides) {
+            if (ovk.startsWith(occDateStr)) { hasOverride = true; break; }
+          }
+          if (hasOverride) continue;
+        }
 
-    const dtStartLine = getLine(u, 'DTSTART');
-    if (!dtStartLine) continue;
-    const dtStartVal = dtStartLine.replace(/^[^:]*:/, '').trim();
-    const allDay = dtStartVal.length === 8;
+        const dedupKey = p.uid + '|' + dtKey;
+        if (seen.has(dedupKey)) continue;
+        seen.add(dedupKey);
+        addEvent(p.summary, occ.start, occ.end, allDay);
+      }
 
-    const start = parseICSDate(dtStartLine);
-    if (!start || isNaN(start.getTime())) continue;
+    } else if (p.recIdVal) {
+      // Edited recurring instance — always keep
+      const start = parseICSDate(p.dtStartLine);
+      const end   = p.dtEndLine ? parseICSDate(p.dtEndLine) : null;
+      const key   = p.uid + '|edited|' + p.recIdVal;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      addEvent(p.summary, start, end, allDay);
 
-    const dtEndLine = getLine(u, 'DTEND');
-    let end = dtEndLine ? parseICSDate(dtEndLine) : new Date(start.getTime() + 3600000);
-    if (!end || isNaN(end.getTime())) end = new Date(start.getTime() + 3600000);
-
-    events.push({ title, start, end, allDay, color });
+    } else {
+      // Plain non-recurring event
+      const start = parseICSDate(p.dtStartLine);
+      const end   = p.dtEndLine ? parseICSDate(p.dtEndLine) : null;
+      const key   = p.uid + '|' + p.dtStartVal;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      addEvent(p.summary, start, end, allDay);
+    }
   }
+
   return events;
 }
 
