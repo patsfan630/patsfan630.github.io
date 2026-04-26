@@ -658,65 +658,72 @@ async function loadICSFeeds() {
 function unfold(text) { return text.replace(/\r\n[ \t]/g,'').replace(/\n[ \t]/g,''); }
 
 function parseICS(text, color) {
+  // Two-pass approach to correctly handle recurring events and duplicates.
+  // Google Calendar ICS feeds send BOTH a master VEVENT with RRULE (template)
+  // AND individual expanded VEVENTs for each occurrence. We need the instances,
+  // not the master. But if a recurring event has NO expanded instances in the
+  // feed window, we keep the master so it isn't silently dropped.
+
+  const getLine = (block, k) => {
+    const m = block.match(new RegExp('^' + k + '[;:][^\r\n]*', 'mi'));
+    return m ? m[0] : null;
+  };
+  const getVal = (block, k) => {
+    const line = getLine(block, k);
+    return line ? line.replace(/^[^:]*:/, '').trim() : null;
+  };
+
+  const rawBlocks = text.split(/BEGIN:VEVENT/i);
+  rawBlocks.shift();
+
+  // Pass 1: parse metadata for every block
+  const parsed = rawBlocks.map(b => {
+    const u = unfold(b);
+    return {
+      u,
+      uid      : getVal(u, 'UID')     || '',
+      dtRaw    : getVal(u, 'DTSTART') || '',
+      hasRrule : !!getVal(u, 'RRULE'),
+      status   : (getVal(u, 'STATUS') || '').toUpperCase(),
+    };
+  });
+
+  // UIDs that have at least one concrete instance (no RRULE) in this feed
+  const instanceUIDs = new Set(
+    parsed.filter(p => !p.hasRrule && p.uid).map(p => p.uid)
+  );
+
+  // Pass 2: filter and deduplicate
+  const seen = new Set();
   const events = [];
-  // Track UIDs we've seen to catch true duplicates (same feed sent twice, etc.)
-  const seenUIDs = new Set();
 
-  const blocks = text.split(/BEGIN:VEVENT/i);
-  blocks.shift();
+  for (const p of parsed) {
+    if (p.status === 'CANCELLED') continue;
 
-  for (const block of blocks) {
-    const unfolded = unfold(block);
+    // Drop RRULE master only when concrete instances exist for that UID.
+    // If no instances exist (event far in future/past), keep the master.
+    if (p.hasRrule && instanceUIDs.has(p.uid)) continue;
 
-    // Get a raw property line (handles both "KEY:val" and "KEY;param=x:val")
-    const getLine = k => {
-      const m = unfolded.match(new RegExp(`^${k}[;:][^\r\n]*`, 'mi'));
-      return m ? m[0] : null;
-    };
-    const getVal = k => {
-      const line = getLine(k);
-      if (!line) return null;
-      return line.replace(/^[^:]*:/, '').trim();
-    };
+    // Deduplicate: same UID + same DTSTART = exact same occurrence
+    const key = p.uid + '|' + p.dtRaw;
+    if (p.uid && seen.has(key)) continue;
+    if (p.uid) seen.add(key);
 
-    // Skip cancelled events
-    const status = getVal('STATUS');
-    if (status && status.toUpperCase() === 'CANCELLED') continue;
+    const { u } = p;
+    const title = (getVal(u, 'SUMMARY') || '(No title)')
+      .replace(/\\,/g, ',').replace(/\\;/g, ';')
+      .replace(/\\n/g, ' ').replace(/\\\\/g, '\\');
 
-    const title = (getVal('SUMMARY') || '(No title)')
-      .replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\n/g, ' ').replace(/\\\\/g, '\\');
-
-    const uid          = getVal('UID') || '';
-    const hasRrule     = !!getVal('RRULE');
-    const recurrenceId = getVal('RECURRENCE-ID') || '';
-    const dtRaw        = getVal('DTSTART') || '';
-
-    // Skip master recurring templates — Google sends these alongside the
-    // already-expanded individual instances, so keeping them causes duplicates.
-    if (hasRrule) continue;
-
-    // For all remaining events, deduplicate by UID + DTSTART.
-    // Two events with the same UID and same DTSTART are true duplicates.
-    // Overriding instances have a RECURRENCE-ID but a *different* DTSTART
-    // from the base, so they get their own key and are kept.
-    const dedupKey = uid + '|' + dtRaw;
-    if (uid && seenUIDs.has(dedupKey)) continue;
-    if (uid) seenUIDs.add(dedupKey);
-
-    const dtStartLine = getLine('DTSTART');
+    const dtStartLine = getLine(u, 'DTSTART');
     if (!dtStartLine) continue;
-
-    // Is it an all-day event? Value part is just YYYYMMDD (8 chars, no T)
     const dtStartVal = dtStartLine.replace(/^[^:]*:/, '').trim();
     const allDay = dtStartVal.length === 8;
 
     const start = parseICSDate(dtStartLine);
-    if (!start) continue;
+    if (!start || isNaN(start.getTime())) continue;
 
-    const dtEndLine = getLine('DTEND');
+    const dtEndLine = getLine(u, 'DTEND');
     let end = dtEndLine ? parseICSDate(dtEndLine) : new Date(start.getTime() + 3600000);
-
-    // Guard: skip events where parsing failed
     if (!end || isNaN(end.getTime())) end = new Date(start.getTime() + 3600000);
 
     events.push({ title, start, end, allDay, color });
