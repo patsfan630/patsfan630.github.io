@@ -38,24 +38,7 @@
   }
   html.dark-mode .clock,
   html.dark-mode .clock-sub { color: #e2e5f0; }
-  html.dark-mode .score-card.mlb { background: #0a1e35; border-color: rgba(189,48,57,0.3); }
-  html.dark-mode .score-card.mlb .sc-team-name { color: #c8d8e8; }
-  html.dark-mode .score-card.mlb .sc-abbr { color: #fff; }
-  html.dark-mode .score-card.mlb .sc-record { color: #5a7a9a; }
-  html.dark-mode .score-card.mlb .sc-score { color: #8aaacc; }
-  html.dark-mode .score-card.mlb .sc-score.winner { color: #fff; }
-  html.dark-mode .score-card.nba { background: #051e0f; border-color: rgba(0,122,51,0.4); }
-  html.dark-mode .score-card.nba .sc-team-name { color: #a8c8a8; }
-  html.dark-mode .score-card.nba .sc-abbr { color: #fff; }
-  html.dark-mode .score-card.nba .sc-record { color: #2a5a3a; }
-  html.dark-mode .score-card.nba .sc-score { color: #4a8a5a; }
-  html.dark-mode .score-card.nba .sc-score.winner { color: #BA9A3C; }
-  html.dark-mode .score-card.nhl { background: #0a0f2a; border-color: rgba(252,181,20,0.3); }
-  html.dark-mode .score-card.nhl .sc-team-name { color: #c8d0e8; }
-  html.dark-mode .score-card.nhl .sc-abbr { color: #fff; }
-  html.dark-mode .score-card.nhl .sc-record { color: #4a5070; }
-  html.dark-mode .score-card.nhl .sc-score { color: #6a78b0; }
-  html.dark-mode .score-card.nhl .sc-score.winner { color: #fcb514; }
+
 
   #screensaver {
     display: none; position: fixed; inset: 0; background: #000; z-index: 999;
@@ -378,46 +361,95 @@
 
   /* SCORES */
   .score-loading { font-size: 14px; color: var(--muted); text-align: center; padding: 10px 0; }
-  .score-card { border-radius: 10px; overflow: hidden; }
-  .score-card.mlb { background: #fef2f2; border: 0.5px solid rgba(189,48,57,0.25); }
-  .score-card.mlb .sc-header { background: #bd3039; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; }
-  .score-card.mlb .sc-team-label { font-size: 15px; font-weight: 700; color: #fff; }
-  .score-card.mlb .sc-league { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.65); }
-  .score-card.mlb .sc-status { font-size: 12px; color: rgba(255,255,255,0.85); font-family: 'DM Mono', monospace; }
-  .score-card.mlb .sc-body { padding: 10px 12px; }
-  .score-card.mlb .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
-  .score-card.mlb .sc-team:last-child { border-bottom: none; }
-  .score-card.mlb .sc-team-name { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; color: #333; }
-  .score-card.mlb .sc-abbr { color: #111; }
-  .score-card.mlb .sc-record { font-size: 12px; color: #888; }
-  .score-card.mlb .sc-score { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: #777; }
-  .score-card.mlb .sc-score.winner { color: #bd3039; }
-  .score-card.nba { background: #f0faf4; border: 0.5px solid rgba(0,122,51,0.25); }
-  .score-card.nba .sc-header { background: linear-gradient(90deg,#007a33,#005a25); padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; }
-  .score-card.nba .sc-team-label { font-size: 15px; font-weight: 700; color: #BA9A3C; }
-  .score-card.nba .sc-league { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
-  .score-card.nba .sc-status { font-size: 12px; color: rgba(255,255,255,0.9); font-family: 'DM Mono', monospace; }
-  .score-card.nba .sc-body { padding: 10px 12px; }
-  .score-card.nba .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
-  .score-card.nba .sc-team:last-child { border-bottom: none; }
-  .score-card.nba .sc-team-name { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; color: #333; }
-  .score-card.nba .sc-abbr { color: #111; }
-  .score-card.nba .sc-record { font-size: 12px; color: #888; }
-  .score-card.nba .sc-score { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: #777; }
-  .score-card.nba .sc-score.winner { color: #007a33; }
-  .score-card.nhl { background: #f0f2ff; border: 0.5px solid rgba(22,43,94,0.2); }
-  .score-card.nhl .sc-header { background: linear-gradient(90deg,#162b5e,#0d1e42); padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; }
-  .score-card.nhl .sc-team-label { font-size: 15px; font-weight: 700; color: #fcb514; }
-  .score-card.nhl .sc-league { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
-  .score-card.nhl .sc-status { font-size: 12px; color: rgba(255,255,255,0.9); font-family: 'DM Mono', monospace; }
-  .score-card.nhl .sc-body { padding: 10px 12px; }
-  .score-card.nhl .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
-  .score-card.nhl .sc-team:last-child { border-bottom: none; }
-  .score-card.nhl .sc-team-name { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; color: #333; }
-  .score-card.nhl .sc-abbr { color: #111; }
-  .score-card.nhl .sc-record { font-size: 12px; color: #888; }
-  .score-card.nhl .sc-score { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: #777; }
-  .score-card.nhl .sc-score.winner { color: #162b5e; }
+
+  .score-card {
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+  }
+
+  /* League label strip at top */
+  .sc-header {
+    padding: 5px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface2);
+    border-bottom: 0.5px solid var(--border);
+  }
+  .sc-league-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .sc-status {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Series status bar (playoffs) */
+  .sc-series {
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    text-align: center;
+    color: #fff;
+    letter-spacing: 0.03em;
+  }
+
+  /* Each team row */
+  .sc-body { padding: 6px 0; }
+  .sc-team {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 12px;
+  }
+  .sc-team-name {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  /* Colored left bar + team name pill */
+  .sc-team-bar {
+    width: 4px;
+    border-radius: 2px;
+    align-self: stretch;
+    min-height: 28px;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+  .sc-team-info { display: flex; flex-direction: column; gap: 1px; }
+  .sc-abbr { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1; }
+  .sc-fullname { font-size: 10px; color: var(--muted); font-weight: 400; line-height: 1; }
+  .sc-record { font-size: 10px; color: var(--dim); font-weight: 400; }
+  .sc-score {
+    font-family: 'DM Mono', monospace;
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--dim);
+    line-height: 1;
+  }
+  .sc-score.winner { color: var(--text); }
+
+  /* Live detail strip */
+  .sc-live {
+    margin: 4px 12px 2px;
+    padding: 6px 8px;
+    background: var(--surface2);
+    border-radius: 6px;
+  }
+  .sc-inning-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
 
   .carousel-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--surface2); border: 0.5px solid var(--border); cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
   .carousel-dot.active { background: var(--muted); }
@@ -1115,8 +1147,198 @@ function carouselNext(){goToSlide(carouselIndex+1);}
 function carouselPrev(){goToSlide(carouselIndex-1);}
 function resetAutoAdvance(){if(carouselAutoTimer)clearInterval(carouselAutoTimer);carouselAutoTimer=setInterval(()=>showSlide(carouselIndex+1),8000);}
 async function fetchScores(){await Promise.all(TEAMS.map(async(team,idx)=>{try{const res=await fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard`);const data=await res.json();const game=(data?.events||[]).find(evt=>evt.competitions?.[0]?.competitors?.some(c=>c.team?.abbreviation===team.abbrev));if(game){carouselCards[idx]=await buildScoreCard(game,team.label,team.league);}else{carouselCards[idx]=buildEmptyCard(team.label,team.league);}}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';carouselCards[idx]=el;}}));showSlide(carouselIndex);}
-function buildEmptyCard(label,league){const[lp,tp]=label.split(' · ');const card=document.createElement('div');card.className=`score-card ${league}`;card.innerHTML=`<div class="sc-header"><div style="display:flex;flex-direction:column;gap:1px"><span class="sc-team-label">${tp||label}</span><span class="sc-league">${lp}</span></div></div><div class="sc-body"><div style="padding:10px 0;text-align:center;font-size:13px;color:var(--muted)">No game today</div></div>`;return card;}
-async function buildScoreCard(game,label,league){const comp=game.competitions?.[0],status=comp?.status?.type,competitors=comp?.competitors||[];const home=competitors.find(c=>c.homeAway==='home'),away=competitors.find(c=>c.homeAway==='away');const t1=away||competitors[0]||{},t2=home||competitors[1]||{};const s1=parseInt(t1.score||0),s2=parseInt(t2.score||0);const done=status?.completed,inProgress=status?.state==='in',showScore=done||inProgress;const n1=t1.team?.abbreviation||'—',n2=t2.team?.abbreviation||'—';const r1=t1.records?.[0]?.summary||'',r2=t2.records?.[0]?.summary||'';let statusLabel='';if(done)statusLabel='Final';else if(inProgress)statusLabel=comp?.status?.detail||'Live';else{const d=new Date(game.date);statusLabel=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}let liveHTML='';if(inProgress){try{const sp=league==='mlb'?'baseball/mlb':league==='nba'?'basketball/nba':'hockey/nhl';const res=await fetch(`https://site.api.espn.com/apis/site/v2/sports/${sp}/summary?event=${game.id}`);const data=await res.json();if(league==='mlb'){const sit=data.situation||{},balls=sit.balls??'—',strikes=sit.strikes??'—',outs=sit.outs??'—',inning=comp?.status?.detail||'',athletes=data.boxscore?.players?.flatMap(t=>t.statistics||[]).flatMap(s=>s.athletes||[])||[],findName=id=>athletes.find(a=>String(a.athlete?.id)===String(id))?.athlete?.displayName||'—',batter=findName(sit.batter?.playerId),pitcher=findName(sit.pitcher?.playerId),onFirst=sit.onFirst?'var(--blue)':'var(--surface2)',onSecond=sit.onSecond?'var(--blue)':'var(--surface2)',onThird=sit.onThird?'var(--blue)':'var(--surface2)';liveHTML=`<div style="margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border)"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:var(--muted)">${inning}</span><span style="font-size:12px;color:var(--muted)">B${balls} S${strikes} O${outs}</span><div style="position:relative;width:28px;height:28px;flex-shrink:0"><div style="position:absolute;top:0;left:50%;transform:translateX(-50%) rotate(45deg);width:9px;height:9px;background:${onSecond};border:1px solid var(--blue)"></div><div style="position:absolute;top:50%;right:0;transform:translateY(-50%) rotate(45deg);width:9px;height:9px;background:${onFirst};border:1px solid var(--blue)"></div><div style="position:absolute;top:50%;left:0;transform:translateY(-50%) rotate(45deg);width:9px;height:9px;background:${onThird};border:1px solid var(--blue)"></div><div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%) rotate(45deg);width:9px;height:9px;background:var(--surface2);border:1px solid var(--blue)"></div></div></div><div style="font-size:12px;color:var(--muted)">&#127921; <span style="color:var(--text)">${batter}</span></div><div style="font-size:12px;color:var(--muted);margin-top:2px">&#9917; <span style="color:var(--text)">${pitcher}</span></div></div>`;}else if(league==='nba'||league==='nhl'){const period=comp?.status?.period||'—',clock=comp?.status?.displayClock||'—';let pl;if(league==='nba')pl=period===1?'1st':period===2?'2nd':period===3?'3rd':period===4?'4th':`OT${period-4}`;else pl=period===1?'1st':period===2?'2nd':period===3?'3rd':'OT';liveHTML=`<div style="margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border)"><div style="font-size:13px;color:var(--muted);text-align:center">${pl} &middot; ${clock}</div></div>`;}}catch(e){}}const card=document.createElement('div');card.className=`score-card ${league}`;const[lp,tp]=label.split(' · ');card.innerHTML=`<div class="sc-header"><div style="display:flex;flex-direction:column;gap:1px"><span class="sc-team-label">${tp||label}</span><span class="sc-league">${lp}</span></div><span class="sc-status">${statusLabel}</span></div><div class="sc-body"><div class="sc-team"><div class="sc-team-name"><span class="sc-abbr">${n1}</span>${r1?`<span class="sc-record">${r1}</span>`:''}</div><span class="sc-score ${done&&s1>s2?'winner':''}">${showScore?s1:'—'}</span></div><div class="sc-team"><div class="sc-team-name"><span class="sc-abbr">${n2}</span>${r2?`<span class="sc-record">${r2}</span>`:''}</div><span class="sc-score ${done&&s2>s1?'winner':''}">${showScore?s2:'—'}</span></div>${liveHTML}</div>`;return card;}
+
+// ── Team color database ──────────────────────────────────────────────────────
+// Primary and secondary colors per team abbreviation.
+// primary = the main brand color, secondary = accent (used for winner highlight)
+const TEAM_COLORS = {
+  // MLB
+  ARI:['#A71930','#E3D4AD'], ATL:['#CE1141','#13274F'], BAL:['#DF4601','#000000'],
+  BOS:['#BD3039','#0C2340'], CHC:['#0E3386','#CC3433'], CHW:['#27251F','#C4CED4'],
+  CIN:['#C6011F','#000000'], CLE:['#00385D','#E31937'], COL:['#33006F','#C4CED4'],
+  DET:['#0C2340','#FA4616'], HOU:['#002D62','#EB6E1F'], KC: ['#004687','#C09A5B'],
+  LAA:['#BA0021','#003263'], LAD:['#005A9C','#EF3E42'], MIA:['#00A3E0','#EF3340'],
+  MIL:['#12284B','#FFC52F'], MIN:['#002B5C','#D31145'], NYM:['#002D72','#FF5910'],
+  NYY:['#003087','#C4CED4'], OAK:['#003831','#EFB21E'], PHI:['#E81828','#002D72'],
+  PIT:['#27251F','#FDB827'], SD: ['#2F241D','#FFC425'], SEA:['#0C2C56','#005C5C'],
+  SF: ['#FD5A1E','#27251F'], STL:['#C41E3A','#0C2340'], TB: ['#092C5C','#8FBCE6'],
+  TEX:['#003278','#C0111F'], TOR:['#134A8E','#E8291C'], WSH:['#AB0003','#14225A'],
+  // NBA
+  ATL:['#C1D32F','#E03A3E'], BOS:['#007A33','#BA9A3C'], BKN:['#000000','#FFFFFF'],
+  CHA:['#1D1160','#00788C'], CHI:['#CE1141','#000000'], CLE:['#860038','#FDBB30'],
+  DAL:['#00538C','#002B5E'], DEN:['#0E2240','#FEC524'], DET:['#C8102E','#1D42BA'],
+  GSW:['#1D428A','#FFC72C'], HOU:['#CE1141','#000000'], IND:['#002D62','#FDBB30'],
+  LAC:['#C8102E','#1D428A'], LAL:['#552583','#FDB927'], MEM:['#5D76A9','#12173F'],
+  MIA:['#98002E','#F9A01B'], MIL:['#00471B','#EEE1C6'], MIN:['#0C2340','#236192'],
+  NOP:['#0C2340','#C8102E'], NYK:['#006BB6','#F58426'], OKC:['#007AC1','#EF3B24'],
+  ORL:['#0077C0','#C4CED4'], PHI:['#006BB6','#ED174C'], PHX:['#1D1160','#E56020'],
+  POR:['#E03A3E','#000000'], SAC:['#5A2D81','#63727A'], SAS:['#C4CED4','#000000'],
+  TOR:['#CE1141','#000000'], UTA:['#002B5C','#F9A01B'], WAS:['#002B5C','#E31837'],
+  // NHL
+  ANA:['#F47A38','#B09862'], ARI:['#8C2633','#E2D6B5'], BOS:['#FCB514','#000000'],
+  BUF:['#003087','#FCB514'], CGY:['#C8102E','#F1BE48'], CAR:['#CC0000','#000000'],
+  CHI:['#CF0A2C','#000000'], COL:['#6F263D','#236192'], CBJ:['#002654','#CE1126'],
+  DAL:['#006847','#8F8F8C'], DET:['#CE1126','#FFFFFF'], EDM:['#FF4C00','#041E42'],
+  FLA:['#041E42','#C8102E'], LAK:['#111111','#A2AAAD'], MIN:['#154734','#A6192E'],
+  MTL:['#AF1E2D','#192168'], NSH:['#FFB81C','#041E42'], NJD:['#CE1126','#000000'],
+  NYI:['#003087','#FC4C02'], NYR:['#0038A8','#CE1126'], OTT:['#E4173E','#000000'],
+  PHI:['#F74902','#000000'], PIT:['#000000','#FCB514'], SJS:['#006D75','#EA7200'],
+  SEA:['#001628','#99D9D9'], STL:['#002F87','#FCB514'], TBL:['#002868','#FFFFFF'],
+  TOR:['#00205B','#FFFFFF'], VAN:['#00843D','#00205B'], VGK:['#B4975A','#333F42'],
+  WSH:['#041E42','#C8102E'], WPG:['#041E42','#AC162C'],
+};
+
+function teamColors(abbr) {
+  return TEAM_COLORS[abbr] || ['#555','#888'];
+}
+
+// ── Inning label helper ───────────────────────────────────────────────────────
+function inningLabel(detail, situation) {
+  if (!detail) return '';
+  // ESPN detail strings: "Top 3rd", "Mid 3rd", "Bot 3rd", "End 3rd"
+  const d = detail.toLowerCase();
+  if (d.startsWith('top'))  return '▲ ' + detail.replace(/top\s*/i,'').trim();
+  if (d.startsWith('mid'))  return '— ' + detail.replace(/mid\s*/i,'').trim();
+  if (d.startsWith('bot'))  return '▼ ' + detail.replace(/bot\s*/i,'').trim();
+  if (d.startsWith('end'))  return '■ End ' + detail.replace(/end\s*/i,'').trim();
+  return detail;
+}
+
+// ── Series status helper ──────────────────────────────────────────────────────
+function seriesLabel(comp, t1abbr, t2abbr) {
+  const series = comp?.series;
+  if (!series) return null;
+  const summary = series.summary || '';
+  // ESPN: "BOS leads 3-1", "Tied 2-2", "BOS wins 4-1" etc.
+  return summary || null;
+}
+
+// ── Empty card ────────────────────────────────────────────────────────────────
+function buildEmptyCard(label, league) {
+  const [lp, tp] = label.split(' · ');
+  const card = document.createElement('div');
+  card.className = 'score-card';
+  card.innerHTML = `
+    <div class="sc-header">
+      <span class="sc-league-label">${lp} · ${tp||label}</span>
+    </div>
+    <div class="sc-body">
+      <div style="padding:14px 0;text-align:center;font-size:12px;color:var(--muted)">No game today</div>
+    </div>`;
+  return card;
+}
+
+// ── Main score card ───────────────────────────────────────────────────────────
+async function buildScoreCard(game, label, league) {
+  const comp        = game.competitions?.[0];
+  const status      = comp?.status?.type;
+  const competitors = comp?.competitors || [];
+  const away = competitors.find(c => c.homeAway === 'away') || competitors[0] || {};
+  const home = competitors.find(c => c.homeAway === 'home') || competitors[1] || {};
+
+  const s1 = parseInt(away.score || 0);
+  const s2 = parseInt(home.score || 0);
+  const done       = status?.completed;
+  const inProgress = status?.state === 'in';
+  const showScore  = done || inProgress;
+
+  const a1 = away.team?.abbreviation || '—';
+  const a2 = home.team?.abbreviation || '—';
+  const fn1 = away.team?.displayName || '';
+  const fn2 = home.team?.displayName || '';
+  const r1  = away.records?.[0]?.summary || '';
+  const r2  = home.records?.[0]?.summary || '';
+
+  const [c1p] = teamColors(a1);
+  const [c2p] = teamColors(a2);
+
+  let statusLabel = '';
+  if (done)           statusLabel = 'Final';
+  else if (inProgress) statusLabel = comp?.status?.detail || 'Live';
+  else { const d = new Date(game.date); statusLabel = d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }
+
+  const [lp, tp] = label.split(' · ');
+
+  // Series status (playoffs)
+  const seriesStr = seriesLabel(comp, a1, a2);
+
+  // Live detail
+  let liveHTML = '';
+  if (inProgress) {
+    try {
+      const sp  = league==='mlb'?'baseball/mlb':league==='nba'?'basketball/nba':'hockey/nhl';
+      const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${sp}/summary?event=${game.id}`);
+      const data = await res.json();
+
+      if (league === 'mlb') {
+        const sit     = data.situation || {};
+        const balls   = sit.balls   ?? '—';
+        const strikes = sit.strikes ?? '—';
+        const outs    = sit.outs    ?? '—';
+        const inningStr = inningLabel(comp?.status?.detail, sit);
+        const athletes  = data.boxscore?.players?.flatMap(t=>t.statistics||[]).flatMap(s=>s.athletes||[]) || [];
+        const findName  = id => athletes.find(a=>String(a.athlete?.id)===String(id))?.athlete?.shortName || athletes.find(a=>String(a.athlete?.id)===String(id))?.athlete?.displayName || '—';
+        const batter  = findName(sit.batter?.playerId);
+        const pitcher = findName(sit.pitcher?.playerId);
+        const base = (on) => on ? 'var(--blue)' : 'var(--surface2)';
+        liveHTML = `
+          <div class="sc-live">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+              <span class="sc-inning-label">${inningStr}</span>
+              <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">B${balls} S${strikes} O${outs}</span>
+              <div style="position:relative;width:26px;height:26px;flex-shrink:0">
+                <div style="position:absolute;top:0;left:50%;transform:translateX(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onSecond)};border:1.5px solid var(--blue);border-radius:1px"></div>
+                <div style="position:absolute;top:50%;right:0;transform:translateY(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onFirst)};border:1.5px solid var(--blue);border-radius:1px"></div>
+                <div style="position:absolute;top:50%;left:0;transform:translateY(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onThird)};border:1.5px solid var(--blue);border-radius:1px"></div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--muted)">🏏 <span style="color:var(--text)">${batter}</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">⚾ <span style="color:var(--text)">${pitcher}</span></div>
+          </div>`;
+
+      } else if (league === 'nba' || league === 'nhl') {
+        const period = comp?.status?.period || '—';
+        const clock  = comp?.status?.displayClock || '—';
+        let pl;
+        if (league==='nba') pl = period===1?'1st':period===2?'2nd':period===3?'3rd':period===4?'4th':`OT${period-4}`;
+        else                 pl = period===1?'1st':period===2?'2nd':period===3?'3rd':'OT';
+        liveHTML = `
+          <div class="sc-live" style="text-align:center">
+            <span style="font-size:12px;font-weight:600;color:var(--text)">${pl}</span>
+            <span style="font-size:12px;color:var(--muted);margin-left:6px;font-family:'DM Mono',monospace">${clock}</span>
+          </div>`;
+      }
+    } catch(e) {}
+  }
+
+  const teamRow = (abbr, fullName, record, score, isWinner, color) => `
+    <div class="sc-team">
+      <div class="sc-team-name">
+        <div class="sc-team-bar" style="background:${color}"></div>
+        <div class="sc-team-info">
+          <span class="sc-abbr">${abbr}</span>
+          ${record ? `<span class="sc-record">${record}</span>` : ''}
+        </div>
+      </div>
+      <span class="sc-score ${isWinner?'winner':''}">${showScore ? score : '—'}</span>
+    </div>`;
+
+  const card = document.createElement('div');
+  card.className = 'score-card';
+  card.innerHTML = `
+    <div class="sc-header">
+      <span class="sc-league-label">${lp}</span>
+      <span class="sc-status">${statusLabel}</span>
+    </div>
+    ${seriesStr ? `<div class="sc-series" style="background:${c2p}">${seriesStr}</div>` : ''}
+    <div class="sc-body">
+      ${teamRow(a1, fn1, r1, s1, done&&s1>s2, c1p)}
+      ${teamRow(a2, fn2, r2, s2, done&&s2>s1, c2p)}
+      ${liveHTML}
+    </div>`;
+  return card;
+}
+
 
 /* ================================================================
    BOOT
