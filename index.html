@@ -706,14 +706,13 @@ function parseICS(text, color) {
   });
 
   // Map of uid -> Set of date strings (YYYYMMDD) that are overridden or cancelled.
-  // We collect ALL blocks with a RECURRENCE-ID here, including CANCELLED ones,
-  // so that deleted instances suppress their corresponding RRULE expansion.
   const overrides = {};
   for (const p of parsed) {
     if (p.recIdVal && p.uid) {
       if (!overrides[p.uid]) overrides[p.uid] = new Set();
-      // Normalize to YYYYMMDD so date-only comparison works regardless of time/tz suffix
-      overrides[p.uid].add(p.recIdVal.replace(/Z$/, '').slice(0, 8));
+      const dateKey = p.recIdVal.replace(/Z$/, '').replace(/T.*$/, '').replace(/-/g, '').slice(0, 8);
+      overrides[p.uid].add(dateKey);
+      console.log('[ICS override]', p.uid.slice(-12), 'date:', dateKey, 'status:', p.status);
     }
   }
 
@@ -833,7 +832,9 @@ function parseICS(text, color) {
             String(occ.start.getMonth()+1).padStart(2,'0'),
             String(occ.start.getDate()).padStart(2,'0'),
           ].join('');
-          if (uidOverrides.has(occDateStr)) continue;
+          const isOverridden = uidOverrides.has(occDateStr);
+          console.log('[ICS expand]', p.uid.slice(-12), 'date:', occDateStr, 'overridden:', isOverridden, 'overrides:', [...uidOverrides]);
+          if (isOverridden) continue;
         }
 
         const dedupKey = p.uid + '|' + dtKey;
