@@ -686,16 +686,15 @@ function parseICS(text, color) {
     const title = (getVal('SUMMARY') || '(No title)')
       .replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\n/g, ' ').replace(/\\\\/g, '\\');
 
-    // Use RECURRENCE-ID + UID together as a unique key so overridden
-    // recurring instances don't duplicate the base event
-    const uid         = getVal('UID') || '';
-    const recurrenceId = getVal('RECURRENCE-ID') || '';
-    const dedupKey    = uid + '|' + recurrenceId;
-
-    // Only skip plain duplicates (same UID, no recurrence-id differentiation)
-    // — recurring instances have different RECURRENCE-IDs so they pass through
-    if (uid && !recurrenceId && seenUIDs.has(uid)) continue;
-    if (uid && !recurrenceId) seenUIDs.add(uid);
+    // Dedup key = UID + DTSTART value. This correctly handles:
+    //  - true duplicates (same UID, same start → skip)
+    //  - recurring instances (same UID, different DTSTART → keep each)
+    //  - overridden instances (RECURRENCE-ID present, unique DTSTART → keep)
+    const uid      = getVal('UID') || '';
+    const dtRaw    = getVal('DTSTART') || '';
+    const dedupKey = uid + '|' + dtRaw;
+    if (uid && seenUIDs.has(dedupKey)) continue;
+    if (uid) seenUIDs.add(dedupKey);
 
     const dtStartLine = getLine('DTSTART');
     if (!dtStartLine) continue;
