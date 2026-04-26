@@ -659,28 +659,92 @@ function unfold(text) { return text.replace(/\r\n[ \t]/g,'').replace(/\n[ \t]/g,
 
 function parseICS(text, color) {
   const events = [];
+  // Track UIDs we've seen to catch true duplicates (same feed sent twice, etc.)
+  const seenUIDs = new Set();
+
   const blocks = text.split(/BEGIN:VEVENT/i);
   blocks.shift();
+
   for (const block of blocks) {
     const unfolded = unfold(block);
-    const get = k => { const m = unfolded.match(new RegExp(`^${k}[;:][^\r\n]*`,'mi')); return m ? m[0].replace(/^[^:]*:/,'').trim() : null; };
-    const title   = (get('SUMMARY')||'(No title)').replace(/\\,/g,',').replace(/\\n/g,' ');
-    const dtstart = get('DTSTART');
-    if (!dtstart) continue;
-    const allDay  = dtstart.replace(/.*:/,'').length === 8;
-    const start   = parseICSDate(dtstart);
-    let   end     = parseICSDate(get('DTEND')) || new Date(start.getTime() + 3600000);
+
+    // Get a raw property line (handles both "KEY:val" and "KEY;param=x:val")
+    const getLine = k => {
+      const m = unfolded.match(new RegExp(`^${k}[;:][^\r\n]*`, 'mi'));
+      return m ? m[0] : null;
+    };
+    const getVal = k => {
+      const line = getLine(k);
+      if (!line) return null;
+      return line.replace(/^[^:]*:/, '').trim();
+    };
+
+    // Skip cancelled events
+    const status = getVal('STATUS');
+    if (status && status.toUpperCase() === 'CANCELLED') continue;
+
+    const title = (getVal('SUMMARY') || '(No title)')
+      .replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\n/g, ' ').replace(/\\\\/g, '\\');
+
+    // Use RECURRENCE-ID + UID together as a unique key so overridden
+    // recurring instances don't duplicate the base event
+    const uid         = getVal('UID') || '';
+    const recurrenceId = getVal('RECURRENCE-ID') || '';
+    const dedupKey    = uid + '|' + recurrenceId;
+
+    // Only skip plain duplicates (same UID, no recurrence-id differentiation)
+    // — recurring instances have different RECURRENCE-IDs so they pass through
+    if (uid && !recurrenceId && seenUIDs.has(uid)) continue;
+    if (uid && !recurrenceId) seenUIDs.add(uid);
+
+    const dtStartLine = getLine('DTSTART');
+    if (!dtStartLine) continue;
+
+    // Is it an all-day event? Value part is just YYYYMMDD (8 chars, no T)
+    const dtStartVal = dtStartLine.replace(/^[^:]*:/, '').trim();
+    const allDay = dtStartVal.length === 8;
+
+    const start = parseICSDate(dtStartLine);
     if (!start) continue;
+
+    const dtEndLine = getLine('DTEND');
+    let end = dtEndLine ? parseICSDate(dtEndLine) : new Date(start.getTime() + 3600000);
+
+    // Guard: skip events where parsing failed
+    if (!end || isNaN(end.getTime())) end = new Date(start.getTime() + 3600000);
+
     events.push({ title, start, end, allDay, color });
   }
   return events;
 }
 
-function parseICSDate(raw) {
-  if (!raw) return null;
-  const s = raw.replace(/^[^:]*:/,'').replace(/Z$/,'');
-  if (s.length === 8) return new Date(+s.slice(0,4), +s.slice(4,6)-1, +s.slice(6,8));
-  return new Date(+s.slice(0,4), +s.slice(4,6)-1, +s.slice(6,8), +s.slice(9,11), +s.slice(11,13), +s.slice(13,15));
+function parseICSDate(lineOrRaw) {
+  if (!lineOrRaw) return null;
+
+  // Accept either a full property line ("DTSTART;TZID=America/New_York:20250425T090000")
+  // or a bare value string
+  const isUtc   = lineOrRaw.includes('Z') && !lineOrRaw.includes('TZID');
+  const hasTzid = /TZID=/i.test(lineOrRaw);
+
+  // Strip everything up to and including the colon to get the value
+  const val = lineOrRaw.replace(/^[^:]*:/, '').trim().replace(/Z$/, '');
+
+  if (val.length === 8) {
+    // All-day: YYYYMMDD — treat as local date, no timezone conversion
+    return new Date(+val.slice(0,4), +val.slice(4,6)-1, +val.slice(6,8));
+  }
+
+  // Datetime: YYYYMMDDTHHmmss
+  const yr = +val.slice(0,4), mo = +val.slice(4,6)-1, dy = +val.slice(6,8);
+  const hr = +val.slice(9,11), mn = +val.slice(11,13), sc = +val.slice(13,15);
+
+  if (isUtc) {
+    // UTC — let JS convert to local time automatically
+    return new Date(Date.UTC(yr, mo, dy, hr, mn, sc));
+  } else {
+    // TZID or floating — treat as local wall-clock time as-is
+    return new Date(yr, mo, dy, hr, mn, sc);
+  }
 }
 
 /* ---------- Helpers ---------- */
