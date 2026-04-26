@@ -658,28 +658,23 @@ async function loadICSFeeds() {
 function unfold(text) { return text.replace(/\r\n[ \t]/g,'').replace(/\n[ \t]/g,''); }
 
 function parseICS(text, color) {
-  // Google Calendar ICS feeds work like this:
-  // - Non-recurring events: one VEVENT per event.
-  // - Recurring events: one master VEVENT with RRULE (defines the pattern),
-  //   plus one extra VEVENT per edited instance (has RECURRENCE-ID).
-  //   Unedited instances are NOT expanded — they must be generated from RRULE.
-  //
-  // Strategy:
-  // 1. Parse all blocks.
-  // 2. Collect edited instance dates per UID (RECURRENCE-ID values).
-  // 3. Expand RRULE masters ourselves (simple daily/weekly/monthly).
-  // 4. For each expansion, skip dates covered by an edited instance.
-  // 5. Keep edited instances (RECURRENCE-ID blocks) as-is.
-  // 6. Keep non-recurring events as-is.
-  // 7. Deduplicate everything by UID+start.
-
   const getLine = (block, k) => {
     const m = block.match(new RegExp('^' + k + '[;:][^\r\n]*', 'mi'));
     return m ? m[0] : null;
   };
+  const getLines = (block, k) => {
+    const re = new RegExp('^' + k + '[;:][^\r\n]*', 'gmi');
+    return [...block.matchAll(re)].map(m => m[0]);
+  };
   const getVal = (block, k) => {
     const line = getLine(block, k);
     return line ? line.replace(/^[^:]*:/, '').trim() : null;
+  };
+
+  // Normalize any ICS date string to YYYYMMDD for date-only comparison
+  const toDateKey = s => {
+    if (!s) return '';
+    return s.replace(/^[^:]*:/, '').trim().replace(/Z$/, '').replace(/-/g, '').slice(0, 8);
   };
 
   const rawBlocks = text.split(/BEGIN:VEVENT/i);
@@ -691,33 +686,50 @@ function parseICS(text, color) {
     const dtEndLine   = getLine(u, 'DTEND');
     const dtStartVal  = dtStartLine ? dtStartLine.replace(/^[^:]*:/, '').trim() : '';
     const recIdLine   = getLine(u, 'RECURRENCE-ID');
-    const recIdVal    = recIdLine ? recIdLine.replace(/^[^:]*:/, '').trim() : '';
+    const recIdVal    = recIdLine   ? recIdLine.replace(/^[^:]*:/, '').trim()   : '';
+
+    // EXDATE can appear multiple times and can have comma-separated values
+    const exdateLines = getLines(u, 'EXDATE');
+    const exdates = new Set();
+    for (const line of exdateLines) {
+      const val = line.replace(/^[^:]*:/, '').trim();
+      val.split(',').forEach(d => exdates.add(toDateKey(d)));
+    }
+
     return {
       u,
       uid         : getVal(u, 'UID')    || '',
       dtStartLine, dtEndLine, dtStartVal,
       recIdVal,
+      recIdDateKey: toDateKey(recIdVal),
       rrule       : getVal(u, 'RRULE') || '',
       status      : (getVal(u, 'STATUS') || '').toUpperCase(),
+      exdates,
       summary     : (getVal(u, 'SUMMARY') || '(No title)')
                       .replace(/\\,/g,',').replace(/\\;/g,';')
                       .replace(/\\n/g,' ').replace(/\\\\/g,'\\'),
     };
   });
 
-  // Map of uid -> Set of date strings (YYYYMMDD) that are overridden or cancelled.
-  const overrides = {};
+  // Build suppressed dates per UID from:
+  // 1. EXDATE entries on master events (deleted instances)
+  // 2. RECURRENCE-ID on override blocks (edited instances — suppress original, keep override)
+  // 3. STATUS:CANCELLED blocks with RECURRENCE-ID (another way Google marks deletions)
+  const suppressed = {}; // uid -> Set<YYYYMMDD>
+  const suppress = (uid, dateKey) => {
+    if (!uid || !dateKey) return;
+    if (!suppressed[uid]) suppressed[uid] = new Set();
+    suppressed[uid].add(dateKey);
+  };
+
   for (const p of parsed) {
-    if (p.recIdVal && p.uid) {
-      if (!overrides[p.uid]) overrides[p.uid] = new Set();
-      const dateKey = p.recIdVal.replace(/Z$/, '').replace(/T.*$/, '').replace(/-/g, '').slice(0, 8);
-      overrides[p.uid].add(dateKey);
-      console.log('[ICS override]', p.uid.slice(-12), 'date:', dateKey, 'status:', p.status);
-    }
+    // EXDATE on master
+    for (const d of p.exdates) suppress(p.uid, d);
+    // Any block with RECURRENCE-ID suppresses that date from RRULE expansion
+    if (p.recIdDateKey) suppress(p.uid, p.recIdDateKey);
   }
 
-  // Simple RRULE expander — handles FREQ=DAILY/WEEKLY/MONTHLY/YEARLY + INTERVAL + COUNT + UNTIL
-  // Returns array of {start:Date, end:Date} for occurrences within a ±6 week window
+  // Simple RRULE expander
   function expandRRule(rruleStr, dtStartLine, dtEndLine) {
     const masterStart = parseICSDate(dtStartLine);
     const masterEnd   = dtEndLine ? parseICSDate(dtEndLine) : new Date(masterStart.getTime() + 3600000);
@@ -732,16 +744,14 @@ function parseICS(text, color) {
 
     const freq     = params['FREQ'] || 'WEEKLY';
     const interval = parseInt(params['INTERVAL'] || '1', 10);
-    const count    = params['COUNT'] ? parseInt(params['COUNT'], 10) : 200;
+    const count    = params['COUNT'] ? parseInt(params['COUNT'], 10) : 500;
     let   until    = null;
     if (params['UNTIL']) until = parseICSDate('UNTIL:' + params['UNTIL']);
 
-    // By-day filter for WEEKLY (e.g. BYDAY=MO,WE,FR)
     const bydayDays = params['BYDAY']
       ? params['BYDAY'].split(',').map(d => ['SU','MO','TU','WE','TH','FR','SA'].indexOf(d.replace(/[+-\d]/g,'')))
       : null;
 
-    // Window: show events in a wide range so navigation works (±8 weeks from today)
     const now      = new Date();
     const winStart = new Date(now); winStart.setDate(winStart.getDate() - 60);
     const winEnd   = new Date(now); winEnd.setDate(winEnd.getDate() + 60);
@@ -755,9 +765,7 @@ function parseICS(text, color) {
       if (cur > winEnd) break;
 
       if (cur >= winStart) {
-        // For WEEKLY with BYDAY, emit each matching weekday in this week
         if (freq === 'WEEKLY' && bydayDays) {
-          // week anchor: go to Sunday of cur's week
           const weekSun = new Date(cur);
           weekSun.setDate(cur.getDate() - cur.getDay());
           for (const wd of bydayDays) {
@@ -773,15 +781,13 @@ function parseICS(text, color) {
         }
       }
 
-      // Advance
       const next = new Date(cur);
-      if (freq === 'DAILY')        next.setDate(cur.getDate() + interval);
+      if      (freq === 'DAILY')   next.setDate(cur.getDate() + interval);
       else if (freq === 'WEEKLY')  next.setDate(cur.getDate() + 7 * interval);
       else if (freq === 'MONTHLY') next.setMonth(cur.getMonth() + interval);
       else if (freq === 'YEARLY')  next.setFullYear(cur.getFullYear() + interval);
-      else                         next.setDate(cur.getDate() + 7); // fallback
-
-      if (next.getTime() === cur.getTime()) break; // safety
+      else                         next.setDate(cur.getDate() + 7);
+      if (next.getTime() === cur.getTime()) break;
       cur = next;
       n++;
     }
@@ -799,55 +805,37 @@ function parseICS(text, color) {
   };
 
   for (const p of parsed) {
+    // Always skip cancelled — deleted instances have RECURRENCE-ID already
+    // recorded in suppressed map above, so RRULE expansion will skip them
     if (p.status === 'CANCELLED') continue;
     if (!p.dtStartLine) continue;
 
     const allDay = p.dtStartVal.length === 8;
 
     if (p.rrule) {
-      // Recurring master: expand occurrences
+      // Expand recurring master, skipping suppressed dates
       const occurrences = expandRRule(p.rrule, p.dtStartLine, p.dtEndLine);
       for (const occ of occurrences) {
-        // Normalize to compare against override keys
-        const dtKey = p.dtStartVal.slice(0,8) === occ.start.toISOString().slice(0,10).replace(/-/g,'')
-          ? p.dtStartVal.slice(0,15) // allDay
-          : (() => {
-              const d = occ.start;
-              return [
-                d.getFullYear(),
-                String(d.getMonth()+1).padStart(2,'0'),
-                String(d.getDate()).padStart(2,'0'),
-                'T',
-                String(d.getHours()).padStart(2,'0'),
-                String(d.getMinutes()).padStart(2,'0'),
-                String(d.getSeconds()).padStart(2,'0'),
-              ].join('');
-            })();
+        const occDateKey = [
+          occ.start.getFullYear(),
+          String(occ.start.getMonth()+1).padStart(2,'0'),
+          String(occ.start.getDate()).padStart(2,'0'),
+        ].join('');
 
-        // Skip if this date is overridden or cancelled
-        const uidOverrides = overrides[p.uid];
-        if (uidOverrides) {
-          const occDateStr = [
-            occ.start.getFullYear(),
-            String(occ.start.getMonth()+1).padStart(2,'0'),
-            String(occ.start.getDate()).padStart(2,'0'),
-          ].join('');
-          const isOverridden = uidOverrides.has(occDateStr);
-          console.log('[ICS expand]', p.uid.slice(-12), 'date:', occDateStr, 'overridden:', isOverridden, 'overrides:', [...uidOverrides]);
-          if (isOverridden) continue;
-        }
+        const uid_suppressed = suppressed[p.uid];
+        if (uid_suppressed && uid_suppressed.has(occDateKey)) continue;
 
-        const dedupKey = p.uid + '|' + dtKey;
+        const dedupKey = p.uid + '|' + occDateKey;
         if (seen.has(dedupKey)) continue;
         seen.add(dedupKey);
         addEvent(p.summary, occ.start, occ.end, allDay);
       }
 
     } else if (p.recIdVal) {
-      // Edited recurring instance — always keep
+      // Edited override — keep it (it already suppressed the original date above)
       const start = parseICSDate(p.dtStartLine);
       const end   = p.dtEndLine ? parseICSDate(p.dtEndLine) : null;
-      const key   = p.uid + '|edited|' + p.recIdVal;
+      const key   = p.uid + '|edited|' + p.recIdDateKey;
       if (seen.has(key)) continue;
       seen.add(key);
       addEvent(p.summary, start, end, allDay);
