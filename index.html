@@ -200,20 +200,60 @@
     letter-spacing: 0.03em;
   }
 
-  /* Live detail strip */
-  .sc-live {
-    margin: 4px 12px 4px;
-    padding: 6px 8px;
-    background: var(--surface2);
-    border-radius: 6px;
-  }
-  .sc-inning-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
+/* Line score table */
+.sc-linescore {
+  margin: 4px 12px 6px;
+  overflow-x: auto;
+}
+.sc-linescore table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+}
+.sc-linescore th {
+  color: var(--muted);
+  font-weight: 400;
+  text-align: center;
+  padding: 2px 4px;
+  min-width: 18px;
+  border-bottom: 0.5px solid var(--border);
+}
+.sc-linescore th.sc-ls-team {
+  text-align: left;
+  min-width: 36px;
+  padding-left: 0;
+}
+.sc-linescore td {
+  text-align: center;
+  padding: 3px 4px;
+  color: var(--text);
+}
+.sc-linescore td.sc-ls-team {
+  text-align: left;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  padding-left: 0;
+}
+.sc-linescore td.sc-ls-cur {
+  background: var(--blue-dim);
+  color: var(--blue);
+  font-weight: 500;
+  border-radius: 3px;
+}
+.sc-linescore td.sc-ls-total {
+  font-weight: 600;
+  color: var(--text);
+  border-left: 0.5px solid var(--border);
+}
+.sc-linescore td.sc-ls-winner {
+  color: var(--blue);
+}
+html.dark-mode .sc-linescore td.sc-ls-winner {
+  color: var(--blue);
+}
   .sc-team-name { display: flex; align-items: center; gap: 6px; }
   .sc-team-info { display: flex; flex-direction: column; gap: 1px; }
   .sc-record { font-size: 10px; color: var(--dim); }
@@ -406,7 +446,13 @@ function windDir(deg){if(deg==null)return'';return['N','NE','E','SE','S','SW','W
 /* ================================================================
    CAROUSEL / SCORES  (unchanged from original)
    ================================================================ */
-const TEAMS=[{label:'MLB · Red Sox',league:'mlb',abbrev:'BOS',sport:'baseball/mlb'},{label:'NBA · Celtics',league:'nba',abbrev:'BOS',sport:'basketball/nba'},{label:'NHL · Bruins',league:'nhl',abbrev:'BOS',sport:'hockey/nhl'}];
+const TEAMS=[
+  {label:'MLB · Red Sox',  league:'mlb', abbrev:'BOS', sport:'baseball/mlb'},
+  // ── Re-enable in October (NBA season start) ──────────────────────────────
+  // {label:'NBA · Celtics', league:'nba', abbrev:'BOS', sport:'basketball/nba'},
+  // ── Re-enable in October (NHL season start) ──────────────────────────────
+  // {label:'NHL · Bruins',  league:'nhl', abbrev:'BOS', sport:'hockey/nhl'},
+];
 let carouselIndex=0,carouselCards=[null,null,null],carouselAutoTimer=null;
 function renderDots(){const el=document.getElementById('carousel-dots');el.innerHTML='';TEAMS.forEach((_,i)=>{const dot=document.createElement('div');dot.className='carousel-dot'+(i===carouselIndex?' active':'');dot.onclick=()=>goToSlide(i);el.appendChild(dot);});}
 function showSlide(idx){carouselIndex=((idx%TEAMS.length)+TEAMS.length)%TEAMS.length;renderDots();const wrap=document.getElementById('scores-wrap');wrap.innerHTML='';if(carouselCards[carouselIndex]){wrap.appendChild(carouselCards[carouselIndex]);}else{wrap.innerHTML='<div class="score-loading"><span class="spinner"></span></div>';}}
@@ -441,7 +487,6 @@ function buildEmptyCard(label, league) {
   return card;
 }
 
-// ── Score card ────────────────────────────────────────────────────────────────
 async function buildScoreCard(game, label, league) {
   const comp        = game.competitions?.[0];
   const statusObj   = comp?.status;
@@ -468,25 +513,89 @@ async function buildScoreCard(game, label, league) {
   else if (inProgress) statusLabel = statusObj?.detail || 'Live';
   else { const d = new Date(game.date); statusLabel = d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }
 
-  // Playoff series status
   const seriesStr = comp?.series?.summary || null;
+  const seriesBg  = league==='mlb' ? '#bd3039' : league==='nba' ? '#007a33' : '#111';
 
-  // Determine series banner color from league
-  const seriesBg = league==='mlb' ? '#bd3039' : league==='nba' ? '#007a33' : '#111';
+  let liveHTML      = '';
+  let lineScoreHTML = '';
 
-  // Live detail
-  let liveHTML = '';
-  if (inProgress) {
+  if (league === 'mlb' && (inProgress || done)) {
     try {
-      const sp  = league==='mlb'?'baseball/mlb':league==='nba'?'basketball/nba':'hockey/nhl';
-      const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${sp}/summary?event=${game.id}`);
+      const res  = await fetch(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event=${game.id}`);
       const data = await res.json();
 
-      if (league === 'mlb') {
-        const sit     = data.situation || {};
-        const balls   = sit.balls   ?? '—';
-        const strikes = sit.strikes ?? '—';
-        const outs    = sit.outs    ?? '—';
+      // ── Line score ────────────────────────────────────────────────────────
+      const bsTeams = data.boxscore?.teams || [];
+      // ESPN orders: index 0 = away, index 1 = home (confirm by homeAway)
+      const bsAway = bsTeams.find(t => t.homeAway === 'away') || bsTeams[0];
+      const bsHome = bsTeams.find(t => t.homeAway === 'home') || bsTeams[1];
+
+      const lsAway = bsAway?.linescores || [];
+      const lsHome = bsHome?.linescores || [];
+
+      // Hits & Errors from team statistics
+      const getStat = (team, name) => {
+        const stats = team?.statistics || [];
+        return stats.find(s => s.name === name)?.displayValue ?? '—';
+      };
+      const hitsAway   = getStat(bsAway, 'hits');
+      const hitsHome   = getStat(bsHome, 'hits');
+      const errorsAway = getStat(bsAway, 'errors');
+      const errorsHome = getStat(bsHome, 'errors');
+
+      const totalInnings = Math.max(lsAway.length, lsHome.length, 9);
+
+      // Current inning index (1-based period from status, minus 1 for 0-index)
+      const curInning = inProgress ? (statusObj?.period || 0) - 1 : -1;
+
+      const renderCells = (linescores, totalInn) => {
+        let cells = '';
+        for (let i = 0; i < totalInn; i++) {
+          const val = linescores[i]?.value;
+          const display = val !== undefined ? (Number.isInteger(val) ? val : Math.round(val)) : (inProgress && i >= linescores.length ? '' : '—');
+          const isCur = inProgress && i === curInning;
+          cells += `<td class="${isCur ? 'sc-ls-cur' : ''}">${display}</td>`;
+        }
+        return cells;
+      };
+
+      lineScoreHTML = `
+        <div class="sc-linescore">
+          <table>
+            <thead>
+              <tr>
+                <th class="sc-ls-team"></th>
+                ${Array.from({length: totalInnings}, (_, i) => `<th>${i+1}</th>`).join('')}
+                <th class="sc-ls-total">R</th>
+                <th class="sc-ls-total">H</th>
+                <th class="sc-ls-total">E</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="sc-ls-team">${a1}</td>
+                ${renderCells(lsAway, totalInnings)}
+                <td class="sc-ls-total ${done && s1>s2 ? 'sc-ls-winner' : ''}">${showScore ? s1 : '—'}</td>
+                <td class="sc-ls-total">${hitsAway}</td>
+                <td class="sc-ls-total">${errorsAway}</td>
+              </tr>
+              <tr>
+                <td class="sc-ls-team">${a2}</td>
+                ${renderCells(lsHome, totalInnings)}
+                <td class="sc-ls-total ${done && s2>s1 ? 'sc-ls-winner' : ''}">${showScore ? s2 : '—'}</td>
+                <td class="sc-ls-total">${hitsHome}</td>
+                <td class="sc-ls-total">${errorsHome}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>`;
+
+      // ── Live situation strip ──────────────────────────────────────────────
+      if (inProgress) {
+        const sit      = data.situation || {};
+        const balls    = sit.balls   ?? '—';
+        const strikes  = sit.strikes ?? '—';
+        const outs     = sit.outs    ?? '—';
         const inningStr = inningLabel(statusObj?.detail || '');
         const athletes  = data.boxscore?.players?.flatMap(t=>t.statistics||[]).flatMap(s=>s.athletes||[]) || [];
         const findName  = id => {
@@ -495,7 +604,7 @@ async function buildScoreCard(game, label, league) {
         };
         const batter  = findName(sit.batter?.playerId);
         const pitcher = findName(sit.pitcher?.playerId);
-        const base = on => on ? 'var(--blue)' : 'var(--surface2)';
+        const base    = on => on ? 'var(--blue)' : 'var(--surface2)';
         liveHTML = `
           <div class="sc-live">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
@@ -510,19 +619,26 @@ async function buildScoreCard(game, label, league) {
             <div style="font-size:11px;color:var(--muted)">🏏 <span style="color:var(--text)">${batter}</span></div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">⚾ <span style="color:var(--text)">${pitcher}</span></div>
           </div>`;
-
-      } else if (league === 'nba' || league === 'nhl') {
-        const period = statusObj?.period || comp?.status?.period || '—';
-        const clock  = statusObj?.displayClock || comp?.status?.displayClock || '—';
-        let pl;
-        if (league==='nba') pl = period===1?'1st':period===2?'2nd':period===3?'3rd':period===4?'4th':`OT${period-4}`;
-        else                 pl = period===1?'1st':period===2?'2nd':period===3?'3rd':'OT';
-        liveHTML = `
-          <div class="sc-live" style="text-align:center">
-            <span style="font-size:12px;font-weight:600;color:var(--text)">${pl}</span>
-            <span style="font-size:12px;color:var(--muted);margin-left:6px;font-family:'DM Mono',monospace">${clock}</span>
-          </div>`;
       }
+
+    } catch(e) { /* silently skip line score on error */ }
+
+  } else if ((league === 'nba' || league === 'nhl') && inProgress) {
+    // NBA/NHL live strip (unchanged)
+    try {
+      const sp  = league==='nba' ? 'basketball/nba' : 'hockey/nhl';
+      const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${sp}/summary?event=${game.id}`);
+      const data = await res.json();
+      const period = statusObj?.period || comp?.status?.period || '—';
+      const clock  = statusObj?.displayClock || comp?.status?.displayClock || '—';
+      let pl;
+      if (league==='nba') pl = period===1?'1st':period===2?'2nd':period===3?'3rd':period===4?'4th':`OT${period-4}`;
+      else                 pl = period===1?'1st':period===2?'2nd':period===3?'3rd':'OT';
+      liveHTML = `
+        <div class="sc-live" style="text-align:center">
+          <span style="font-size:12px;font-weight:600;color:var(--text)">${pl}</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:6px;font-family:'DM Mono',monospace">${clock}</span>
+        </div>`;
     } catch(e) {}
   }
 
@@ -548,6 +664,7 @@ async function buildScoreCard(game, label, league) {
     <div class="sc-body">
       ${teamRow(a1, r1, s1, done&&s1>s2)}
       ${teamRow(a2, r2, s2, done&&s2>s1)}
+      ${lineScoreHTML}
       ${liveHTML}
     </div>`;
   return card;
@@ -558,6 +675,11 @@ async function buildScoreCard(game, label, league) {
    ================================================================ */
 async function refreshAll() {
   renderDots();
+  // Hide carousel controls when only one team is active
+  const oneTeam = TEAMS.length === 1;
+  document.getElementById('carousel-dots').style.display = oneTeam ? 'none' : 'flex';
+  document.querySelectorAll('[onclick="carouselPrev()"], [onclick="carouselNext()"]')
+    .forEach(btn => btn.style.display = oneTeam ? 'none' : 'flex');
   await fetchWeather();
 }
 
