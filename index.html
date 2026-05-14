@@ -57,14 +57,14 @@
   html, body { width: 100%; height: 100%; overflow: hidden; }
   body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); font-size: 14px; line-height: 1.4; }
 
-  .screen { width: 100vw; height: 100vh; display: grid; grid-template-rows: auto 1fr; padding: 1.2vw 1.4vw 1vw; gap: 1vh; }
+  .screen { width: 100vw; height: 100vh; display: grid; grid-template-rows: auto 1fr; padding: 0.7vw 1.4vw 0.6vw; gap: 0.5vh; }
 
   .topbar { display: grid; grid-template-columns: 1fr auto; align-items: center; }
   .clock-block { display: flex; align-items: baseline; gap: 0.8vw; }
-  .clock { font-family: 'DM Mono', monospace; font-size: 1.7vw; font-weight: 400; color: #1a1c22; letter-spacing: -1px; line-height: 1; }
-  .clock-sub { font-family: 'DM Mono', monospace; font-size: 1.7vw; font-weight: 400; color: #1a1c22; letter-spacing: -1px; line-height: 1; }
+  .clock { font-family: 'DM Mono', monospace; font-size: 1.3vw; font-weight: 400; color: #1a1c22; letter-spacing: -1px; line-height: 1; }
+  .clock-sub { font-family: 'DM Mono', monospace; font-size: 1.3vw; font-weight: 400; color: #1a1c22; letter-spacing: -1px; line-height: 1; }
   .topbar-right { display: flex; align-items: center; gap: 6px; }
-  .refresh-btn { background: var(--surface2); border: 0.5px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 0.85vw; padding: 0.3vw 0.7vw; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: color 0.2s; }
+  .refresh-btn { background: var(--surface2); border: 0.5px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 0.72vw; padding: 0.2vw 0.6vw; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: color 0.2s; }
   .refresh-btn:hover { color: var(--text); }
 
   .main { display: grid; grid-template-columns: 5fr 1fr; gap: 0.8vw; min-height: 0; min-width: 0; }
@@ -260,7 +260,7 @@
     <!-- CALENDAR -->
     <div class="cal-card">
       <div class="cal-iframe-wrap">
-        <iframe src="https://calendar.google.com/calendar/embed?height=800&wkst=1&ctz=America%2FNew_York&showPrint=0&mode=WEEK&showTz=0&showDate=0&showTitle=0&src=ZmFtaWx5MDYwNzE3Njg5ODMyNzQzNDE1NTVAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=M2xtZWw0aTlzNDk4NnNvcnBla2cyc3Q4ZWtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=Z3F2dWJoMzMwcHNnNjNvaGZhZXFkZWxiczA0bGxhY3JAaW1wb3J0LmNhbGVuZGFyLmdvb2dsZS5jb20&src=ZW4udXNhI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=Y19mYWY5OTAwZjdhZmRjZmU2NjY3MTQ1Y2MxMjZlNWY5YmQ1NmY5NmRjZTg2NmU3NTE0MzJmZWExMTIwMzUwMzY4QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%237986cb&color=%238e24aa&color=%233f51b5&color=%237cb342&color=%23ad1457" style="border-width:0" width="1150" height="800" frameborder="0" scrolling="no"></iframe>
+        <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FNew_York&showPrint=0&mode=WEEK&showTz=0&showDate=0&showTitle=0&src=ZmFtaWx5MDYwNzE3Njg5ODMyNzQzNDE1NTVAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=M2xtZWw0aTlzNDk4NnNvcnBla2cyc3Q4ZWtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=Z3F2dWJoMzMwcHNnNjNvaGZhZXFkZWxiczA0bGxhY3JAaW1wb3J0LmNhbGVuZGFyLmdvb2dsZS5jb20&src=ZW4udXNhI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=Y19mYWY5OTAwZjdhZmRjZmU2NjY3MTQ1Y2MxMjZlNWY5YmQ1NmY5NmRjZTg2NmU3NTE0MzJmZWExMTIwMzUwMzY4QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%237986cb&color=%238e24aa&color=%233f51b5&color=%237cb342&color=%23ad1457" style="border-width:0;width:100%;height:100%;display:block" frameborder="0" scrolling="no"></iframe>
       </div>
     </div>
 
@@ -309,12 +309,13 @@
    CLOCK / MODE
    ================================================================ */
 function getMode(now){const m=now.getHours()*60+now.getMinutes();if(m>=7*60&&m<20*60)return'light';if(m>=20*60&&m<22*60+30)return'dark';return'screensaver';}
-let _lastMode=null,_lastScheduledMode=null;
-function checkMode(){const m=getMode(new Date());if(m===_lastScheduledMode)return;_lastScheduledMode=m;_lastMode=m;const h=document.documentElement,ss=document.getElementById('screensaver');if(m==='screensaver'){h.classList.add('dark-mode');ss.classList.add('active');}else{ss.classList.remove('active');m==='dark'?h.classList.add('dark-mode'):h.classList.remove('dark-mode');}}
-function exitScreensaver(){document.getElementById('screensaver').classList.remove('active');setTimeout(()=>{if(getMode(new Date())==='screensaver')document.getElementById('screensaver').classList.add('active');},300000);}
-function openConfig(){const m=_lastMode||getMode(new Date());document.getElementById('override-light-btn').style.cssText=m==='light'?'background:var(--blue);color:#fff':'';document.getElementById('override-dark-btn').style.cssText=m==='dark'?'background:var(--blue);color:#fff':'';document.getElementById('cfg-overlay').classList.add('open');}
+let _lastScheduledMode=null,_manualOverride=null;
+function applyMode(m){const h=document.documentElement,ss=document.getElementById('screensaver');if(m==='screensaver'){h.classList.add('dark-mode');ss.classList.add('active');}else{ss.classList.remove('active');m==='dark'?h.classList.add('dark-mode'):h.classList.remove('dark-mode');}}
+function checkMode(){if(_manualOverride)return;const m=getMode(new Date());if(m===_lastScheduledMode)return;_lastScheduledMode=m;applyMode(m);}
+function exitScreensaver(){document.getElementById('screensaver').classList.remove('active');setTimeout(()=>{if(!_manualOverride&&getMode(new Date())==='screensaver')document.getElementById('screensaver').classList.add('active');},300000);}
+function openConfig(){const m=_manualOverride||getMode(new Date());document.getElementById('override-light-btn').style.cssText=m==='light'?'background:var(--blue);color:#fff':'';document.getElementById('override-dark-btn').style.cssText=m==='dark'?'background:var(--blue);color:#fff':'';document.getElementById('cfg-overlay').classList.add('open');}
 function closeConfig(){document.getElementById('cfg-overlay').classList.remove('open');}
-function overrideMode(mode){_lastMode=null;_lastScheduledMode=null;const h=document.documentElement,ss=document.getElementById('screensaver');if(mode==='screensaver'){h.classList.add('dark-mode');ss.classList.add('active');_lastMode='screensaver';closeConfig();}else if(mode==='dark'){ss.classList.remove('active');h.classList.add('dark-mode');_lastMode='dark';}else{ss.classList.remove('active');h.classList.remove('dark-mode');_lastMode='light';}document.getElementById('override-light-btn').style.cssText=mode==='light'?'background:var(--blue);color:#fff':'';document.getElementById('override-dark-btn').style.cssText=mode==='dark'?'background:var(--blue);color:#fff':'';}
+function overrideMode(mode){_manualOverride=mode;applyMode(mode);if(mode==='screensaver')closeConfig();document.getElementById('override-light-btn').style.cssText=mode==='light'?'background:var(--blue);color:#fff':'';document.getElementById('override-dark-btn').style.cssText=mode==='dark'?'background:var(--blue);color:#fff':'';}
 function tickClock(){const now=new Date();let h=now.getHours(),m=now.getMinutes();const ap=h>=12?'PM':'AM';h=h%12||12;const timeStr=`${h}:${String(m).padStart(2,'0')} ${ap}`;const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];const dateStr=`${DAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;document.getElementById('clock').textContent=timeStr;document.getElementById('datestr').textContent=dateStr;document.getElementById('ss-clock').textContent=timeStr;document.getElementById('ss-date').textContent=dateStr;checkMode();}
 setInterval(tickClock,1000);tickClock();
 
