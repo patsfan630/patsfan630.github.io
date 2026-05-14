@@ -168,7 +168,6 @@
   .mlb-team-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; border-radius: 6px; transition: background 0.2s; }
   .mlb-team-row.winner { background: rgba(232,184,75,0.08); }
   .mlb-team-left { display: flex; align-items: center; gap: 6px; }
-  .mlb-team-label { font-size: 0.78vw; font-weight: 400; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.1em; min-width: 28px; }
   .mlb-team-name { font-size: 1.0vw; font-weight: 500; color: #fff; letter-spacing: -0.02em; }
   .mlb-team-record { font-size: 0.72vw; color: rgba(255,255,255,0.35); font-family: 'DM Mono', monospace; }
   .mlb-team-score { font-family: 'DM Mono', monospace; font-size: 1.8vw; font-weight: 500; color: rgba(255,255,255,0.3); line-height: 1; }
@@ -349,7 +348,10 @@ async function fetchWeather(){
     _wxFV=0;
     inner.innerHTML=`<div class="wx-location-row"><div class="wx-location"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M6 1a3.5 3.5 0 0 1 3.5 3.5C9.5 7.5 6 11 6 11S2.5 7.5 2.5 4.5A3.5 3.5 0 0 1 6 1z" fill="rgba(255,255,255,0.6)"/><circle cx="6" cy="4.5" r="1.2" fill="rgba(30,60,110,0.6)"/></svg>${WX_LABEL}</div><div class="wx-updated">Updated ${upd}</div></div><div class="wx-main-row"><div class="wx-temp-block"><div class="wx-temp">${tempNow}<sup>°F</sup></div><div class="wx-condition">${ci.l}</div><div class="wx-feels">Feels like ${feels}°</div></div><div class="wx-icon-wrap">${wxSVG(ci.svg,52)}</div></div><div class="wx-details-row"><div class="wx-detail-pill"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 2 Q7.5 5 7.5 7 A1.5 1.5 0 0 1 4.5 7 Q4.5 5 6 2Z" fill="rgba(130,200,255,0.9)"/></svg>${hum}% Humidity</div><div class="wx-detail-pill"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6 L10 6 M7 3 L10 6 L7 9" stroke="rgba(255,255,255,0.8)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>${wind} mph ${wdir}</div></div><div class="wx-divider-row"><div class="wx-divider" style="flex:1"></div><div style="display:flex;align-items:center;gap:4px;padding:0 6px;flex-shrink:0"><div id="wx-dot-0" style="height:6px;width:14px;border-radius:3px;background:rgba(255,255,255,0.8);transition:all 0.4s ease"></div><div id="wx-dot-1" style="height:6px;width:6px;border-radius:3px;background:rgba(255,255,255,0.3);transition:all 0.4s ease"></div></div><div class="wx-divider" style="flex:1"></div></div><div style="position:relative;flex:1;min-height:0;"><div id="wx-forecast-daily" class="wx-forecast" style="position:absolute;inset:0;transition:opacity 0.5s ease,transform 0.5s ease;opacity:1;transform:translateY(0)">${dHTML}</div><div id="wx-forecast-hourly" class="wx-forecast" style="position:absolute;inset:0;transition:opacity 0.5s ease,transform 0.5s ease;opacity:0;transform:translateY(6px);overflow-x:auto;flex-wrap:nowrap;">${hHTML||'<div style="color:rgba(255,255,255,0.4);font-size:0.8vw;margin:auto">No more hours today</div>'}</div></div>`;
     wxStartRot();
-  }catch(e){inner.innerHTML=`<div class="wx-loading" style="flex-direction:column;gap:4px"><span style="font-size:1.2vw">⚠</span><span>Weather unavailable</span></div>`;}
+  }catch(e){
+    if(_wxRotateTimer){clearInterval(_wxRotateTimer);_wxRotateTimer=null;}
+    inner.innerHTML=`<div class="wx-loading" style="flex-direction:column;gap:4px"><span style="font-size:1.2vw">⚠</span><span>Weather unavailable</span></div>`;
+  }
 }
 function windDir(deg){if(deg==null)return'';return['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8];}
 
@@ -358,7 +360,8 @@ function windDir(deg){if(deg==null)return'';return['N','NE','E','SE','S','SW','W
    MLB STATS API  —  Red Sox (team id 111)
    ================================================================ */
 const SOX_TEAM_ID = 111;
-const MLB_API = 'https://statsapi.mlb.com/api/v1';
+const MLB_API     = 'https://statsapi.mlb.com/api/v1';
+const MLB_API_V11 = 'https://statsapi.mlb.com/api/v1.1';
 
 function diamondSVG(onFirst, onSecond, onThird) {
   const baseSize = 42;
@@ -378,16 +381,6 @@ function diamondSVG(onFirst, onSecond, onThird) {
     <!-- home plate (bottom) -->
     <polygon points="21,33 25,37 21,41 17,37" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
   </svg>`;
-}
-
-function inningArrow(detail) {
-  if (!detail) return '';
-  const d = detail.trim().toLowerCase();
-  if (d.startsWith('top'))    return '▲';
-  if (d.startsWith('mid'))    return '—';
-  if (d.startsWith('bot'))    return '▼';
-  if (d.startsWith('end'))    return '■';
-  return '';
 }
 
 function fmtGameTime(dateStr) {
@@ -418,7 +411,6 @@ async function fetchMLB() {
     }
 
     const status    = game.status?.abstractGameState; // 'Preview','Live','Final'
-    const detailStr = game.status?.detailedState || '';
     const isLive    = status === 'Live';
     const isFinal   = status === 'Final';
     const isPreview = !isLive && !isFinal;
@@ -435,14 +427,15 @@ async function fetchMLB() {
     const awayScore  = away?.score ?? '—';
     const homeScore  = home?.score ?? '—';
 
-    const awayWin = isFinal && awayScore > homeScore;
-    const homeWin = isFinal && homeScore > awayScore;
+    // Fix: parse as integers so "9" vs "10" compares correctly (string comparison would fail)
+    const awayWin = isFinal && parseInt(awayScore) > parseInt(homeScore);
+    const homeWin = isFinal && parseInt(homeScore) > parseInt(awayScore);
 
     // For live/final details, fetch live feed
     let linescore = null, situation = null, decisions = null, boxscore = null;
     if (isLive || isFinal) {
       try {
-        const liveRes = await fetch(`${MLB_API}.1/game/${game.gamePk}/feed/live`);
+        const liveRes = await fetch(`${MLB_API_V11}/game/${game.gamePk}/feed/live`);
         const liveData = await liveRes.json();
         linescore  = liveData.liveData?.linescore;
         situation  = liveData.liveData?.plays?.currentPlay?.matchup;
@@ -650,10 +643,6 @@ async function fetchMLB() {
 
 function getPitcherRecord(boxscore, playerId, ...statNames) {
   if (!boxscore || !playerId) return '';
-  const allPlayers = [
-    ...(boxscore.teams?.away?.pitchers || []),
-    ...(boxscore.teams?.home?.pitchers || [])
-  ];
   const pid = String(playerId);
   // Find in away/home player objects
   for (const side of ['away','home']) {
@@ -671,10 +660,17 @@ function getPitcherRecord(boxscore, playerId, ...statNames) {
 }
 
 function findNextGame(dates, todayGamePk) {
+  const today = new Date().toISOString().slice(0, 10);
   for (const d of dates) {
     for (const g of (d.games || [])) {
+      // Skip today's game (already being shown)
       if (g.gamePk === todayGamePk) continue;
+      // Skip completed games
       if (g.status?.abstractGameState === 'Final') continue;
+      // Skip postponed, cancelled, suspended, or any non-upcoming state
+      if (g.status?.abstractGameState === 'Live') continue;
+      const detailedState = g.status?.detailedState || '';
+      if (/postponed|cancelled|suspended/i.test(detailedState)) continue;
       return g;
     }
   }
@@ -695,6 +691,8 @@ function buildNextGame(game) {
 }
 
 function renderNoGame(inner, nextGame) {
+  // nextGame is only shown if it's a genuinely future game (findNextGame already
+  // filters out same-day games and non-preview states, so this is safe)
   let html = `<div class="mlb-nogame">
     <div class="mlb-nogame-icon">⚾</div>
     <div class="mlb-nogame-text">No game today</div>
@@ -717,10 +715,10 @@ function addDays(dateStr, n) {
    ================================================================ */
 async function refreshAll() {
   await fetchWeather();
-  await fetchMLB();
 }
 
 refreshAll();
+fetchMLB();
 setInterval(refreshAll,  15 * 60 * 1000);  // weather every 15 min
 setInterval(fetchMLB,    30 * 1000);        // scores every 30 sec
 </script>
