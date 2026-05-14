@@ -382,7 +382,7 @@ function openConfig() {
 function closeConfig() { document.getElementById('cfg-overlay').classList.remove('open'); }
 function overrideMode(mode) {
   _lastMode = null;
-  _lastScheduledMode = null; // allow checkMode() to re-trigger after an override
+  _lastScheduledMode = null;
   const html = document.documentElement, ss = document.getElementById('screensaver');
   if (mode==='screensaver') { html.classList.add('dark-mode'); ss.classList.add('active'); _lastMode='screensaver'; closeConfig(); }
   else if (mode==='dark')  { ss.classList.remove('active'); html.classList.add('dark-mode'); _lastMode='dark'; }
@@ -444,7 +444,7 @@ async function fetchWeather(){
 function windDir(deg){if(deg==null)return'';return['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8];}
 
 /* ================================================================
-   CAROUSEL / SCORES  (unchanged from original)
+   CAROUSEL / SCORES
    ================================================================ */
 const TEAMS=[
   {label:'MLB · Red Sox',  league:'mlb', abbrev:'BOS', sport:'baseball/mlb'},
@@ -526,18 +526,24 @@ async function buildScoreCard(game, label, league) {
 
       // ── Line score ────────────────────────────────────────────────────────
       const bsTeams = data.boxscore?.teams || [];
-      // ESPN orders: index 0 = away, index 1 = home (confirm by homeAway)
       const bsAway = bsTeams.find(t => t.homeAway === 'away') || bsTeams[0];
       const bsHome = bsTeams.find(t => t.homeAway === 'home') || bsTeams[1];
 
       const lsAway = bsAway?.linescores || [];
       const lsHome = bsHome?.linescores || [];
 
-      // Hits & Errors from team statistics
-      const getStat = (team, name) => {
-        const stats = team?.statistics || [];
-        return stats.find(s => s.name === name)?.displayValue ?? '—';
+      // ── FIX 1: Hits & Errors ─────────────────────────────────────────────
+      // The ESPN summary API nests stats two levels deep:
+      //   team.statistics[] → each element has a .stats[] array with {name, displayValue}
+      // The original code searched team.statistics[] directly by name, which never matched.
+      const getStat = (team, statName) => {
+        for (const group of (team?.statistics || [])) {
+          const found = (group.stats || []).find(s => s.name === statName);
+          if (found) return found.displayValue ?? '—';
+        }
+        return '—';
       };
+
       const hitsAway   = getStat(bsAway, 'hits');
       const hitsHome   = getStat(bsHome, 'hits');
       const errorsAway = getStat(bsAway, 'errors');
@@ -545,14 +551,29 @@ async function buildScoreCard(game, label, league) {
 
       const totalInnings = Math.max(lsAway.length, lsHome.length, 9);
 
-      // Current inning index (1-based period from status, minus 1 for 0-index)
-      const curInning = inProgress ? (statusObj?.period || 0) - 1 : -1;
+      // ── FIX 2: Current inning highlight ──────────────────────────────────
+      // statusObj.period is 1-based (the inning currently being played).
+      // Convert to 0-based index directly — do NOT subtract 1 again.
+      // Previously: (statusObj?.period || 0) - 1  → highlighted the completed inning before the live one.
+      // Corrected:  lsAway.length gives us the index of the inning in progress (0-based),
+      //             which equals the number of completed innings so far.
+      const curInning = inProgress ? lsAway.length : -1;
 
+      // ── FIX 3: Line score cell values ────────────────────────────────────
+      // linescore[i].value comes back as a string from the API (e.g. "2", "0").
+      // Number.isInteger("2") is false, so the original always fell through to
+      // Math.round("2") which returns NaN. Parse to int explicitly.
       const renderCells = (linescores, totalInn) => {
         let cells = '';
         for (let i = 0; i < totalInn; i++) {
-          const val = linescores[i]?.value;
-          const display = val !== undefined ? (Number.isInteger(val) ? val : Math.round(val)) : (inProgress && i >= linescores.length ? '' : '—');
+          const raw = linescores[i]?.value;
+          let display;
+          if (raw !== undefined && raw !== null && raw !== '') {
+            display = parseInt(raw, 10);             // always parse as int
+            if (isNaN(display)) display = raw;       // keep original if truly non-numeric
+          } else {
+            display = (inProgress && i >= linescores.length) ? '' : '—';
+          }
           const isCur = inProgress && i === curInning;
           cells += `<td class="${isCur ? 'sc-ls-cur' : ''}">${display}</td>`;
         }
@@ -624,7 +645,6 @@ async function buildScoreCard(game, label, league) {
     } catch(e) { /* silently skip line score on error */ }
 
   } else if ((league === 'nba' || league === 'nhl') && inProgress) {
-    // NBA/NHL live strip (unchanged)
     try {
       const sp  = league==='nba' ? 'basketball/nba' : 'hockey/nhl';
       const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${sp}/summary?event=${game.id}`);
@@ -675,7 +695,6 @@ async function buildScoreCard(game, label, league) {
    ================================================================ */
 async function refreshAll() {
   renderDots();
-  // Hide carousel controls when only one team is active
   const oneTeam = TEAMS.length === 1;
   document.getElementById('carousel-dots').style.display = oneTeam ? 'none' : 'flex';
   document.querySelectorAll('[onclick="carouselPrev()"], [onclick="carouselNext()"]')
@@ -684,10 +703,10 @@ async function refreshAll() {
 }
 
 resetAutoAdvance();
-fetchScores(); // initial load
-refreshAll();  // initial weather + dots
-setInterval(refreshAll,  15*60*1000); // weather every 15 min
-setInterval(fetchScores, 30*1000);    // scores every 30 sec
+fetchScores();
+refreshAll();
+setInterval(refreshAll,  15*60*1000);
+setInterval(fetchScores, 30*1000);
 </script>
 </body>
 </html>
