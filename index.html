@@ -401,10 +401,11 @@ async function fetchMLB() {
     const games = schedData.dates?.[0]?.games || [];
     const game  = games[0] || null;
 
-    // Always fetch next game regardless
-    const nextRes = await fetch(`${MLB_API}/schedule?teamId=${SOX_TEAM_ID}&sportId=1&startDate=${today}&endDate=${addDays(today,14)}&language=en`);
+    // Fetch next game starting from tomorrow — today's game is already handled above
+    const tomorrow = addDays(today, 1);
+    const nextRes = await fetch(`${MLB_API}/schedule?teamId=${SOX_TEAM_ID}&sportId=1&startDate=${tomorrow}&endDate=${addDays(today,14)}&language=en`);
     const nextData = await nextRes.json();
-    const nextGame = findNextGame(nextData.dates || [], game?.gamePk);
+    const nextGame = findNextGame(nextData.dates || []);
 
     if (!game) {
       renderNoGame(inner, nextGame);
@@ -660,16 +661,12 @@ function getPitcherRecord(boxscore, playerId, ...statNames) {
   return '';
 }
 
-function findNextGame(dates, todayGamePk) {
-  const today = new Date().toISOString().slice(0, 10);
+function findNextGame(dates) {
   for (const d of dates) {
     for (const g of (d.games || [])) {
-      // Skip today's game (already being shown)
-      if (g.gamePk === todayGamePk) continue;
       // Skip completed games
       if (g.status?.abstractGameState === 'Final') continue;
-      // Skip postponed, cancelled, suspended, or any non-upcoming state
-      if (g.status?.abstractGameState === 'Live') continue;
+      // Skip postponed, cancelled, or suspended games
       const detailedState = g.status?.detailedState || '';
       if (/postponed|cancelled|suspended/i.test(detailedState)) continue;
       return g;
