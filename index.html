@@ -178,6 +178,7 @@
 
   .mlb-divider { height: 0.5px; background: rgba(255,255,255,0.08); flex-shrink: 0; }
 
+  /* Linescore */
   .mlb-linescore { overflow-x: auto; flex-shrink: 0; }
   .mlb-linescore table { width: 100%; border-collapse: collapse; font-family: 'DM Mono', monospace; font-size: 0.7vw; }
   .mlb-linescore th { color: rgba(255,255,255,0.3); font-weight: 400; text-align: center; padding: 2px 3px; min-width: 16px; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
@@ -187,7 +188,9 @@
   .mlb-linescore td.ls-cur { background: rgba(200,16,46,0.55); color: #fff; font-weight: 600; border-radius: 3px; }
   .mlb-linescore td.ls-total { font-weight: 600; color: #fff; border-left: 0.5px solid rgba(255,255,255,0.12); }
   .mlb-linescore td.ls-winner-cell { color: var(--sox-gold); }
+  .mlb-linescore td.ls-empty { color: rgba(255,255,255,0.15); }
 
+  /* Situation */
   .mlb-situation { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
   .mlb-diamond-wrap { flex-shrink: 0; }
   .mlb-situation-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
@@ -197,7 +200,9 @@
   .mlb-player-row { display: flex; align-items: center; gap: 5px; font-size: 0.75vw; }
   .mlb-player-lbl { color: rgba(255,255,255,0.35); min-width: 40px; text-transform: uppercase; letter-spacing: 0.07em; font-size: 0.68vw; }
   .mlb-player-name { color: rgba(255,255,255,0.9); font-weight: 500; }
+  .mlb-half-inning { font-size: 0.72vw; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; font-family: 'DM Mono', monospace; padding-bottom: 2px; }
 
+  /* Pitchers */
   .mlb-pitchers { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
   .mlb-pitcher-row { display: flex; align-items: center; gap: 6px; font-size: 0.75vw; padding: 4px 6px; border-radius: 5px; background: rgba(255,255,255,0.04); }
   .mlb-pitcher-badge { font-size: 0.65vw; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
@@ -207,11 +212,13 @@
   .mlb-pitcher-name   { color: rgba(255,255,255,0.9); font-weight: 500; flex: 1; }
   .mlb-pitcher-record { font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.4); font-size: 0.68vw; }
 
+  /* Next game */
   .mlb-next { display: flex; flex-direction: column; gap: 3px; padding: 6px 8px; background: rgba(255,255,255,0.04); border-radius: 6px; border: 0.5px solid rgba(255,255,255,0.07); flex-shrink: 0; }
   .mlb-next-label { font-size: 0.65vw; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.3); font-weight: 600; }
   .mlb-next-info  { font-size: 0.8vw; color: rgba(255,255,255,0.8); font-weight: 500; }
   .mlb-next-detail { font-size: 0.72vw; color: rgba(255,255,255,0.4); font-family: 'DM Mono', monospace; }
 
+  /* No game */
   .mlb-nogame { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; }
   .mlb-nogame-icon { font-size: 1.8vw; opacity: 0.25; }
   .mlb-nogame-text { font-size: 0.8vw; color: rgba(255,255,255,0.3); }
@@ -249,8 +256,7 @@
     <!-- CALENDAR -->
     <div class="cal-card">
       <div class="cal-iframe-wrap">
-        <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=2&ctz=America%2FNew_York&showPrint=0&showTitle=0&showDate=0&mode=WEEK&showTz=0&showCalendars=0&src=M2xtZWw0aTlzNDk4NnNvcnBla2cyc3Q4ZWtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=ZmFtaWx5MDYwNzE3Njg5ODMyNzQzNDE1NTVAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=ZW4udXNhI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=Y19mYWY5OTAwZjdhZmRjZmU2NjY3MTQ1Y2MxMjZlNWY5YmQ1NmY5NmRjZTg2NmU3NTE0MzJmZWExMTIwMzUwMzY4QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&src=Z3F2dWJoMzMwcHNnNjNvaGZhZXFkZWxiczA0bGxhY3JAaW1wb3J0LmNhbGVuZGFyLmdvb2dsZS5jb20&color=%238e24aa&color=%237986cb&color=%237cb342&color=%23ad1457&color=%233f51b5" style="border-width:0" width="100%" height="100%" frameborder="0" scrolling="no">  
-        </iframe>
+        <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FNew_York&showPrint=0&mode=WEEK&showTz=0&showDate=0&showTitle=0&src=ZmFtaWx5MDYwNzE3Njg5ODMyNzQzNDE1NTVAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=M2xtZWw0aTlzNDk4NnNvcnBla2cyc3Q4ZWtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=Z3F2dWJoMzMwcHNnNjNvaGZhZXFkZWxiczA0bGxhY3JAaW1wb3J0LmNhbGVuZGFyLmdvb2dsZS5jb20&src=ZW4udXNhI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=Y19mYWY5OTAwZjdhZmRjZmU2NjY3MTQ1Y2MxMjZlNWY5YmQ1NmY5NmRjZTg2NmU3NTE0MzJmZWExMTIwMzUwMzY4QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%237986cb&color=%238e24aa&color=%233f51b5&color=%237cb342&color=%23ad1457" style="border-width:0;width:100%;height:100%;display:block" frameborder="0" scrolling="no"></iframe>
       </div>
     </div>
 
@@ -348,245 +354,309 @@ function windDir(deg){if(deg==null)return'';return['N','NE','E','SE','S','SW','W
 
 
 /* ================================================================
-   MLB STATS API  —  Red Sox (team id 111)
-   ================================================================ */
-const SOX_TEAM_ID = 111;
-const MLB_API     = 'https://statsapi.mlb.com/api/v1';
-const MLB_API_V11 = 'https://statsapi.mlb.com/api/v1.1';
+   MLB — ESPN API   (Red Sox = team id 2)
+   ================================================================
 
-// How long to keep a completed game displayed before it clears to "Next Game" / "No game".
-// The window starts from the scheduled first pitch and includes an allowance for game duration.
-const RETAIN_HOURS   = 18;   // hours to keep showing the result after the game ends
-const AVG_GAME_HOURS = 3.5;  // conservative estimate of game length (start → final out)
+   ESPN public endpoints used:
+     Scoreboard (today):
+       https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard
+     Summary (live + box score detail):
+       https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event={id}
+     Team schedule (upcoming games):
+       https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/bos/schedule
+
+   Retention rule: show the completed game until 11 AM the next calendar day.
+   ================================================================ */
+
+const ESPN_BASE    = 'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb';
+const SOX_ESPN_ID  = '2';   // ESPN internal team ID for Boston Red Sox
+const SOX_ABBR     = 'BOS';
 
 /**
- * Returns true while we should still show a completed game on the card.
- * gameDate is the UTC ISO string from the MLB API (i.e. scheduled first-pitch time).
- * The window = gameDate + AVG_GAME_HOURS (approx end) + RETAIN_HOURS.
+ * Returns true if a completed game should still be displayed.
+ * A game stays visible until 11:00 AM on the day after it was played.
+ * gameDate: ISO date string (YYYY-MM-DD) for the date the game was played.
  */
 function withinRetentionWindow(gameDate) {
   if (!gameDate) return false;
-  const windowEnd = new Date(gameDate).getTime() + (AVG_GAME_HOURS + RETAIN_HOURS) * 3600 * 1000;
-  return Date.now() < windowEnd;
+  // Parse the game date as a local-time date (no time zone shift)
+  const parts  = gameDate.split('-').map(Number);
+  const nextDay = new Date(parts[0], parts[1] - 1, parts[2] + 1, 11, 0, 0); // next day at 11 AM local
+  return Date.now() < nextDay.getTime();
 }
 
+/** Build a small SVG baseball diamond showing which bases are occupied. */
 function diamondSVG(onFirst, onSecond, onThird) {
-  const baseSize = 42;
+  const sz  = 42;
   const on  = 'rgba(200,16,46,0.9)';
   const off = 'rgba(255,255,255,0.12)';
-  const stroke = 'rgba(255,255,255,0.25)';
-  return `<svg width="${baseSize}" height="${baseSize}" viewBox="0 0 42 42" fill="none">
-    <polygon points="21,4 38,21 21,38 4,21" fill="rgba(255,255,255,0.04)" stroke="${stroke}" stroke-width="0.8"/>
-    <rect x="16.5" y="1" width="9" height="9" rx="1.5" transform="rotate(45 21 5.5)" fill="${onSecond?on:off}" stroke="${onSecond?'rgba(200,16,46,0.5)':'rgba(255,255,255,0.15)'}" stroke-width="0.8"/>
-    <rect x="29.5" y="16.5" width="9" height="9" rx="1.5" transform="rotate(45 34 21)" fill="${onFirst?on:off}" stroke="${onFirst?'rgba(200,16,46,0.5)':'rgba(255,255,255,0.15)'}" stroke-width="0.8"/>
-    <rect x="3.5" y="16.5" width="9" height="9" rx="1.5" transform="rotate(45 8 21)" fill="${onThird?on:off}" stroke="${onThird?'rgba(200,16,46,0.5)':'rgba(255,255,255,0.15)'}" stroke-width="0.8"/>
+  const str = 'rgba(255,255,255,0.25)';
+  return `<svg width="${sz}" height="${sz}" viewBox="0 0 42 42" fill="none">
+    <polygon points="21,4 38,21 21,38 4,21" fill="rgba(255,255,255,0.04)" stroke="${str}" stroke-width="0.8"/>
+    <rect x="16.5" y="1"    width="9" height="9" rx="1.5" transform="rotate(45 21 5.5)"  fill="${onSecond?on:off}" stroke="${onSecond?'rgba(200,16,46,0.5)':'rgba(255,255,255,0.15)'}" stroke-width="0.8"/>
+    <rect x="29.5" y="16.5" width="9" height="9" rx="1.5" transform="rotate(45 34 21)"   fill="${onFirst?on:off}"  stroke="${onFirst?'rgba(200,16,46,0.5)':'rgba(255,255,255,0.15)'}"  stroke-width="0.8"/>
+    <rect x="3.5"  y="16.5" width="9" height="9" rx="1.5" transform="rotate(45 8 21)"    fill="${onThird?on:off}"  stroke="${onThird?'rgba(200,16,46,0.5)':'rgba(255,255,255,0.15)'}"  stroke-width="0.8"/>
     <polygon points="21,33 25,37 21,41 17,37" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
   </svg>`;
 }
 
-function fmtGameTime(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit', timeZoneName:'short', timeZone:'America/New_York' });
+/** Format a game date/time string for display (e.g. "Sat, May 17 · 7:10 PM ET"). */
+function fmtGameTime(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  return d.toLocaleString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric',
+    hour: 'numeric', minute: '2-digit',
+    timeZoneName: 'short', timeZone: 'America/New_York'
+  });
 }
 
+/** Format a date string (YYYY-MM-DD) for a short "Mon, May 19" style. */
+function fmtDateShort(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, day] = dateStr.split('-').map(Number);
+  const d = new Date(y, m - 1, day);
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+/** Today's date as YYYY-MM-DD in local time. */
+function localToday() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+
+/** Yesterday's date as YYYY-MM-DD in local time. */
+function localYesterday() {
+  const n = new Date();
+  n.setDate(n.getDate() - 1);
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   findSoxGame(scoreboard)
+   Searches the scoreboard's events array for a Red Sox game.
+   Returns the competition object (first match) or null.
+──────────────────────────────────────────────────────────────── */
+function findSoxGame(events) {
+  for (const event of (events || [])) {
+    const comp = event.competitions?.[0];
+    if (!comp) continue;
+    const hasSox = comp.competitors?.some(c => c.team?.abbreviation === SOX_ABBR || c.team?.id === SOX_ESPN_ID);
+    if (hasSox) return { event, comp };
+  }
+  return null;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Main fetch
+──────────────────────────────────────────────────────────────── */
 async function fetchMLB() {
   const inner = document.getElementById('mlb-inner');
   try {
-    const today     = new Date().toISOString().slice(0, 10);
-    const yesterday = addDays(today, -1);
+    const today     = localToday();
+    const yesterday = localYesterday();
 
-    // Fetch today's schedule, yesterday's schedule, and upcoming games in parallel
-    const [schedRes, yestRes, nextRes] = await Promise.all([
-      fetch(`${MLB_API}/schedule?teamId=${SOX_TEAM_ID}&sportId=1&date=${today}&hydrate=linescore,decisions,probablePitcher,team,game(content(summary))&language=en`),
-      fetch(`${MLB_API}/schedule?teamId=${SOX_TEAM_ID}&sportId=1&date=${yesterday}&hydrate=linescore,decisions,probablePitcher,team,game(content(summary))&language=en`),
-      fetch(`${MLB_API}/schedule?teamId=${SOX_TEAM_ID}&sportId=1&startDate=${addDays(today,1)}&endDate=${addDays(today,14)}&language=en`),
+    // 1. Fetch today's scoreboard + yesterday's scoreboard + upcoming schedule in parallel
+    const [todayRes, yestRes, schedRes] = await Promise.all([
+      fetch(`${ESPN_BASE}/scoreboard?dates=${today.replace(/-/g,'')}`),
+      fetch(`${ESPN_BASE}/scoreboard?dates=${yesterday.replace(/-/g,'')}`),
+      fetch(`${ESPN_BASE}/teams/bos/schedule?season=${today.slice(0,4)}`),
     ]);
-    const [schedData, yestData, nextData] = await Promise.all([schedRes.json(), yestRes.json(), nextRes.json()]);
+    const [todayData, yestData, schedData] = await Promise.all([
+      todayRes.json(), yestRes.json(), schedRes.json()
+    ]);
 
-    const todayGames = schedData.dates?.[0]?.games || [];
-    const yestGames  = yestData.dates?.[0]?.games  || [];
-    const nextGame   = findNextGame(nextData.dates || []);
-
-    // ── Determine which game to display ─────────────────────────────────────
-    // Priority 1: Any game scheduled today (preview, live, or final still in window).
-    //             Even today's final is kept until the 18h window expires.
-    // Priority 2: Yesterday's final if it is still within the 18h retention window.
-    // Priority 3: No-game fallback (shows next upcoming game).
-
-    let game        = todayGames[0] || null;
+    // 2. Find Sox game
+    let found      = findSoxGame(todayData.events);
     let isYesterday = false;
+    let gameDate    = today;
 
-    if (!game) {
-      // No game today — check yesterday
-      const yg = yestGames[0] || null;
-      if (yg && yg.status?.abstractGameState === 'Final' && withinRetentionWindow(yg.gameDate)) {
-        game        = yg;
-        isYesterday = true;
+    if (!found) {
+      // No game today — check yesterday (retention window)
+      const yFound = findSoxGame(yestData.events);
+      if (yFound) {
+        const st = yFound.comp.status?.type?.state;  // 'post' = finished
+        if (st === 'post' && withinRetentionWindow(yesterday)) {
+          found       = yFound;
+          isYesterday = true;
+          gameDate    = yesterday;
+        }
       }
     }
 
-    if (!game) {
+    // 3. Find next upcoming game from schedule
+    const nextGame = findNextGame(schedData, today);
+
+    if (!found) {
       renderNoGame(inner, nextGame);
       return;
     }
 
-    const status    = game.status?.abstractGameState; // 'Preview', 'Live', 'Final'
-    const isLive    = status === 'Live';
-    const isFinal   = status === 'Final';
-    const isPreview = !isLive && !isFinal;
+    const { event, comp } = found;
+    const statusState  = comp.status?.type?.state;     // 'pre' | 'in' | 'post'
+    const statusDetail = comp.status?.type?.shortDetail || comp.status?.type?.detail || '';
+    const isLive    = statusState === 'in';
+    const isFinal   = statusState === 'post';
+    const isPreview = statusState === 'pre';
 
-    // Teams
-    const away = game.teams?.away;
-    const home = game.teams?.home;
-    const awayName   = away?.team?.teamName || away?.team?.name || '—';
-    const homeName   = home?.team?.teamName || home?.team?.name || '—';
-    const awayAbbr   = away?.team?.abbreviation || '—';
-    const homeAbbr   = home?.team?.abbreviation || '—';
-    const awayRecord = away?.leagueRecord ? `${away.leagueRecord.wins}-${away.leagueRecord.losses}` : '';
-    const homeRecord = home?.leagueRecord ? `${home.leagueRecord.wins}-${home.leagueRecord.losses}` : '';
-    const awayScore  = away?.score ?? '—';
-    const homeScore  = home?.score ?? '—';
+    // Teams — ESPN always puts home second in competitors array, but we detect explicitly
+    const awayComp = comp.competitors?.find(c => c.homeAway === 'away') || comp.competitors?.[0];
+    const homeComp = comp.competitors?.find(c => c.homeAway === 'home') || comp.competitors?.[1];
+
+    const awayName   = awayComp?.team?.shortDisplayName || awayComp?.team?.displayName || '—';
+    const homeName   = homeComp?.team?.shortDisplayName || homeComp?.team?.displayName || '—';
+    const awayAbbr   = awayComp?.team?.abbreviation || '—';
+    const homeAbbr   = homeComp?.team?.abbreviation || '—';
+    const awayRecord = awayComp?.records?.[0]?.summary || '';
+    const homeRecord = homeComp?.records?.[0]?.summary || '';
+    const awayScore  = awayComp?.score ?? '—';
+    const homeScore  = homeComp?.score ?? '—';
 
     const awayWin = isFinal && parseInt(awayScore) > parseInt(homeScore);
     const homeWin = isFinal && parseInt(homeScore) > parseInt(awayScore);
 
-    // For live/final: fetch the full live feed for linescore, situation, decisions
-    let linescore = null, situation = null, decisions = null, boxscore = null;
-    if (isLive || isFinal) {
+    // 4. Fetch detailed summary for live/final (linescore, situation, decisions)
+    let summary = null;
+    if ((isLive || isFinal) && event.id) {
       try {
-        const liveRes  = await fetch(`${MLB_API_V11}/game/${game.gamePk}/feed/live`);
-        const liveData = await liveRes.json();
-        linescore = liveData.liveData?.linescore;
-        situation = liveData.liveData?.plays?.currentPlay?.matchup;
-        boxscore  = liveData.liveData?.boxscore;
-        decisions = liveData.liveData?.decisions;
-        if (isLive) {
-          const curPlay = liveData.liveData?.plays?.currentPlay;
-          if (curPlay) {
-            situation = {
-              ...situation,
-              balls:       curPlay.count?.balls   ?? '—',
-              strikes:     curPlay.count?.strikes ?? '—',
-              outs:        linescore?.outs         ?? '—',
-              batterName:  curPlay.matchup?.batter?.fullName  || '—',
-              pitcherName: curPlay.matchup?.pitcher?.fullName || '—',
-            };
+        const sumRes = await fetch(`${ESPN_BASE}/summary?event=${event.id}`);
+        summary = await sumRes.json();
+      } catch(e) { /* degrade gracefully */ }
+    }
+
+    // ── Extract data from summary ────────────────────────────────────────────
+
+    // Linescore: summary.linescore.lines  (array of inning objects)
+    //   Each line: { inning: "1", away: { runs:"0" }, home: { runs:"—" } }
+    const linescore   = summary?.linescore;
+    const lsLines     = linescore?.lines || [];  // per-inning half-inning data
+
+    // Totals from linescore
+    const lsAwayTotals = linescore?.teams?.find(t => t.homeAway === 'away') || {};
+    const lsHomeTotals = linescore?.teams?.find(t => t.homeAway === 'home') || {};
+    const totalAwayR = lsAwayTotals.runs   ?? awayScore;
+    const totalHomeR = lsHomeTotals.runs   ?? homeScore;
+    const totalAwayH = lsAwayTotals.hits   ?? '—';
+    const totalHomeH = lsHomeTotals.hits   ?? '—';
+    const totalAwayE = lsAwayTotals.errors ?? '—';
+    const totalHomeE = lsHomeTotals.errors ?? '—';
+
+    // Current inning info
+    const situation    = summary?.situation;
+    const currentInn   = isLive ? (situation?.period || comp.status?.period || 0) : 0;
+    const isTop        = isLive ? (situation?.isTopHalf !== false && situation?.pitcher?.team?.abbreviation !== homeAbbr) : true;
+    // ESPN's situation.isTopHalf is a boolean when present
+    const isTopHalf    = isLive ? (situation?.isTopHalf ?? true) : true;
+
+    // Pitching/batting situation
+    const balls    = situation?.balls    ?? '—';
+    const strikes  = situation?.strikes  ?? '—';
+    const outs     = situation?.outs     ?? '—';
+    const batterName  = situation?.batter?.fullName  || situation?.batter?.athlete?.fullName  || '—';
+    const pitcherName = situation?.pitcher?.fullName || situation?.pitcher?.athlete?.fullName || '—';
+    const onFirst  = situation?.onFirst  || false;
+    const onSecond = situation?.onSecond || false;
+    const onThird  = situation?.onThird  || false;
+
+    // Decisions (from summary.boxscore or summary.header.competitions[0])
+    const decisionsComp = summary?.header?.competitions?.[0];
+    const decisions = {
+      winner: decisionsComp?.competitors?.find(c => c.winner)?.probables?.find(p => p.type === 'winning') ||
+              summary?.boxscore?.teams?.flatMap(t => t.statistics || []).find(s => s.type === 'winning') ||
+              null,
+      // We parse pitchers from the leaders / lastEvent sections below
+    };
+
+    // ESPN surfaces W/L/SV in summary.boxscore.players[].statistics[pitching category]
+    // More reliably, we pull from summary.leaders or from the loser/winner in the header
+    let winPitcher = null, lossPitcher = null, savePitcher = null;
+    if (isFinal && summary) {
+      // Try header.competitions[0].situation for pitchers
+      const hdrSit = summary?.header?.competitions?.[0]?.situation;
+      if (hdrSit) {
+        winPitcher  = hdrSit.lastPlay?.participants?.find(p => p.type === 'winner')  || null;
+        lossPitcher = hdrSit.lastPlay?.participants?.find(p => p.type === 'loser')   || null;
+        savePitcher = hdrSit.lastPlay?.participants?.find(p => p.type === 'saver')   || null;
+      }
+
+      // Most reliable: summary.boxscore.players → pitching decisions
+      // ESPN places W/L/S in the stat line. We scan all pitchers.
+      if (summary.boxscore?.players) {
+        for (const teamBlock of summary.boxscore.players) {
+          const pitchersGroup = teamBlock.statistics?.find(s => s.type === 'pitching');
+          if (!pitchersGroup) continue;
+          for (const athlete of (pitchersGroup.athletes || [])) {
+            const note = athlete.stats?.[athlete.stats.length - 1] || '';   // Last stat column is often "note" W/L/S
+            const statLabels = pitchersGroup.labels || pitchersGroup.keys || [];
+            const noteIdx = statLabels.indexOf('note');
+            const statNote = noteIdx >= 0 ? (athlete.stats?.[noteIdx] || '') : '';
+            const nm = athlete.athlete?.displayName || athlete.athlete?.fullName || '';
+
+            // Also look for season W-L from seasonStats
+            const seasonWins   = athlete.athlete?.statisticsSummary?.wins   ?? '';
+            const seasonLosses = athlete.athlete?.statisticsSummary?.losses ?? '';
+            const seasonSaves  = athlete.athlete?.statisticsSummary?.saves  ?? '';
+
+            if (/\bW\b/.test(statNote) && !winPitcher)  winPitcher  = { name: nm, record: seasonWins && seasonLosses ? `${seasonWins}-${seasonLosses}` : '' };
+            if (/\bL\b/.test(statNote) && !lossPitcher) lossPitcher = { name: nm, record: seasonWins && seasonLosses ? `${seasonWins}-${seasonLosses}` : '' };
+            if (/\bS\b/.test(statNote) && !savePitcher) savePitcher = { name: nm, saves: seasonSaves || '' };
           }
         }
-      } catch(e) { /* live feed unavailable — degrade gracefully */ }
+      }
+
+      // Final fallback: summary.notes or summary.pitchingLeaders
+      if (!winPitcher && summary.winningPitcher) {
+        winPitcher = { name: summary.winningPitcher.displayName || '', record: '' };
+      }
+      if (!lossPitcher && summary.losingPitcher) {
+        lossPitcher = { name: summary.losingPitcher.displayName || '', record: '' };
+      }
     }
 
     // ── Build HTML ───────────────────────────────────────────────────────────
     let html = '';
 
-    // Matchup header
+    // ▸ Team rows + scores
     html += `<div class="mlb-teams">`;
-    html += `<div class="mlb-team-row ${awayWin?'winner':''}">
-      <div class="mlb-team-left"><div>
-        <div class="mlb-team-name">${awayName}</div>
-        ${awayRecord?`<div class="mlb-team-record">${awayAbbr} &middot; ${awayRecord}</div>`:''}
-      </div></div>
-      <div class="mlb-team-score ${isPreview?'':(awayWin?'winner':'live')}">${isPreview?'&mdash;':awayScore}</div>
-    </div>`;
-    html += `<div class="mlb-team-row ${homeWin?'winner':''}">
-      <div class="mlb-team-left"><div>
-        <div class="mlb-team-name">${homeName}</div>
-        ${homeRecord?`<div class="mlb-team-record">${homeAbbr} &middot; ${homeRecord}</div>`:''}
-      </div></div>
-      <div class="mlb-team-score ${isPreview?'':(homeWin?'winner':'live')}">${isPreview?'&mdash;':homeScore}</div>
-    </div>`;
+    html += teamRow(awayName, awayAbbr, awayRecord, awayScore, isPreview, awayWin, isLive || isFinal);
+    html += teamRow(homeName, homeAbbr, homeRecord, homeScore, isPreview, homeWin, isLive || isFinal);
     html += `</div>`;
 
-    // Status bar
+    // ▸ Status bar
     if (isPreview) {
-      html += `<div class="mlb-status-bar"><span class="mlb-status-label">${fmtGameTime(game.gameDate)}</span></div>`;
+      html += `<div class="mlb-status-bar"><span class="mlb-status-label">${fmtGameTime(event.date)}</span></div>`;
     } else if (isLive) {
-      const inningNum  = linescore?.currentInning || '?';
-      const inningHalf = linescore?.inningHalf || '';
-      const arrow = inningHalf.toLowerCase().includes('top') ? '&#9650;' : '&#9660;';
+      const halfWord  = isTopHalf ? 'TOP' : 'BOT';
+      const inningNum = comp.status?.period || '?';
       html += `<div class="mlb-status-bar">
         <span class="mlb-status-live">&#9679; LIVE</span>
-        <span class="mlb-status-label">${arrow} ${inningNum}</span>
+        <span class="mlb-status-label">${halfWord} ${inningNum}</span>
       </div>`;
     } else if (isFinal) {
-      const inn     = linescore?.currentInning;
-      const extra   = inn && inn > 9 ? ` (${inn})` : '';
-      // Flag yesterday's games so it's clear the result is from the prior day
+      // ESPN statusDetail is often "Final" or "Final/10" for extras
       const dayNote = isYesterday ? ' &middot; Yesterday' : '';
-      html += `<div class="mlb-status-bar"><span class="mlb-status-label">Final${extra}${dayNote}</span></div>`;
+      html += `<div class="mlb-status-bar"><span class="mlb-status-label">${statusDetail}${dayNote}</span></div>`;
     }
 
     html += `<div class="mlb-divider"></div>`;
 
-    // Linescore (live or final)
-    if ((isLive || isFinal) && linescore) {
-      const innings  = linescore.innings || [];
-      const totalInn = Math.max(innings.length, 9);
-      const curInn   = isLive ? (linescore.currentInning || 1) : -1;
-      const isTop    = (linescore.inningHalf || '').toLowerCase().includes('top');
-
-      const awayRuns = linescore.teams?.away?.runs   ?? awayScore;
-      const homeRuns = linescore.teams?.home?.runs   ?? homeScore;
-      const awayHits = linescore.teams?.away?.hits   ?? '&mdash;';
-      const homeHits = linescore.teams?.home?.hits   ?? '&mdash;';
-      const awayErrs = linescore.teams?.away?.errors ?? '&mdash;';
-      const homeErrs = linescore.teams?.home?.errors ?? '&mdash;';
-
-      const renderCells = (side, totalInn) => {
-        let cells = '';
-        for (let i = 1; i <= totalInn; i++) {
-          const inn = innings.find(x => x.num === i);
-          const val = inn ? (inn[side]?.runs ?? (isLive && i === curInn ? '' : '&mdash;')) : (isLive && i > innings.length ? '' : '&mdash;');
-          const isCur = isLive && i === curInn && (side === 'away' ? isTop : !isTop);
-          cells += `<td class="${isCur?'ls-cur':''}">${val}</td>`;
-        }
-        return cells;
-      };
-
-      html += `<div class="mlb-linescore"><table>
-        <thead><tr>
-          <th class="ls-team-h"></th>
-          ${Array.from({length:totalInn},(_,i)=>`<th>${i+1}</th>`).join('')}
-          <th class="ls-team-h" style="border-left:0.5px solid rgba(255,255,255,0.12)">R</th>
-          <th class="ls-team-h">H</th>
-          <th class="ls-team-h">E</th>
-        </tr></thead>
-        <tbody>
-          <tr>
-            <td class="ls-team">${awayAbbr}</td>
-            ${renderCells('away',totalInn)}
-            <td class="ls-total ${isFinal&&awayWin?'ls-winner-cell':''}">${awayRuns}</td>
-            <td class="ls-total">${awayHits}</td>
-            <td class="ls-total">${awayErrs}</td>
-          </tr>
-          <tr>
-            <td class="ls-team">${homeAbbr}</td>
-            ${renderCells('home',totalInn)}
-            <td class="ls-total ${isFinal&&homeWin?'ls-winner-cell':''}">${homeRuns}</td>
-            <td class="ls-total">${homeHits}</td>
-            <td class="ls-total">${homeErrs}</td>
-          </tr>
-        </tbody>
-      </table></div>`;
+    // ▸ Linescore table (live or final)
+    if ((isLive || isFinal) && lsLines.length > 0) {
+      const totalInn = Math.max(lsLines.length, 9);
+      html += buildLinescoreTable(lsLines, totalInn, awayAbbr, homeAbbr,
+        totalAwayR, totalHomeR, totalAwayH, totalHomeH, totalAwayE, totalHomeE,
+        isLive, currentInn, isTopHalf, awayWin, homeWin);
     }
 
-    // Live situation: diamond + count + players
-    if (isLive && linescore) {
-      const runners     = linescore.offense || {};
-      const onFirst     = !!runners.first;
-      const onSecond    = !!runners.second;
-      const onThird     = !!runners.third;
-      const balls       = situation?.balls   ?? linescore.balls   ?? '&mdash;';
-      const strikes     = situation?.strikes ?? linescore.strikes ?? '&mdash;';
-      const outs        = situation?.outs    ?? linescore.outs    ?? '&mdash;';
-      const batterName  = situation?.batterName  || runners.batter?.fullName  || '&mdash;';
-      const pitcherName = situation?.pitcherName || '&mdash;';
-
+    // ▸ Live situation block
+    if (isLive && situation) {
+      const halfLabel = isTopHalf ? 'Top' : 'Bot';
+      const inningOrd = ordinal(comp.status?.period || currentInn || 1);
       html += `<div class="mlb-divider"></div>
       <div class="mlb-situation">
-        <div class="mlb-diamond-wrap">${diamondSVG(onFirst,onSecond,onThird)}</div>
+        <div class="mlb-diamond-wrap">${diamondSVG(onFirst, onSecond, onThird)}</div>
         <div class="mlb-situation-info">
+          <div class="mlb-half-inning">${halfLabel} ${inningOrd} Inning</div>
           <div class="mlb-count-row">
             <div class="mlb-count-pill">B <span class="val">${balls}</span></div>
             <div class="mlb-count-pill">S <span class="val">${strikes}</span></div>
@@ -604,106 +674,179 @@ async function fetchMLB() {
       </div>`;
     }
 
-    // Post-game decisions
-    if (isFinal && decisions) {
+    // ▸ Post-game decisions
+    if (isFinal && (winPitcher || lossPitcher || savePitcher)) {
       html += `<div class="mlb-divider"></div><div class="mlb-pitchers">`;
-      if (decisions.winner) {
-        const w = decisions.winner;
+      if (winPitcher) {
         html += `<div class="mlb-pitcher-row">
           <span class="mlb-pitcher-badge win">W</span>
-          <span class="mlb-pitcher-name">${w.fullName}</span>
-          <span class="mlb-pitcher-record">${getPitcherRecord(boxscore,w.id,'wins','losses')}</span>
+          <span class="mlb-pitcher-name">${winPitcher.name}</span>
+          <span class="mlb-pitcher-record">${winPitcher.record || ''}</span>
         </div>`;
       }
-      if (decisions.loser) {
-        const l = decisions.loser;
+      if (lossPitcher) {
         html += `<div class="mlb-pitcher-row">
           <span class="mlb-pitcher-badge loss">L</span>
-          <span class="mlb-pitcher-name">${l.fullName}</span>
-          <span class="mlb-pitcher-record">${getPitcherRecord(boxscore,l.id,'wins','losses')}</span>
+          <span class="mlb-pitcher-name">${lossPitcher.name}</span>
+          <span class="mlb-pitcher-record">${lossPitcher.record || ''}</span>
         </div>`;
       }
-      if (decisions.save) {
-        const sv = decisions.save;
+      if (savePitcher) {
         html += `<div class="mlb-pitcher-row">
           <span class="mlb-pitcher-badge save">SV</span>
-          <span class="mlb-pitcher-name">${sv.fullName}</span>
-          <span class="mlb-pitcher-record">${getPitcherRecord(boxscore,sv.id,'saves')}</span>
+          <span class="mlb-pitcher-name">${savePitcher.name}</span>
+          <span class="mlb-pitcher-record">${savePitcher.saves ? `${savePitcher.saves} SV` : ''}</span>
         </div>`;
       }
       html += `</div>`;
     }
 
-    // ── Next game block ──────────────────────────────────────────────────────
-    // Only shown once the completed game has aged out of the 18h retention window.
-    // During a live game, or while a final is still "fresh", this block is hidden —
-    // the result deserves the spotlight.
-    if (isFinal && nextGame && !withinRetentionWindow(game.gameDate)) {
+    // ▸ Next game (shown once a completed game is the current display)
+    if (isFinal && nextGame) {
       html += `<div class="mlb-divider"></div>`;
-      html += buildNextGame(nextGame);
+      html += buildNextGameBlock(nextGame);
     }
 
     inner.innerHTML = html;
 
   } catch(e) {
-    inner.innerHTML = `<div class="mlb-loading"><span style="font-size:1.2vw;opacity:0.4">&#9888;</span><span>Unable to load game data</span></div>`;
-    console.error('MLB fetch error:', e);
+    document.getElementById('mlb-inner').innerHTML =
+      `<div class="mlb-loading"><span style="font-size:1.2vw;opacity:0.4">&#9888;</span><span>Unable to load game data</span></div>`;
+    console.error('ESPN MLB fetch error:', e);
   }
 }
 
-function getPitcherRecord(boxscore, playerId, ...statNames) {
-  if (!boxscore || !playerId) return '';
-  const pid = String(playerId);
-  for (const side of ['away','home']) {
-    const pObj = boxscore.teams?.[side]?.players?.['ID'+pid];
-    if (!pObj) continue;
-    const stats = pObj.seasonStats?.pitching || pObj.stats?.pitching || {};
-    if (statNames.includes('saves')) return stats.saves != null ? `${stats.saves} SV` : '';
-    return `${stats.wins??'?'}-${stats.losses??'?'}`;
-  }
-  return '';
+/* ────────────────────────────────────────────────────────────────
+   Helper: single team row
+──────────────────────────────────────────────────────────────── */
+function teamRow(name, abbr, record, score, isPreview, isWinner, scoreVisible) {
+  const scoreClass = isPreview ? '' : (isWinner ? 'winner' : 'live');
+  return `<div class="mlb-team-row ${isWinner ? 'winner' : ''}">
+    <div class="mlb-team-left">
+      <div>
+        <div class="mlb-team-name">${name}</div>
+        ${record ? `<div class="mlb-team-record">${abbr} &middot; ${record}</div>` : ''}
+      </div>
+    </div>
+    <div class="mlb-team-score ${scoreClass}">${isPreview ? '&mdash;' : score}</div>
+  </div>`;
 }
 
-function findNextGame(dates) {
-  for (const d of dates) {
-    for (const g of (d.games || [])) {
-      if (g.status?.abstractGameState === 'Final') continue;
-      if (/postponed|cancelled|suspended/i.test(g.status?.detailedState || '')) continue;
-      return g;
-    }
+/* ────────────────────────────────────────────────────────────────
+   Helper: linescore table
+   ESPN linescore.lines format:
+     { displayValue: "1", away: { runs: "0", hits: "1", errors: "0" },
+       home: { runs: "—", hits: "0", errors: "0" } }
+──────────────────────────────────────────────────────────────── */
+function buildLinescoreTable(lines, totalInn, awayAbbr, homeAbbr,
+    awayR, homeR, awayH, homeH, awayE, homeE,
+    isLive, currentInn, isTopHalf, awayWin, homeWin) {
+
+  // Build a map from inning number (1-based) to the ESPN line object
+  const lineMap = {};
+  lines.forEach(l => { lineMap[parseInt(l.displayValue || l.inning || 0)] = l; });
+
+  let awayRow = '', homeRow = '';
+  for (let i = 1; i <= totalInn; i++) {
+    const line = lineMap[i];
+    const awayRuns = line ? (line.away?.runs ?? '') : '';
+    const homeRuns = line ? (line.home?.runs ?? '') : '';
+
+    // Highlight current inning half
+    const awayCur = isLive && i === currentInn && isTopHalf;
+    const homeCur = isLive && i === currentInn && !isTopHalf;
+
+    const awayVal = awayCur && awayRuns === '' ? '&bull;' : (awayRuns === '' ? '&mdash;' : awayRuns);
+    const homeVal = homeCur && homeRuns === '' ? '&bull;' : (homeRuns === '' ? '&mdash;' : homeRuns);
+
+    awayRow += `<td class="${awayCur ? 'ls-cur' : (awayRuns === '' ? 'ls-empty' : '')}">${awayVal}</td>`;
+    homeRow += `<td class="${homeCur ? 'ls-cur' : (homeRuns === '' ? 'ls-empty' : '')}">${homeVal}</td>`;
+  }
+
+  return `<div class="mlb-linescore"><table>
+    <thead><tr>
+      <th class="ls-team-h"></th>
+      ${Array.from({length:totalInn},(_,i) => `<th>${i+1}</th>`).join('')}
+      <th class="ls-team-h" style="border-left:0.5px solid rgba(255,255,255,0.12)">R</th>
+      <th class="ls-team-h">H</th>
+      <th class="ls-team-h">E</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td class="ls-team">${awayAbbr}</td>
+        ${awayRow}
+        <td class="ls-total ${awayWin ? 'ls-winner-cell' : ''}">${awayR}</td>
+        <td class="ls-total">${awayH}</td>
+        <td class="ls-total">${awayE}</td>
+      </tr>
+      <tr>
+        <td class="ls-team">${homeAbbr}</td>
+        ${homeRow}
+        <td class="ls-total ${homeWin ? 'ls-winner-cell' : ''}">${homeR}</td>
+        <td class="ls-total">${homeH}</td>
+        <td class="ls-total">${homeE}</td>
+      </tr>
+    </tbody>
+  </table></div>`;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Helper: find the next upcoming Sox game from schedule data
+──────────────────────────────────────────────────────────────── */
+function findNextGame(schedData, today) {
+  const events = schedData.events || [];
+  for (const ev of events) {
+    // ESPN schedule events have a date and a competitions array
+    const evDateStr = ev.date ? ev.date.slice(0,10) : '';
+    if (evDateStr <= today) continue;                        // skip past games
+    const statusState = ev.competitions?.[0]?.status?.type?.state;
+    if (statusState === 'post') continue;                    // skip finished
+    const detail = ev.competitions?.[0]?.status?.type?.detail || '';
+    if (/postponed|cancelled|suspended/i.test(detail)) continue;
+    return ev;
   }
   return null;
 }
 
-function buildNextGame(game) {
-  const away      = game.teams?.away?.team?.teamName || game.teams?.away?.team?.name || '—';
-  const home      = game.teams?.home?.team?.teamName || game.teams?.home?.team?.name || '—';
-  const isSoxHome = game.teams?.home?.team?.id === SOX_TEAM_ID;
-  const opponent  = isSoxHome ? `vs ${away}` : `@ ${home}`;
+/* ────────────────────────────────────────────────────────────────
+   Helper: build "Next Game" block HTML
+──────────────────────────────────────────────────────────────── */
+function buildNextGameBlock(event) {
+  const comp      = event.competitions?.[0];
+  const awayComp  = comp?.competitors?.find(c => c.homeAway === 'away');
+  const homeComp  = comp?.competitors?.find(c => c.homeAway === 'home');
+  const awayName  = awayComp?.team?.shortDisplayName || awayComp?.team?.displayName || '—';
+  const homeName  = homeComp?.team?.shortDisplayName || homeComp?.team?.displayName || '—';
+  const isSoxHome = homeComp?.team?.abbreviation === SOX_ABBR || homeComp?.team?.id === SOX_ESPN_ID;
+  const opponent  = isSoxHome ? `vs ${awayName}` : `@ ${homeName}`;
+
   return `<div class="mlb-next">
     <div class="mlb-next-label">Next Game</div>
     <div class="mlb-next-info">${opponent}</div>
-    <div class="mlb-next-detail">${fmtGameTime(game.gameDate)}</div>
+    <div class="mlb-next-detail">${fmtGameTime(event.date)}</div>
   </div>`;
 }
 
+/* ────────────────────────────────────────────────────────────────
+   Helper: render "No game" state
+──────────────────────────────────────────────────────────────── */
 function renderNoGame(inner, nextGame) {
-  // Only reached when there is truly no game to show — today has nothing
-  // AND yesterday's final has aged past the 18h window (or there was no game).
   let html = `<div class="mlb-nogame">
     <div class="mlb-nogame-icon">&#9918;</div>
     <div class="mlb-nogame-text">No game today</div>
   </div>`;
   if (nextGame) {
-    html += `<div style="padding:0 4px 4px">` + buildNextGame(nextGame) + `</div>`;
+    html += `<div style="padding:0 4px 4px">` + buildNextGameBlock(nextGame) + `</div>`;
   }
   inner.innerHTML = html;
 }
 
-function addDays(dateStr, n) {
-  const d = new Date(dateStr + 'T12:00:00');
-  d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
+/* ────────────────────────────────────────────────────────────────
+   Helper: ordinal number string  (1 → "1st", 2 → "2nd", etc.)
+──────────────────────────────────────────────────────────────── */
+function ordinal(n) {
+  const s = ['th','st','nd','rd'], v = n % 100;
+  return n + (s[(v-20)%10] || s[v] || s[0]);
 }
 
 
@@ -716,8 +859,8 @@ async function refreshAll() {
 
 refreshAll();
 fetchMLB();
-setInterval(refreshAll,  15 * 60 * 1000);   // weather every 15 min
-setInterval(fetchMLB,    30 * 1000);         // scores every 30 sec
+setInterval(refreshAll, 15 * 60 * 1000);   // weather every 15 min
+setInterval(fetchMLB,   30 * 1000);          // scores every 30 sec
 </script>
 </body>
 </html>
