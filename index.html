@@ -143,8 +143,8 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    background: linear-gradient(170deg, #0a1e3d 0%, #0d2b56 60%, #0a1e3d 100%);
-    border: 0.5px solid rgba(200,16,46,0.4);
+    background: linear-gradient(170deg, #7a0d18 0%, #9e1422 50%, #7a0d18 100%);
+    border: 0.5px solid rgba(255,255,255,0.12);
     box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
     position: relative;
   }
@@ -152,13 +152,13 @@
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, #c8102e, #e8b84b, #c8102e);
+    background: linear-gradient(90deg, #0d2b56, #e8b84b, #0d2b56);
     z-index: 2;
   }
   .mlb-inner { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; padding: 10px 12px 10px; min-height: 0; overflow-y: auto; gap: 8px; }
 
   .mlb-loading { flex: 1; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3); font-size: 0.75vw; gap: 8px; flex-direction: column; }
-  .mlb-spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.1); border-top-color: rgba(200,16,46,0.8); border-radius: 50%; animation: mlbspin 0.8s linear infinite; }
+  .mlb-spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.15); border-top-color: rgba(232,184,75,0.9); border-radius: 50%; animation: mlbspin 0.8s linear infinite; }
   @keyframes mlbspin { to { transform: rotate(360deg); } }
 
   .mlb-teams { display: flex; flex-direction: column; gap: 2px; }
@@ -173,7 +173,7 @@
 
   .mlb-status-bar { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 3px 0; }
   .mlb-status-label { font-size: 0.78vw; font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; }
-  .mlb-status-live { color: #c8102e; font-weight: 600; animation: pulse-red 1.5s ease-in-out infinite; }
+  .mlb-status-live { color: #fff; font-weight: 600; animation: pulse-red 1.5s ease-in-out infinite; }
   @keyframes pulse-red { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
   .mlb-divider { height: 0.5px; background: rgba(255,255,255,0.08); flex-shrink: 0; }
@@ -185,7 +185,7 @@
   .mlb-linescore th.ls-team-h { text-align: left; min-width: 28px; padding-left: 2px; }
   .mlb-linescore td { text-align: center; padding: 3px 3px; color: rgba(255,255,255,0.6); }
   .mlb-linescore td.ls-team { text-align: left; font-family: 'DM Sans', sans-serif; font-size: 0.7vw; font-weight: 500; color: rgba(255,255,255,0.4); padding-left: 2px; }
-  .mlb-linescore td.ls-cur { background: rgba(200,16,46,0.55); color: #fff; font-weight: 600; border-radius: 3px; }
+  .mlb-linescore td.ls-cur { background: rgba(13,43,86,0.75); color: #fff; font-weight: 600; border-radius: 3px; }
   .mlb-linescore td.ls-total { font-weight: 600; color: #fff; border-left: 0.5px solid rgba(255,255,255,0.12); }
   .mlb-linescore td.ls-winner-cell { color: var(--sox-gold); }
   .mlb-linescore td.ls-empty { color: rgba(255,255,255,0.15); }
@@ -201,6 +201,14 @@
   .mlb-player-lbl { color: rgba(255,255,255,0.35); min-width: 40px; text-transform: uppercase; letter-spacing: 0.07em; font-size: 0.68vw; }
   .mlb-player-name { color: rgba(255,255,255,0.9); font-weight: 500; }
   .mlb-half-inning { font-size: 0.72vw; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; font-family: 'DM Mono', monospace; padding-bottom: 2px; }
+
+  /* Probable starters */
+  .mlb-starters { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+  .mlb-starters-label { font-size: 0.65vw; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.35); font-weight: 600; margin-bottom: 1px; }
+  .mlb-starter-row { display: flex; align-items: center; gap: 6px; font-size: 0.75vw; padding: 3px 6px; border-radius: 5px; background: rgba(255,255,255,0.06); }
+  .mlb-starter-team { font-size: 0.65vw; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.4); min-width: 26px; font-family: 'DM Mono', monospace; }
+  .mlb-starter-name { color: rgba(255,255,255,0.9); font-weight: 500; flex: 1; }
+  .mlb-starter-era  { font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.35); font-size: 0.68vw; }
 
   /* Pitchers */
   .mlb-pitchers { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
@@ -388,14 +396,14 @@ function withinRetentionWindow(gameDate) {
 /** Build a small SVG baseball diamond showing which bases are occupied. */
 function diamondSVG(onFirst, onSecond, onThird) {
   const sz  = 42;
-  const on  = 'rgba(200,16,46,0.9)';
+  const on  = 'rgba(232,184,75,0.95)';
   const off = 'rgba(255,255,255,0.12)';
   const str = 'rgba(255,255,255,0.25)';
   return `<svg width="${sz}" height="${sz}" viewBox="0 0 42 42" fill="none">
     <polygon points="21,4 38,21 21,38 4,21" fill="rgba(255,255,255,0.04)" stroke="${str}" stroke-width="0.8"/>
-    <rect x="16.5" y="1"    width="9" height="9" rx="1.5" transform="rotate(45 21 5.5)"  fill="${onSecond?on:off}" stroke="${onSecond?'rgba(200,16,46,0.5)':'rgba(255,255,255,0.15)'}" stroke-width="0.8"/>
-    <rect x="29.5" y="16.5" width="9" height="9" rx="1.5" transform="rotate(45 34 21)"   fill="${onFirst?on:off}"  stroke="${onFirst?'rgba(200,16,46,0.5)':'rgba(255,255,255,0.15)'}"  stroke-width="0.8"/>
-    <rect x="3.5"  y="16.5" width="9" height="9" rx="1.5" transform="rotate(45 8 21)"    fill="${onThird?on:off}"  stroke="${onThird?'rgba(200,16,46,0.5)':'rgba(255,255,255,0.15)'}"  stroke-width="0.8"/>
+    <rect x="16.5" y="1"    width="9" height="9" rx="1.5" transform="rotate(45 21 5.5)"  fill="${onSecond?on:off}" stroke="${onSecond?'rgba(200,160,40,0.6)':'rgba(255,255,255,0.15)'}" stroke-width="0.8"/>
+    <rect x="29.5" y="16.5" width="9" height="9" rx="1.5" transform="rotate(45 34 21)"   fill="${onFirst?on:off}"  stroke="${onFirst?'rgba(200,160,40,0.6)':'rgba(255,255,255,0.15)'}"  stroke-width="0.8"/>
+    <rect x="3.5"  y="16.5" width="9" height="9" rx="1.5" transform="rotate(45 8 21)"    fill="${onThird?on:off}"  stroke="${onThird?'rgba(200,160,40,0.6)':'rgba(255,255,255,0.15)'}"  stroke-width="0.8"/>
     <polygon points="21,33 25,37 21,41 17,37" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
   </svg>`;
 }
@@ -516,12 +524,35 @@ async function fetchMLB() {
     const homeWin = isFinal && parseInt(homeScore) > parseInt(awayScore);
 
     // 4. Fetch detailed summary for live/final (linescore, situation, decisions)
+    // Also fetch summary for preview so we can get probable pitchers with ERA
     let summary = null;
-    if ((isLive || isFinal) && event.id) {
+    if (event.id) {
       try {
         const sumRes = await fetch(`${ESPN_BASE}/summary?event=${event.id}`);
         summary = await sumRes.json();
       } catch(e) { /* degrade gracefully */ }
+    }
+
+    // ── Probable starters ───────────────────────────────────────────────────
+    // ESPN surfaces probables in comp.probables[] or summary.header.competitions[0].probables[]
+    // Each probable: { athlete: { fullName, era }, team: { abbreviation } }
+    let awayStarter = null, homeStarter = null;
+    const probSources = [
+      ...(comp.probables || []),
+      ...(summary?.header?.competitions?.[0]?.probables || []),
+      ...(summary?.probables || []),
+    ];
+    for (const p of probSources) {
+      const abbr = p.athlete?.team?.abbreviation || p.team?.abbreviation || '';
+      const name = p.athlete?.fullName || p.athlete?.displayName || p.displayName || '';
+      const era  = p.athlete?.era ?? p.athlete?.statistics?.find?.(s => s.name === 'ERA')?.value ?? p.era ?? null;
+      const eraStr = era != null ? parseFloat(era).toFixed(2) : '';
+      if (!name) continue;
+      // Match to away/home by team abbreviation
+      if (abbr === awayAbbr && !awayStarter) awayStarter = { name, era: eraStr };
+      else if (abbr === homeAbbr && !homeStarter) homeStarter = { name, era: eraStr };
+      else if (!awayStarter) awayStarter = { name, era: eraStr };
+      else if (!homeStarter) homeStarter = { name, era: eraStr };
     }
 
     // ── Extract data from summary ────────────────────────────────────────────
@@ -639,6 +670,27 @@ async function fetchMLB() {
     }
 
     html += `<div class="mlb-divider"></div>`;
+
+    // ▸ Probable starters (pre-game only — live/final rely on actual matchup data)
+    if (isPreview && (awayStarter || homeStarter)) {
+      html += `<div class="mlb-starters">
+        <div class="mlb-starters-label">Probable Starters</div>`;
+      if (awayStarter) {
+        html += `<div class="mlb-starter-row">
+          <span class="mlb-starter-team">${awayAbbr}</span>
+          <span class="mlb-starter-name">${awayStarter.name}</span>
+          ${awayStarter.era ? `<span class="mlb-starter-era">${awayStarter.era} ERA</span>` : ''}
+        </div>`;
+      }
+      if (homeStarter) {
+        html += `<div class="mlb-starter-row">
+          <span class="mlb-starter-team">${homeAbbr}</span>
+          <span class="mlb-starter-name">${homeStarter.name}</span>
+          ${homeStarter.era ? `<span class="mlb-starter-era">${homeStarter.era} ERA</span>` : ''}
+        </div>`;
+      }
+      html += `</div>`;
+    }
 
     // ▸ Linescore table (live or final)
     if ((isLive || isFinal) && lsLines.length > 0) {
