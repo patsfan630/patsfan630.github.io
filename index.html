@@ -20,12 +20,6 @@
     --coral: #e05c2a;
     --red: #dc2626;
     --green: #16a34a;
-
-    /* Red Sox Navy / Red */
-    --sox-navy: #0d2b56;
-    --sox-red: #bd3039;
-    --sox-alt: #c8102e;
-    --sox-gold: #e8b84b;
   }
 
   html.dark-mode {
@@ -134,107 +128,136 @@
   .wx-spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.15); border-top-color: rgba(255,255,255,0.6); border-radius: 50%; animation: wxspin 0.8s linear infinite; }
   @keyframes wxspin { to { transform: rotate(360deg); } }
   html.dark-mode .wx-card { background: linear-gradient(160deg, #0f2540 0%, #143560 35%, #1c4a80 65%, #0e2440 100%); }
+  /* =================== END WEATHER =================== */
 
-  /* ===================== MLB CARD ===================== */
-  .mlb-card {
-    flex: 1;
-    border-radius: 0.8vw;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    background: linear-gradient(170deg, #7a0d18 0%, #9e1422 50%, #7a0d18 100%);
-    border: 0.5px solid rgba(255,255,255,0.12);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
-    position: relative;
+  /* SCORES */
+  .score-loading { font-size: 14px; color: var(--muted); text-align: center; padding: 10px 0; }
+  .score-card { border-radius: 10px; overflow: hidden; }
+
+  /* MLB — Red Sox: navy + red */
+  .score-card.mlb { background: #fef2f2; border: 0.5px solid rgba(189,48,57,0.25); }
+  .score-card.mlb .sc-header { background: #bd3039; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; }
+  .score-card.mlb .sc-league-label { font-size: 15px; font-weight: 700; color: #fff; }
+  .score-card.mlb .sc-status { font-size: 12px; color: rgba(255,255,255,0.85); font-family: 'DM Mono', monospace; }
+  .score-card.mlb .sc-body { padding: 4px 0; }
+  .score-card.mlb .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 12px; border-bottom: 0.5px solid rgba(0,0,0,0.07); }
+  .score-card.mlb .sc-team:last-of-type { border-bottom: none; }
+  .score-card.mlb .sc-abbr { font-size: 15px; font-weight: 500; color: #111; }
+  .score-card.mlb .sc-record { font-size: 11px; color: #888; }
+  .score-card.mlb .sc-score { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: #aaa; }
+  .score-card.mlb .sc-score.winner { color: #bd3039; }
+  html.dark-mode .score-card.mlb { background: #1a0d0d; border-color: rgba(189,48,57,0.3); }
+  html.dark-mode .score-card.mlb .sc-abbr { color: #e8d8d8; }
+  html.dark-mode .score-card.mlb .sc-record { color: #664444; }
+  html.dark-mode .score-card.mlb .sc-score { color: #664444; }
+  html.dark-mode .score-card.mlb .sc-score.winner { color: #e06060; }
+
+  /* NBA — Celtics: green + gold */
+  .score-card.nba { background: #f0faf4; border: 0.5px solid rgba(0,122,51,0.25); }
+  .score-card.nba .sc-header { background: linear-gradient(90deg,#007a33,#005a25); padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; }
+  .score-card.nba .sc-league-label { font-size: 15px; font-weight: 700; color: #BA9A3C; }
+  .score-card.nba .sc-status { font-size: 12px; color: rgba(255,255,255,0.85); font-family: 'DM Mono', monospace; }
+  .score-card.nba .sc-body { padding: 4px 0; }
+  .score-card.nba .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 12px; border-bottom: 0.5px solid rgba(0,0,0,0.07); }
+  .score-card.nba .sc-team:last-of-type { border-bottom: none; }
+  .score-card.nba .sc-abbr { font-size: 15px; font-weight: 500; color: #111; }
+  .score-card.nba .sc-record { font-size: 11px; color: #888; }
+  .score-card.nba .sc-score { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: #aaa; }
+  .score-card.nba .sc-score.winner { color: #007a33; }
+  html.dark-mode .score-card.nba { background: #0a1a10; border-color: rgba(0,122,51,0.3); }
+  html.dark-mode .score-card.nba .sc-abbr { color: #c8e8d0; }
+  html.dark-mode .score-card.nba .sc-record { color: #2a5a3a; }
+  html.dark-mode .score-card.nba .sc-score { color: #2a5a3a; }
+  html.dark-mode .score-card.nba .sc-score.winner { color: #5dca7a; }
+
+  /* NHL — Bruins: gold + black */
+  .score-card.nhl { background: #fdfbf0; border: 0.5px solid rgba(252,181,20,0.35); }
+  .score-card.nhl .sc-header { background: linear-gradient(90deg,#1a1a1a,#111); padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; }
+  .score-card.nhl .sc-league-label { font-size: 15px; font-weight: 700; color: #FCB514; }
+  .score-card.nhl .sc-status { font-size: 12px; color: rgba(255,255,255,0.75); font-family: 'DM Mono', monospace; }
+  .score-card.nhl .sc-body { padding: 4px 0; }
+  .score-card.nhl .sc-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 12px; border-bottom: 0.5px solid rgba(0,0,0,0.07); }
+  .score-card.nhl .sc-team:last-of-type { border-bottom: none; }
+  .score-card.nhl .sc-abbr { font-size: 15px; font-weight: 500; color: #111; }
+  .score-card.nhl .sc-record { font-size: 11px; color: #888; }
+  .score-card.nhl .sc-score { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: #aaa; }
+  .score-card.nhl .sc-score.winner { color: #c8920a; }
+  html.dark-mode .score-card.nhl { background: #1a1800; border-color: rgba(252,181,20,0.25); }
+  html.dark-mode .score-card.nhl .sc-abbr { color: #e8e0b0; }
+  html.dark-mode .score-card.nhl .sc-record { color: #4a4010; }
+  html.dark-mode .score-card.nhl .sc-score { color: #4a4010; }
+  html.dark-mode .score-card.nhl .sc-score.winner { color: #FCB514; }
+
+  /* Series banner (playoffs) */
+  .sc-series {
+    padding: 3px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    text-align: center;
+    color: #fff;
+    letter-spacing: 0.03em;
   }
-  .mlb-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, #0d2b56, #e8b84b, #0d2b56);
-    z-index: 2;
-  }
-  .mlb-inner { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; padding: 10px 12px 10px; min-height: 0; overflow-y: auto; gap: 8px; }
 
-  .mlb-loading { flex: 1; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3); font-size: 0.75vw; gap: 8px; flex-direction: column; }
-  .mlb-spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.15); border-top-color: rgba(232,184,75,0.9); border-radius: 50%; animation: mlbspin 0.8s linear infinite; }
-  @keyframes mlbspin { to { transform: rotate(360deg); } }
+/* Line score table */
+.sc-linescore {
+  margin: 4px 12px 6px;
+  overflow-x: auto;
+}
+.sc-linescore table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+}
+.sc-linescore th {
+  color: var(--muted);
+  font-weight: 400;
+  text-align: center;
+  padding: 2px 4px;
+  min-width: 18px;
+  border-bottom: 0.5px solid var(--border);
+}
+.sc-linescore th.sc-ls-team {
+  text-align: left;
+  min-width: 36px;
+  padding-left: 0;
+}
+.sc-linescore td {
+  text-align: center;
+  padding: 3px 4px;
+  color: var(--text);
+}
+.sc-linescore td.sc-ls-team {
+  text-align: left;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  padding-left: 0;
+}
+.sc-linescore td.sc-ls-cur {
+  background: var(--blue-dim);
+  color: var(--blue);
+  font-weight: 500;
+  border-radius: 3px;
+}
+.sc-linescore td.sc-ls-total {
+  font-weight: 600;
+  color: var(--text);
+  border-left: 0.5px solid var(--border);
+}
+.sc-linescore td.sc-ls-winner {
+  color: var(--blue);
+}
+html.dark-mode .sc-linescore td.sc-ls-winner {
+  color: var(--blue);
+}
+  .sc-team-name { display: flex; align-items: center; gap: 6px; }
+  .sc-team-info { display: flex; flex-direction: column; gap: 1px; }
+  .sc-record { font-size: 10px; color: var(--dim); }
 
-  .mlb-teams { display: flex; flex-direction: column; gap: 2px; }
-  .mlb-team-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; border-radius: 6px; transition: background 0.2s; }
-  .mlb-team-row.winner { background: rgba(232,184,75,0.08); }
-  .mlb-team-left { display: flex; align-items: center; gap: 6px; }
-  .mlb-team-name { font-size: 1.0vw; font-weight: 500; color: #fff; letter-spacing: -0.02em; }
-  .mlb-team-record { font-size: 0.72vw; color: rgba(255,255,255,0.35); font-family: 'DM Mono', monospace; }
-  .mlb-team-score { font-family: 'DM Mono', monospace; font-size: 1.8vw; font-weight: 500; color: rgba(255,255,255,0.3); line-height: 1; }
-  .mlb-team-score.live { color: #fff; }
-  .mlb-team-score.winner { color: var(--sox-gold); }
-
-  .mlb-status-bar { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 3px 0; }
-  .mlb-status-label { font-size: 0.78vw; font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; }
-  .mlb-status-live { color: #fff; font-weight: 600; animation: pulse-red 1.5s ease-in-out infinite; }
-  @keyframes pulse-red { 0%,100%{opacity:1} 50%{opacity:0.5} }
-
-  .mlb-divider { height: 0.5px; background: rgba(255,255,255,0.08); flex-shrink: 0; }
-
-  /* Linescore */
-  .mlb-linescore { overflow-x: auto; flex-shrink: 0; }
-  .mlb-linescore table { width: 100%; border-collapse: collapse; font-family: 'DM Mono', monospace; font-size: 0.7vw; }
-  .mlb-linescore th { color: rgba(255,255,255,0.3); font-weight: 400; text-align: center; padding: 2px 3px; min-width: 16px; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
-  .mlb-linescore th.ls-team-h { text-align: left; min-width: 28px; padding-left: 2px; }
-  .mlb-linescore td { text-align: center; padding: 3px 3px; color: rgba(255,255,255,0.6); }
-  .mlb-linescore td.ls-team { text-align: left; font-family: 'DM Sans', sans-serif; font-size: 0.7vw; font-weight: 500; color: rgba(255,255,255,0.4); padding-left: 2px; }
-  .mlb-linescore td.ls-cur { background: rgba(13,43,86,0.75); color: #fff; font-weight: 600; border-radius: 3px; }
-  .mlb-linescore td.ls-total { font-weight: 600; color: #fff; border-left: 0.5px solid rgba(255,255,255,0.12); }
-  .mlb-linescore td.ls-winner-cell { color: var(--sox-gold); }
-  .mlb-linescore td.ls-empty { color: rgba(255,255,255,0.15); }
-
-  /* Situation */
-  .mlb-situation { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-  .mlb-diamond-wrap { flex-shrink: 0; }
-  .mlb-situation-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-  .mlb-count-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .mlb-count-pill { display: flex; align-items: center; gap: 3px; background: rgba(255,255,255,0.07); border-radius: 20px; padding: 2px 7px; font-size: 0.72vw; color: rgba(255,255,255,0.6); font-family: 'DM Mono', monospace; }
-  .mlb-count-pill span.val { color: #fff; font-weight: 600; }
-  .mlb-player-row { display: flex; align-items: center; gap: 5px; font-size: 0.75vw; }
-  .mlb-player-lbl { color: rgba(255,255,255,0.35); min-width: 40px; text-transform: uppercase; letter-spacing: 0.07em; font-size: 0.68vw; }
-  .mlb-player-name { color: rgba(255,255,255,0.9); font-weight: 500; }
-  .mlb-half-inning { font-size: 0.72vw; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; font-family: 'DM Mono', monospace; padding-bottom: 2px; }
-
-  /* Probable starters */
-  .mlb-starters { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
-  .mlb-starters-label { font-size: 0.65vw; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.35); font-weight: 600; margin-bottom: 1px; }
-  .mlb-starter-row { display: flex; align-items: center; gap: 6px; font-size: 0.75vw; padding: 3px 6px; border-radius: 5px; background: rgba(255,255,255,0.06); }
-  .mlb-starter-team { font-size: 0.65vw; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.4); min-width: 26px; font-family: 'DM Mono', monospace; }
-  .mlb-starter-name { color: rgba(255,255,255,0.9); font-weight: 500; flex: 1; }
-  .mlb-starter-era  { font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.35); font-size: 0.68vw; }
-
-  /* Pitchers */
-  .mlb-pitchers { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
-  .mlb-pitcher-row { display: flex; align-items: center; gap: 6px; font-size: 0.75vw; padding: 4px 6px; border-radius: 5px; background: rgba(255,255,255,0.04); }
-  .mlb-pitcher-badge { font-size: 0.65vw; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
-  .mlb-pitcher-badge.win  { background: rgba(93,202,122,0.2); color: #5dca7a; }
-  .mlb-pitcher-badge.loss { background: rgba(240,96,96,0.2);  color: #f06060; }
-  .mlb-pitcher-badge.save { background: rgba(232,184,75,0.2); color: var(--sox-gold); }
-  .mlb-pitcher-name   { color: rgba(255,255,255,0.9); font-weight: 500; flex: 1; }
-  .mlb-pitcher-record { font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.4); font-size: 0.68vw; }
-
-  /* Next game */
-  .mlb-next { display: flex; flex-direction: column; gap: 3px; padding: 6px 8px; background: rgba(255,255,255,0.04); border-radius: 6px; border: 0.5px solid rgba(255,255,255,0.07); flex-shrink: 0; }
-  .mlb-next-label { font-size: 0.65vw; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.3); font-weight: 600; }
-  .mlb-next-info  { font-size: 0.8vw; color: rgba(255,255,255,0.8); font-weight: 500; }
-  .mlb-next-detail { font-size: 0.72vw; color: rgba(255,255,255,0.4); font-family: 'DM Mono', monospace; }
-
-  /* No game */
-  .mlb-nogame { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; }
-  .mlb-nogame-icon { font-size: 1.8vw; opacity: 0.25; }
-  .mlb-nogame-text { font-size: 0.8vw; color: rgba(255,255,255,0.3); }
-
-  /* =================== END MLB =================== */
-
-  .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .carousel-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--surface2); border: 0.5px solid var(--border); cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .carousel-dot.active { background: var(--muted); }
 
   .cfg-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
   .cfg-overlay.open { display: flex; }
@@ -242,9 +265,14 @@
   .cfg-title { font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 18px; }
   .cfg-section { margin-bottom: 16px; }
   .cfg-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; font-weight: 500; }
+  .cfg-note { font-size: 12px; color: var(--dim); line-height: 1.6; margin-top: 4px; }
+  .cfg-note code { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--surface2); padding: 1px 4px; border-radius: 3px; }
   .cfg-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
   .cfg-btn { background: var(--surface2); border: 0.5px solid var(--border); border-radius: 7px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; padding: 8px 16px; cursor: pointer; }
   .cfg-btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+  .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -261,25 +289,33 @@
   </div>
 
   <div class="main">
-    <!-- CALENDAR -->
+
+    <!-- ===================== CALENDAR ===================== -->
     <div class="cal-card">
       <div class="cal-iframe-wrap">
-        <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FNew_York&showPrint=0&mode=WEEK&showTz=0&showDate=0&showTitle=0&src=ZmFtaWx5MDYwNzE3Njg5ODMyNzQzNDE1NTVAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=M2xtZWw0aTlzNDk4NnNvcnBla2cyc3Q4ZWtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=Z3F2dWJoMzMwcHNnNjNvaGZhZXFkZWxiczA0bGxhY3JAaW1wb3J0LmNhbGVuZGFyLmdvb2dsZS5jb20&src=ZW4udXNhI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=Y19mYWY5OTAwZjdhZmRjZmU2NjY3MTQ1Y2MxMjZlNWY5YmQ1NmY5NmRjZTg2NmU3NTE0MzJmZWExMTIwMzUwMzY4QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%237986cb&color=%238e24aa&color=%233f51b5&color=%237cb342&color=%23ad1457" style="border-width:0;width:100%;height:100%;display:block" frameborder="0" scrolling="no"></iframe>
+        <iframe src="https://calendar.google.com/calendar/embed?height=800&wkst=1&ctz=America%2FNew_York&showPrint=0&mode=WEEK&showTz=0&showDate=0&showTitle=0&src=ZmFtaWx5MDYwNzE3Njg5ODMyNzQzNDE1NTVAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=M2xtZWw0aTlzNDk4NnNvcnBla2cyc3Q4ZWtAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=Z3F2dWJoMzMwcHNnNjNvaGZhZXFkZWxiczA0bGxhY3JAaW1wb3J0LmNhbGVuZGFyLmdvb2dsZS5jb20&src=ZW4udXNhI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=Y19mYWY5OTAwZjdhZmRjZmU2NjY3MTQ1Y2MxMjZlNWY5YmQ1NmY5NmRjZTg2NmU3NTE0MzJmZWExMTIwMzUwMzY4QGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%237986cb&color=%238e24aa&color=%233f51b5&color=%237cb342&color=%23ad1457" style="border-width:0" width="1150" height="800" frameborder="0" scrolling="no"></iframe>
       </div>
     </div>
+    <!-- =================== END CALENDAR =================== -->
 
     <div class="col">
-      <!-- WEATHER -->
       <div class="wx-card">
         <div class="wx-inner" id="wx-inner">
-          <div class="wx-loading"><div class="wx-spinner"></div><span>Loading weather...</span></div>
+          <div class="wx-loading"><div class="wx-spinner"></div><span>Loading weather…</span></div>
         </div>
       </div>
 
-      <!-- MLB CARD -->
-      <div class="mlb-card">
-        <div class="mlb-inner" id="mlb-inner">
-          <div class="mlb-loading"><div class="mlb-spinner"></div><span style="font-size:0.72vw;color:rgba(255,255,255,0.3)">Loading Red Sox...</span></div>
+      <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-shrink:0;">
+          <div class="card-title" style="margin-bottom:0">Boston scores</div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <div id="carousel-dots" style="display:flex;gap:4px;align-items:center;"></div>
+            <button onclick="carouselPrev()" style="background:var(--surface2);border:0.5px solid var(--border);border-radius:5px;color:var(--muted);width:22px;height:22px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;">&#8249;</button>
+            <button onclick="carouselNext()" style="background:var(--surface2);border:0.5px solid var(--border);border-radius:5px;color:var(--muted);width:22px;height:22px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;">&#8250;</button>
+          </div>
+        </div>
+        <div id="scores-wrap" style="flex:1;min-height:0;overflow-y:auto;">
+          <div class="score-loading"><span class="spinner"></span></div>
         </div>
       </div>
     </div>
@@ -289,14 +325,17 @@
 <div class="cfg-overlay" id="cfg-overlay">
   <div class="cfg-modal">
     <div class="cfg-title">Dashboard Setup</div>
+
     <div class="cfg-section">
       <div class="cfg-label">Display Override</div>
+      <div class="cfg-note" style="margin-bottom:10px">Manually override the current display mode.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="cfg-btn" id="override-light-btn" onclick="overrideMode('light')">&#9728; Light</button>
-        <button class="cfg-btn" id="override-dark-btn"  onclick="overrideMode('dark')">&#9790; Dark</button>
+        <button class="cfg-btn" id="override-dark-btn" onclick="overrideMode('dark')">&#9790; Dark</button>
         <button class="cfg-btn" onclick="overrideMode('screensaver')">&#128164; Screensaver</button>
       </div>
     </div>
+
     <div class="cfg-actions">
       <button class="cfg-btn primary" onclick="closeConfig()">Close</button>
     </div>
@@ -312,29 +351,74 @@
 /* ================================================================
    CLOCK / MODE
    ================================================================ */
-function getMode(now){const m=now.getHours()*60+now.getMinutes();if(m>=7*60&&m<20*60)return'light';if(m>=20*60&&m<22*60+30)return'dark';return'screensaver';}
-let _lastScheduledMode=null,_manualOverride=null;
-function applyMode(m){const h=document.documentElement,ss=document.getElementById('screensaver');if(m==='screensaver'){h.classList.add('dark-mode');ss.classList.add('active');}else{ss.classList.remove('active');m==='dark'?h.classList.add('dark-mode'):h.classList.remove('dark-mode');}}
-function checkMode(){if(_manualOverride)return;const m=getMode(new Date());if(m===_lastScheduledMode)return;_lastScheduledMode=m;applyMode(m);}
-function exitScreensaver(){document.getElementById('screensaver').classList.remove('active');setTimeout(()=>{if(!_manualOverride&&getMode(new Date())==='screensaver')document.getElementById('screensaver').classList.add('active');},300000);}
-function openConfig(){const m=_manualOverride||getMode(new Date());document.getElementById('override-light-btn').style.cssText=m==='light'?'background:var(--blue);color:#fff':'';document.getElementById('override-dark-btn').style.cssText=m==='dark'?'background:var(--blue);color:#fff':'';document.getElementById('cfg-overlay').classList.add('open');}
-function closeConfig(){document.getElementById('cfg-overlay').classList.remove('open');}
-function overrideMode(mode){_manualOverride=mode;applyMode(mode);if(mode==='screensaver')closeConfig();document.getElementById('override-light-btn').style.cssText=mode==='light'?'background:var(--blue);color:#fff':'';document.getElementById('override-dark-btn').style.cssText=mode==='dark'?'background:var(--blue);color:#fff':'';}
-function tickClock(){const now=new Date();let h=now.getHours(),m=now.getMinutes();const ap=h>=12?'PM':'AM';h=h%12||12;const timeStr=`${h}:${String(m).padStart(2,'0')} ${ap}`;const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];const dateStr=`${DAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;document.getElementById('clock').textContent=timeStr;document.getElementById('datestr').textContent=dateStr;document.getElementById('ss-clock').textContent=timeStr;document.getElementById('ss-date').textContent=dateStr;checkMode();}
-setInterval(tickClock,1000);tickClock();
+function getMode(now) {
+  const mins = now.getHours() * 60 + now.getMinutes();
+  if (mins >= 7*60 && mins < 20*60) return 'light';
+  if (mins >= 20*60 && mins < 22*60+30) return 'dark';
+  return 'screensaver';
+}
+
+let _lastMode = null, _lastScheduledMode = null;
+function checkMode() {
+  const m = getMode(new Date());
+  if (m === _lastScheduledMode) return;
+  _lastScheduledMode = m; _lastMode = m;
+  const html = document.documentElement, ss = document.getElementById('screensaver');
+  if (m === 'screensaver') { html.classList.add('dark-mode'); ss.classList.add('active'); }
+  else { ss.classList.remove('active'); m === 'dark' ? html.classList.add('dark-mode') : html.classList.remove('dark-mode'); }
+}
+function exitScreensaver() {
+  document.getElementById('screensaver').classList.remove('active');
+  setTimeout(() => { if (getMode(new Date()) === 'screensaver') document.getElementById('screensaver').classList.add('active'); }, 300000);
+}
+function openConfig() {
+  const m = _lastMode || getMode(new Date());
+  document.getElementById('override-light-btn').style.cssText = m==='light'?'background:var(--blue);color:#fff':'';
+  document.getElementById('override-dark-btn').style.cssText  = m==='dark' ?'background:var(--blue);color:#fff':'';
+  document.getElementById('cfg-overlay').classList.add('open');
+}
+function closeConfig() { document.getElementById('cfg-overlay').classList.remove('open'); }
+function overrideMode(mode) {
+  _lastMode = null;
+  _lastScheduledMode = null;
+  const html = document.documentElement, ss = document.getElementById('screensaver');
+  if (mode==='screensaver') { html.classList.add('dark-mode'); ss.classList.add('active'); _lastMode='screensaver'; closeConfig(); }
+  else if (mode==='dark')  { ss.classList.remove('active'); html.classList.add('dark-mode'); _lastMode='dark'; }
+  else                      { ss.classList.remove('active'); html.classList.remove('dark-mode'); _lastMode='light'; }
+  document.getElementById('override-light-btn').style.cssText = mode==='light'?'background:var(--blue);color:#fff':'';
+  document.getElementById('override-dark-btn').style.cssText  = mode==='dark' ?'background:var(--blue);color:#fff':'';
+}
+
+function tickClock() {
+  const now = new Date();
+  let h = now.getHours(), m = now.getMinutes();
+  const ap = h>=12?'PM':'AM'; h = h%12||12;
+  const timeStr = `${h}:${String(m).padStart(2,'0')} ${ap}`;
+  const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dateStr = `${DAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+  document.getElementById('clock').textContent = timeStr;
+  document.getElementById('datestr').textContent = dateStr;
+  document.getElementById('ss-clock').textContent = timeStr;
+  document.getElementById('ss-date').textContent = dateStr;
+  checkMode();
+}
+setInterval(tickClock, 1000);
+tickClock();
 
 
 /* ================================================================
-   WEATHER
+   ACCUWEATHER WIDGET
    ================================================================ */
-const WX_LAT=40.88,WX_LON=-73.91,WX_LABEL='Bronx, NY';
+const WX_LAT=40.88, WX_LON=-73.91, WX_LABEL='Bronx, NY';
 const WMO={0:{l:'Clear',svg:'sun'},1:{l:'Mostly Clear',svg:'sun'},2:{l:'Partly Cloudy',svg:'partly'},3:{l:'Overcast',svg:'cloud'},45:{l:'Foggy',svg:'fog'},48:{l:'Icy Fog',svg:'fog'},51:{l:'Light Drizzle',svg:'drizzle'},53:{l:'Drizzle',svg:'drizzle'},55:{l:'Heavy Drizzle',svg:'drizzle'},61:{l:'Light Rain',svg:'rain'},63:{l:'Rain',svg:'rain'},65:{l:'Heavy Rain',svg:'rain'},71:{l:'Light Snow',svg:'snow'},73:{l:'Snow',svg:'snow'},75:{l:'Heavy Snow',svg:'snow'},77:{l:'Snow Grains',svg:'snow'},80:{l:'Light Showers',svg:'showers'},81:{l:'Showers',svg:'showers'},82:{l:'Heavy Showers',svg:'showers'},85:{l:'Snow Showers',svg:'snow'},86:{l:'Heavy Snow Showers',svg:'snow'},95:{l:'Thunderstorms',svg:'thunder'},96:{l:'Hail Storm',svg:'thunder'},99:{l:'Heavy Hail Storm',svg:'thunder'}};
 function wmo(c){return WMO[c]||{l:'Unknown',svg:'cloud'};}
 function wxSVG(id,size=28){const s=size,icons={sun:`<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="6.5" fill="rgba(255,210,60,0.95)"/>${[0,45,90,135,180,225,270,315].map(a=>{const r=a*Math.PI/180,x1=16+9*Math.cos(r),y1=16+9*Math.sin(r),x2=16+11.5*Math.cos(r),y2=16+11.5*Math.sin(r);return`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="rgba(255,210,60,0.85)" stroke-width="1.8" stroke-linecap="round"/>`;}).join('')}</svg>`,partly:`<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><circle cx="13" cy="13" r="5.5" fill="rgba(255,210,60,0.9)"/>${[0,60,120,180,240,300].map(a=>{const r=a*Math.PI/180,x1=13+8*Math.cos(r),y1=13+8*Math.sin(r),x2=13+10*Math.cos(r),y2=13+10*Math.sin(r);return`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="rgba(255,210,60,0.8)" stroke-width="1.5" stroke-linecap="round"/>`;}).join('')}<path d="M10 21 Q10 17 14 17 Q14 14 18 14 Q22 14 22 18 Q24 18 24 21 Z" fill="rgba(255,255,255,0.92)"/></svg>`,cloud:`<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><path d="M6 22 Q6 17 11 17 Q11 13 16 13 Q21 13 21 17 Q24 17 24 20 Q24 22 22 22 Z" fill="rgba(255,255,255,0.88)"/></svg>`,fog:`<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><path d="M5 14 Q10 12 16 14 Q22 16 27 14" stroke="rgba(255,255,255,0.7)" stroke-width="1.8" stroke-linecap="round"/><path d="M7 18 Q12 16 18 18 Q23 20 26 18" stroke="rgba(255,255,255,0.5)" stroke-width="1.8" stroke-linecap="round"/><path d="M5 22 Q11 20 17 22 Q22 24 27 22" stroke="rgba(255,255,255,0.35)" stroke-width="1.8" stroke-linecap="round"/></svg>`,drizzle:`<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><path d="M7 16 Q7 11 12 11 Q12 8 17 8 Q22 8 22 12 Q25 12 25 16 Q25 18 23 18 H9 Q7 18 7 16Z" fill="rgba(255,255,255,0.85)"/><line x1="13" y1="21" x2="11" y2="25" stroke="rgba(130,200,255,0.9)" stroke-width="1.5" stroke-linecap="round"/><line x1="18" y1="21" x2="16" y2="25" stroke="rgba(130,200,255,0.9)" stroke-width="1.5" stroke-linecap="round"/></svg>`,rain:`<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><path d="M6 15 Q6 10 11 10 Q11 7 16 7 Q21 7 21 11 Q24 11 24 15 Q24 17 22 17 H8 Q6 17 6 15Z" fill="rgba(255,255,255,0.82)"/><line x1="11" y1="21" x2="9" y2="26" stroke="rgba(130,200,255,0.95)" stroke-width="1.8" stroke-linecap="round"/><line x1="16" y1="21" x2="14" y2="26" stroke="rgba(130,200,255,0.95)" stroke-width="1.8" stroke-linecap="round"/><line x1="21" y1="21" x2="19" y2="26" stroke="rgba(130,200,255,0.95)" stroke-width="1.8" stroke-linecap="round"/></svg>`,snow:`<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><path d="M7 15 Q7 10 12 10 Q12 7 16 7 Q21 7 21 11 Q24 11 24 15 Q24 17 22 17 H9 Q7 17 7 15Z" fill="rgba(255,255,255,0.8)"/><text x="11" y="27" font-size="11" fill="rgba(200,230,255,0.95)" font-family="sans-serif" letter-spacing="3">&#10052;</text></svg>`,showers:`<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><circle cx="10" cy="11" r="4" fill="rgba(255,210,60,0.75)"/><path d="M13 16 Q13 13 17 13 Q17 10 21 10 Q25 10 25 14 Q27 14 27 17 Q27 19 25 19 H15 Q13 19 13 17Z" fill="rgba(255,255,255,0.82)"/><line x1="17" y1="22" x2="15" y2="27" stroke="rgba(130,200,255,0.9)" stroke-width="1.8" stroke-linecap="round"/><line x1="22" y1="22" x2="20" y2="27" stroke="rgba(130,200,255,0.9)" stroke-width="1.8" stroke-linecap="round"/></svg>`,thunder:`<svg width="${s}" height="${s}" viewBox="0 0 32 32" fill="none"><path d="M5 15 Q5 10 10 10 Q10 7 15 7 Q20 7 20 11 Q23 11 23 15 Q23 17 21 17 H7 Q5 17 5 15Z" fill="rgba(255,255,255,0.82)"/><path d="M15 18 L12 24 L15 24 L13 30 L19 22 L16 22 Z" fill="rgba(255,220,50,0.95)"/></svg>`};return icons[id]||icons['cloud'];}
 
-let _wxRotateTimer=null,_wxFV=0;
+let _wxRotateTimer=null, _wxFV=0;
 function wxRotate(){const d=document.getElementById('wx-forecast-daily'),h=document.getElementById('wx-forecast-hourly'),d0=document.getElementById('wx-dot-0'),d1=document.getElementById('wx-dot-1');if(!d||!h)return;_wxFV=1-_wxFV;if(_wxFV===0){d.style.opacity='1';d.style.transform='translateY(0)';h.style.opacity='0';h.style.transform='translateY(6px)';if(d0){d0.style.background='rgba(255,255,255,0.8)';d0.style.width='14px';}if(d1){d1.style.background='rgba(255,255,255,0.3)';d1.style.width='6px';}}else{d.style.opacity='0';d.style.transform='translateY(-6px)';h.style.opacity='1';h.style.transform='translateY(0)';if(d0){d0.style.background='rgba(255,255,255,0.3)';d0.style.width='6px';}if(d1){d1.style.background='rgba(255,255,255,0.8)';d1.style.width='14px';}}}
 function wxStartRot(){if(_wxRotateTimer)clearInterval(_wxRotateTimer);_wxRotateTimer=setInterval(wxRotate,15000);}
+
 async function fetchWeather(){
   const inner=document.getElementById('wx-inner');
   try{
@@ -360,559 +444,259 @@ async function fetchWeather(){
 }
 function windDir(deg){if(deg==null)return'';return['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8];}
 
-
 /* ================================================================
-   MLB — ESPN API   (Red Sox = team id 2)
-   ================================================================
-
-   ESPN public endpoints used:
-     Scoreboard (today):
-       https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard
-     Summary (live + box score detail):
-       https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event={id}
-     Team schedule (upcoming games):
-       https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/bos/schedule
-
-   Retention rule: show the completed game until 11 AM the next calendar day.
+   CAROUSEL / SCORES
    ================================================================ */
+const TEAMS=[
+  {label:'MLB · Red Sox',  league:'mlb', abbrev:'BOS', sport:'baseball/mlb'},
+  // ── Re-enable in October (NBA season start) ──────────────────────────────
+  // {label:'NBA · Celtics', league:'nba', abbrev:'BOS', sport:'basketball/nba'},
+  // ── Re-enable in October (NHL season start) ──────────────────────────────
+  // {label:'NHL · Bruins',  league:'nhl', abbrev:'BOS', sport:'hockey/nhl'},
+];
+let carouselIndex=0,carouselCards=[null,null,null],carouselAutoTimer=null;
+function renderDots(){const el=document.getElementById('carousel-dots');el.innerHTML='';TEAMS.forEach((_,i)=>{const dot=document.createElement('div');dot.className='carousel-dot'+(i===carouselIndex?' active':'');dot.onclick=()=>goToSlide(i);el.appendChild(dot);});}
+function showSlide(idx){carouselIndex=((idx%TEAMS.length)+TEAMS.length)%TEAMS.length;renderDots();const wrap=document.getElementById('scores-wrap');wrap.innerHTML='';if(carouselCards[carouselIndex]){wrap.appendChild(carouselCards[carouselIndex]);}else{wrap.innerHTML='<div class="score-loading"><span class="spinner"></span></div>';}}
+function goToSlide(idx){showSlide(idx);resetAutoAdvance();}
+function carouselNext(){goToSlide(carouselIndex+1);}
+function carouselPrev(){goToSlide(carouselIndex-1);}
+function resetAutoAdvance(){if(carouselAutoTimer)clearInterval(carouselAutoTimer);carouselAutoTimer=setInterval(()=>showSlide(carouselIndex+1),8000);}
+async function fetchScores(){await Promise.all(TEAMS.map(async(team,idx)=>{try{const res=await fetch(`https://site.api.espn.com/apis/site/v2/sports/${team.sport}/scoreboard`);const data=await res.json();const game=(data?.events||[]).find(evt=>evt.competitions?.[0]?.competitors?.some(c=>c.team?.abbreviation===team.abbrev));if(game){carouselCards[idx]=await buildScoreCard(game,team.label,team.league);}else{carouselCards[idx]=buildEmptyCard(team.label,team.league);}}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';carouselCards[idx]=el;}}));showSlide(carouselIndex);}
 
-const ESPN_BASE    = 'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb';
-const SOX_ESPN_ID  = '2';   // ESPN internal team ID for Boston Red Sox
-const SOX_ABBR     = 'BOS';
 
-/**
- * Returns true if a completed game should still be displayed.
- * A game stays visible until 11:00 AM on the day after it was played.
- * gameDate: ISO date string (YYYY-MM-DD) for the date the game was played.
- */
-function withinRetentionWindow(gameDate) {
-  if (!gameDate) return false;
-  // Parse the game date as a local-time date (no time zone shift)
-  const parts  = gameDate.split('-').map(Number);
-  const nextDay = new Date(parts[0], parts[1] - 1, parts[2] + 1, 11, 0, 0); // next day at 11 AM local
-  return Date.now() < nextDay.getTime();
+// ── Inning label ─────────────────────────────────────────────────────────────
+function inningLabel(detail) {
+  if (!detail) return '';
+  const d = detail.trim();
+  if (/^top/i.test(d)) return '▲ ' + d.replace(/^top\s*/i, '');
+  if (/^mid/i.test(d)) return '— ' + d.replace(/^mid\s*/i, '');
+  if (/^bot/i.test(d)) return '▼ ' + d.replace(/^bot\s*/i, '');
+  if (/^end/i.test(d)) return '■ End ' + d.replace(/^end\s*/i, '');
+  return d;
 }
 
-/** Build a small SVG baseball diamond showing which bases are occupied. */
-function diamondSVG(onFirst, onSecond, onThird) {
-  const sz  = 42;
-  const on  = 'rgba(232,184,75,0.95)';
-  const off = 'rgba(255,255,255,0.12)';
-  const str = 'rgba(255,255,255,0.25)';
-  return `<svg width="${sz}" height="${sz}" viewBox="0 0 42 42" fill="none">
-    <polygon points="21,4 38,21 21,38 4,21" fill="rgba(255,255,255,0.04)" stroke="${str}" stroke-width="0.8"/>
-    <rect x="16.5" y="1"    width="9" height="9" rx="1.5" transform="rotate(45 21 5.5)"  fill="${onSecond?on:off}" stroke="${onSecond?'rgba(200,160,40,0.6)':'rgba(255,255,255,0.15)'}" stroke-width="0.8"/>
-    <rect x="29.5" y="16.5" width="9" height="9" rx="1.5" transform="rotate(45 34 21)"   fill="${onFirst?on:off}"  stroke="${onFirst?'rgba(200,160,40,0.6)':'rgba(255,255,255,0.15)'}"  stroke-width="0.8"/>
-    <rect x="3.5"  y="16.5" width="9" height="9" rx="1.5" transform="rotate(45 8 21)"    fill="${onThird?on:off}"  stroke="${onThird?'rgba(200,160,40,0.6)':'rgba(255,255,255,0.15)'}"  stroke-width="0.8"/>
-    <polygon points="21,33 25,37 21,41 17,37" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
-  </svg>`;
-}
-
-/** Format a game date/time string for display (e.g. "Sat, May 17 · 7:10 PM ET"). */
-function fmtGameTime(isoStr) {
-  if (!isoStr) return '';
-  const d = new Date(isoStr);
-  return d.toLocaleString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric',
-    hour: 'numeric', minute: '2-digit',
-    timeZoneName: 'short', timeZone: 'America/New_York'
-  });
-}
-
-/** Format a date string (YYYY-MM-DD) for a short "Mon, May 19" style. */
-function fmtDateShort(dateStr) {
-  if (!dateStr) return '';
-  const [y, m, day] = dateStr.split('-').map(Number);
-  const d = new Date(y, m - 1, day);
-  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-}
-
-/** Today's date as YYYY-MM-DD in local time. */
-function localToday() {
-  const n = new Date();
-  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
-}
-
-/** Yesterday's date as YYYY-MM-DD in local time. */
-function localYesterday() {
-  const n = new Date();
-  n.setDate(n.getDate() - 1);
-  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
-}
-
-/* ────────────────────────────────────────────────────────────────
-   findSoxGame(scoreboard)
-   Searches the scoreboard's events array for a Red Sox game.
-   Returns the competition object (first match) or null.
-──────────────────────────────────────────────────────────────── */
-function findSoxGame(events) {
-  for (const event of (events || [])) {
-    const comp = event.competitions?.[0];
-    if (!comp) continue;
-    const hasSox = comp.competitors?.some(c => c.team?.abbreviation === SOX_ABBR || c.team?.id === SOX_ESPN_ID);
-    if (hasSox) return { event, comp };
-  }
-  return null;
-}
-
-/* ────────────────────────────────────────────────────────────────
-   Main fetch
-──────────────────────────────────────────────────────────────── */
-async function fetchMLB() {
-  const inner = document.getElementById('mlb-inner');
-  try {
-    const today     = localToday();
-    const yesterday = localYesterday();
-
-    // 1. Fetch today's scoreboard + yesterday's scoreboard + upcoming schedule in parallel
-    const [todayRes, yestRes, schedRes] = await Promise.all([
-      fetch(`${ESPN_BASE}/scoreboard?dates=${today.replace(/-/g,'')}`),
-      fetch(`${ESPN_BASE}/scoreboard?dates=${yesterday.replace(/-/g,'')}`),
-      fetch(`${ESPN_BASE}/teams/bos/schedule?season=${today.slice(0,4)}`),
-    ]);
-    const [todayData, yestData, schedData] = await Promise.all([
-      todayRes.json(), yestRes.json(), schedRes.json()
-    ]);
-
-    // 2. Find Sox game
-    let found      = findSoxGame(todayData.events);
-    let isYesterday = false;
-    let gameDate    = today;
-
-    if (!found) {
-      // No game today — check yesterday (retention window)
-      const yFound = findSoxGame(yestData.events);
-      if (yFound) {
-        const st = yFound.comp.status?.type?.state;  // 'post' = finished
-        if (st === 'post' && withinRetentionWindow(yesterday)) {
-          found       = yFound;
-          isYesterday = true;
-          gameDate    = yesterday;
-        }
-      }
-    }
-
-    // 3. Find next upcoming game from schedule
-    const nextGame = findNextGame(schedData, today);
-
-    if (!found) {
-      renderNoGame(inner, nextGame);
-      return;
-    }
-
-    const { event, comp } = found;
-    const statusState  = comp.status?.type?.state;     // 'pre' | 'in' | 'post'
-    const statusDetail = comp.status?.type?.shortDetail || comp.status?.type?.detail || '';
-    const isLive    = statusState === 'in';
-    const isFinal   = statusState === 'post';
-    const isPreview = statusState === 'pre';
-
-    // Teams — ESPN always puts home second in competitors array, but we detect explicitly
-    const awayComp = comp.competitors?.find(c => c.homeAway === 'away') || comp.competitors?.[0];
-    const homeComp = comp.competitors?.find(c => c.homeAway === 'home') || comp.competitors?.[1];
-
-    const awayName   = awayComp?.team?.shortDisplayName || awayComp?.team?.displayName || '—';
-    const homeName   = homeComp?.team?.shortDisplayName || homeComp?.team?.displayName || '—';
-    const awayAbbr   = awayComp?.team?.abbreviation || '—';
-    const homeAbbr   = homeComp?.team?.abbreviation || '—';
-    const awayRecord = awayComp?.records?.[0]?.summary || '';
-    const homeRecord = homeComp?.records?.[0]?.summary || '';
-    const awayScore  = awayComp?.score ?? '—';
-    const homeScore  = homeComp?.score ?? '—';
-
-    const awayWin = isFinal && parseInt(awayScore) > parseInt(homeScore);
-    const homeWin = isFinal && parseInt(homeScore) > parseInt(awayScore);
-
-    // 4. Fetch detailed summary for live/final (linescore, situation, decisions)
-    // Also fetch summary for preview so we can get probable pitchers with ERA
-    let summary = null;
-    if (event.id) {
-      try {
-        const sumRes = await fetch(`${ESPN_BASE}/summary?event=${event.id}`);
-        summary = await sumRes.json();
-      } catch(e) { /* degrade gracefully */ }
-    }
-
-    // ── Probable starters ───────────────────────────────────────────────────
-    // ESPN surfaces probables in comp.probables[] or summary.header.competitions[0].probables[]
-    // Each probable: { athlete: { fullName, era }, team: { abbreviation } }
-    let awayStarter = null, homeStarter = null;
-    const probSources = [
-      ...(comp.probables || []),
-      ...(summary?.header?.competitions?.[0]?.probables || []),
-      ...(summary?.probables || []),
-    ];
-    for (const p of probSources) {
-      const abbr = p.athlete?.team?.abbreviation || p.team?.abbreviation || '';
-      const name = p.athlete?.fullName || p.athlete?.displayName || p.displayName || '';
-      const era  = p.athlete?.era ?? p.athlete?.statistics?.find?.(s => s.name === 'ERA')?.value ?? p.era ?? null;
-      const eraStr = era != null ? parseFloat(era).toFixed(2) : '';
-      if (!name) continue;
-      // Match to away/home by team abbreviation
-      if (abbr === awayAbbr && !awayStarter) awayStarter = { name, era: eraStr };
-      else if (abbr === homeAbbr && !homeStarter) homeStarter = { name, era: eraStr };
-      else if (!awayStarter) awayStarter = { name, era: eraStr };
-      else if (!homeStarter) homeStarter = { name, era: eraStr };
-    }
-
-    // ── Extract data from summary ────────────────────────────────────────────
-
-    // Linescore: summary.linescore.lines  (array of inning objects)
-    //   Each line: { inning: "1", away: { runs:"0" }, home: { runs:"—" } }
-    const linescore   = summary?.linescore;
-    const lsLines     = linescore?.lines || [];  // per-inning half-inning data
-
-    // Totals from linescore
-    const lsAwayTotals = linescore?.teams?.find(t => t.homeAway === 'away') || {};
-    const lsHomeTotals = linescore?.teams?.find(t => t.homeAway === 'home') || {};
-    const totalAwayR = lsAwayTotals.runs   ?? awayScore;
-    const totalHomeR = lsHomeTotals.runs   ?? homeScore;
-    const totalAwayH = lsAwayTotals.hits   ?? '—';
-    const totalHomeH = lsHomeTotals.hits   ?? '—';
-    const totalAwayE = lsAwayTotals.errors ?? '—';
-    const totalHomeE = lsHomeTotals.errors ?? '—';
-
-    // Current inning info
-    const situation    = summary?.situation;
-    const currentInn   = isLive ? (situation?.period || comp.status?.period || 0) : 0;
-    const isTop        = isLive ? (situation?.isTopHalf !== false && situation?.pitcher?.team?.abbreviation !== homeAbbr) : true;
-    // ESPN's situation.isTopHalf is a boolean when present
-    const isTopHalf    = isLive ? (situation?.isTopHalf ?? true) : true;
-
-    // Pitching/batting situation
-    const balls    = situation?.balls    ?? '—';
-    const strikes  = situation?.strikes  ?? '—';
-    const outs     = situation?.outs     ?? '—';
-    const batterName  = situation?.batter?.fullName  || situation?.batter?.athlete?.fullName  || '—';
-    const pitcherName = situation?.pitcher?.fullName || situation?.pitcher?.athlete?.fullName || '—';
-    const onFirst  = situation?.onFirst  || false;
-    const onSecond = situation?.onSecond || false;
-    const onThird  = situation?.onThird  || false;
-
-    // Decisions (from summary.boxscore or summary.header.competitions[0])
-    const decisionsComp = summary?.header?.competitions?.[0];
-    const decisions = {
-      winner: decisionsComp?.competitors?.find(c => c.winner)?.probables?.find(p => p.type === 'winning') ||
-              summary?.boxscore?.teams?.flatMap(t => t.statistics || []).find(s => s.type === 'winning') ||
-              null,
-      // We parse pitchers from the leaders / lastEvent sections below
-    };
-
-    // ESPN surfaces W/L/SV in summary.boxscore.players[].statistics[pitching category]
-    // More reliably, we pull from summary.leaders or from the loser/winner in the header
-    let winPitcher = null, lossPitcher = null, savePitcher = null;
-    if (isFinal && summary) {
-      // Try header.competitions[0].situation for pitchers
-      const hdrSit = summary?.header?.competitions?.[0]?.situation;
-      if (hdrSit) {
-        winPitcher  = hdrSit.lastPlay?.participants?.find(p => p.type === 'winner')  || null;
-        lossPitcher = hdrSit.lastPlay?.participants?.find(p => p.type === 'loser')   || null;
-        savePitcher = hdrSit.lastPlay?.participants?.find(p => p.type === 'saver')   || null;
-      }
-
-      // Most reliable: summary.boxscore.players → pitching decisions
-      // ESPN places W/L/S in the stat line. We scan all pitchers.
-      if (summary.boxscore?.players) {
-        for (const teamBlock of summary.boxscore.players) {
-          const pitchersGroup = teamBlock.statistics?.find(s => s.type === 'pitching');
-          if (!pitchersGroup) continue;
-          for (const athlete of (pitchersGroup.athletes || [])) {
-            const note = athlete.stats?.[athlete.stats.length - 1] || '';   // Last stat column is often "note" W/L/S
-            const statLabels = pitchersGroup.labels || pitchersGroup.keys || [];
-            const noteIdx = statLabels.indexOf('note');
-            const statNote = noteIdx >= 0 ? (athlete.stats?.[noteIdx] || '') : '';
-            const nm = athlete.athlete?.displayName || athlete.athlete?.fullName || '';
-
-            // Also look for season W-L from seasonStats
-            const seasonWins   = athlete.athlete?.statisticsSummary?.wins   ?? '';
-            const seasonLosses = athlete.athlete?.statisticsSummary?.losses ?? '';
-            const seasonSaves  = athlete.athlete?.statisticsSummary?.saves  ?? '';
-
-            if (/\bW\b/.test(statNote) && !winPitcher)  winPitcher  = { name: nm, record: seasonWins && seasonLosses ? `${seasonWins}-${seasonLosses}` : '' };
-            if (/\bL\b/.test(statNote) && !lossPitcher) lossPitcher = { name: nm, record: seasonWins && seasonLosses ? `${seasonWins}-${seasonLosses}` : '' };
-            if (/\bS\b/.test(statNote) && !savePitcher) savePitcher = { name: nm, saves: seasonSaves || '' };
-          }
-        }
-      }
-
-      // Final fallback: summary.notes or summary.pitchingLeaders
-      if (!winPitcher && summary.winningPitcher) {
-        winPitcher = { name: summary.winningPitcher.displayName || '', record: '' };
-      }
-      if (!lossPitcher && summary.losingPitcher) {
-        lossPitcher = { name: summary.losingPitcher.displayName || '', record: '' };
-      }
-    }
-
-    // ── Build HTML ───────────────────────────────────────────────────────────
-    let html = '';
-
-    // ▸ Team rows + scores
-    html += `<div class="mlb-teams">`;
-    html += teamRow(awayName, awayAbbr, awayRecord, awayScore, isPreview, awayWin, isLive || isFinal);
-    html += teamRow(homeName, homeAbbr, homeRecord, homeScore, isPreview, homeWin, isLive || isFinal);
-    html += `</div>`;
-
-    // ▸ Status bar
-    if (isPreview) {
-      html += `<div class="mlb-status-bar"><span class="mlb-status-label">${fmtGameTime(event.date)}</span></div>`;
-    } else if (isLive) {
-      const halfWord  = isTopHalf ? 'TOP' : 'BOT';
-      const inningNum = comp.status?.period || '?';
-      html += `<div class="mlb-status-bar">
-        <span class="mlb-status-live">&#9679; LIVE</span>
-        <span class="mlb-status-label">${halfWord} ${inningNum}</span>
-      </div>`;
-    } else if (isFinal) {
-      // ESPN statusDetail is often "Final" or "Final/10" for extras
-      const dayNote = isYesterday ? ' &middot; Yesterday' : '';
-      html += `<div class="mlb-status-bar"><span class="mlb-status-label">${statusDetail}${dayNote}</span></div>`;
-    }
-
-    html += `<div class="mlb-divider"></div>`;
-
-    // ▸ Probable starters (pre-game only — live/final rely on actual matchup data)
-    if (isPreview && (awayStarter || homeStarter)) {
-      html += `<div class="mlb-starters">
-        <div class="mlb-starters-label">Probable Starters</div>`;
-      if (awayStarter) {
-        html += `<div class="mlb-starter-row">
-          <span class="mlb-starter-team">${awayAbbr}</span>
-          <span class="mlb-starter-name">${awayStarter.name}</span>
-          ${awayStarter.era ? `<span class="mlb-starter-era">${awayStarter.era} ERA</span>` : ''}
-        </div>`;
-      }
-      if (homeStarter) {
-        html += `<div class="mlb-starter-row">
-          <span class="mlb-starter-team">${homeAbbr}</span>
-          <span class="mlb-starter-name">${homeStarter.name}</span>
-          ${homeStarter.era ? `<span class="mlb-starter-era">${homeStarter.era} ERA</span>` : ''}
-        </div>`;
-      }
-      html += `</div>`;
-    }
-
-    // ▸ Linescore table (live or final)
-    if ((isLive || isFinal) && lsLines.length > 0) {
-      const totalInn = Math.max(lsLines.length, 9);
-      html += buildLinescoreTable(lsLines, totalInn, awayAbbr, homeAbbr,
-        totalAwayR, totalHomeR, totalAwayH, totalHomeH, totalAwayE, totalHomeE,
-        isLive, currentInn, isTopHalf, awayWin, homeWin);
-    }
-
-    // ▸ Live situation block
-    if (isLive && situation) {
-      const halfLabel = isTopHalf ? 'Top' : 'Bot';
-      const inningOrd = ordinal(comp.status?.period || currentInn || 1);
-      html += `<div class="mlb-divider"></div>
-      <div class="mlb-situation">
-        <div class="mlb-diamond-wrap">${diamondSVG(onFirst, onSecond, onThird)}</div>
-        <div class="mlb-situation-info">
-          <div class="mlb-half-inning">${halfLabel} ${inningOrd} Inning</div>
-          <div class="mlb-count-row">
-            <div class="mlb-count-pill">B <span class="val">${balls}</span></div>
-            <div class="mlb-count-pill">S <span class="val">${strikes}</span></div>
-            <div class="mlb-count-pill">O <span class="val">${outs}</span></div>
-          </div>
-          <div class="mlb-player-row">
-            <span class="mlb-player-lbl">Batter</span>
-            <span class="mlb-player-name">${batterName}</span>
-          </div>
-          <div class="mlb-player-row">
-            <span class="mlb-player-lbl">Pitcher</span>
-            <span class="mlb-player-name">${pitcherName}</span>
-          </div>
-        </div>
-      </div>`;
-    }
-
-    // ▸ Post-game decisions
-    if (isFinal && (winPitcher || lossPitcher || savePitcher)) {
-      html += `<div class="mlb-divider"></div><div class="mlb-pitchers">`;
-      if (winPitcher) {
-        html += `<div class="mlb-pitcher-row">
-          <span class="mlb-pitcher-badge win">W</span>
-          <span class="mlb-pitcher-name">${winPitcher.name}</span>
-          <span class="mlb-pitcher-record">${winPitcher.record || ''}</span>
-        </div>`;
-      }
-      if (lossPitcher) {
-        html += `<div class="mlb-pitcher-row">
-          <span class="mlb-pitcher-badge loss">L</span>
-          <span class="mlb-pitcher-name">${lossPitcher.name}</span>
-          <span class="mlb-pitcher-record">${lossPitcher.record || ''}</span>
-        </div>`;
-      }
-      if (savePitcher) {
-        html += `<div class="mlb-pitcher-row">
-          <span class="mlb-pitcher-badge save">SV</span>
-          <span class="mlb-pitcher-name">${savePitcher.name}</span>
-          <span class="mlb-pitcher-record">${savePitcher.saves ? `${savePitcher.saves} SV` : ''}</span>
-        </div>`;
-      }
-      html += `</div>`;
-    }
-
-    // ▸ Next game (shown once a completed game is the current display)
-    if (isFinal && nextGame) {
-      html += `<div class="mlb-divider"></div>`;
-      html += buildNextGameBlock(nextGame);
-    }
-
-    inner.innerHTML = html;
-
-  } catch(e) {
-    document.getElementById('mlb-inner').innerHTML =
-      `<div class="mlb-loading"><span style="font-size:1.2vw;opacity:0.4">&#9888;</span><span>Unable to load game data</span></div>`;
-    console.error('ESPN MLB fetch error:', e);
-  }
-}
-
-/* ────────────────────────────────────────────────────────────────
-   Helper: single team row
-──────────────────────────────────────────────────────────────── */
-function teamRow(name, abbr, record, score, isPreview, isWinner, scoreVisible) {
-  const scoreClass = isPreview ? '' : (isWinner ? 'winner' : 'live');
-  return `<div class="mlb-team-row ${isWinner ? 'winner' : ''}">
-    <div class="mlb-team-left">
-      <div>
-        <div class="mlb-team-name">${name}</div>
-        ${record ? `<div class="mlb-team-record">${abbr} &middot; ${record}</div>` : ''}
-      </div>
+// ── Empty card ────────────────────────────────────────────────────────────────
+function buildEmptyCard(label, league) {
+  const [lp, tp] = label.split(' · ');
+  const card = document.createElement('div');
+  card.className = `score-card ${league}`;
+  card.innerHTML = `
+    <div class="sc-header">
+      <span class="sc-league-label">${tp || label}</span>
     </div>
-    <div class="mlb-team-score ${scoreClass}">${isPreview ? '&mdash;' : score}</div>
-  </div>`;
+    <div class="sc-body" style="padding:14px 12px;text-align:center;font-size:12px;color:var(--muted)">No game today</div>`;
+  return card;
 }
 
-/* ────────────────────────────────────────────────────────────────
-   Helper: linescore table
-   ESPN linescore.lines format:
-     { displayValue: "1", away: { runs: "0", hits: "1", errors: "0" },
-       home: { runs: "—", hits: "0", errors: "0" } }
-──────────────────────────────────────────────────────────────── */
-function buildLinescoreTable(lines, totalInn, awayAbbr, homeAbbr,
-    awayR, homeR, awayH, homeH, awayE, homeE,
-    isLive, currentInn, isTopHalf, awayWin, homeWin) {
+async function buildScoreCard(game, label, league) {
+  const comp        = game.competitions?.[0];
+  const statusObj   = comp?.status;
+  const statusType  = statusObj?.type;
+  const competitors = comp?.competitors || [];
+  const away = competitors.find(c => c.homeAway === 'away') || competitors[0] || {};
+  const home = competitors.find(c => c.homeAway === 'home') || competitors[1] || {};
 
-  // Build a map from inning number (1-based) to the ESPN line object
-  const lineMap = {};
-  lines.forEach(l => { lineMap[parseInt(l.displayValue || l.inning || 0)] = l; });
+  const s1 = parseInt(away.score || 0);
+  const s2 = parseInt(home.score || 0);
+  const done       = statusType?.completed;
+  const inProgress = statusType?.state === 'in';
+  const showScore  = done || inProgress;
 
-  let awayRow = '', homeRow = '';
-  for (let i = 1; i <= totalInn; i++) {
-    const line = lineMap[i];
-    const awayRuns = line ? (line.away?.runs ?? '') : '';
-    const homeRuns = line ? (line.home?.runs ?? '') : '';
+  const a1 = away.team?.abbreviation || '—';
+  const a2 = home.team?.abbreviation || '—';
+  const r1 = away.records?.[0]?.summary || '';
+  const r2 = home.records?.[0]?.summary || '';
 
-    // Highlight current inning half
-    const awayCur = isLive && i === currentInn && isTopHalf;
-    const homeCur = isLive && i === currentInn && !isTopHalf;
+  const [lp, tp] = label.split(' · ');
 
-    const awayVal = awayCur && awayRuns === '' ? '&bull;' : (awayRuns === '' ? '&mdash;' : awayRuns);
-    const homeVal = homeCur && homeRuns === '' ? '&bull;' : (homeRuns === '' ? '&mdash;' : homeRuns);
+  let statusLabel = '';
+  if (done)            statusLabel = 'Final';
+  else if (inProgress) statusLabel = statusObj?.detail || 'Live';
+  else { const d = new Date(game.date); statusLabel = d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }
 
-    awayRow += `<td class="${awayCur ? 'ls-cur' : (awayRuns === '' ? 'ls-empty' : '')}">${awayVal}</td>`;
-    homeRow += `<td class="${homeCur ? 'ls-cur' : (homeRuns === '' ? 'ls-empty' : '')}">${homeVal}</td>`;
+  const seriesStr = comp?.series?.summary || null;
+  const seriesBg  = league==='mlb' ? '#bd3039' : league==='nba' ? '#007a33' : '#111';
+
+  let liveHTML      = '';
+  let lineScoreHTML = '';
+
+  if (league === 'mlb' && (inProgress || done)) {
+    try {
+      const res  = await fetch(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event=${game.id}`);
+      const data = await res.json();
+
+      // ── Line score ────────────────────────────────────────────────────────
+      const bsTeams = data.boxscore?.teams || [];
+      const bsAway = bsTeams.find(t => t.homeAway === 'away') || bsTeams[0];
+      const bsHome = bsTeams.find(t => t.homeAway === 'home') || bsTeams[1];
+
+      const lsAway = bsAway?.linescores || [];
+      const lsHome = bsHome?.linescores || [];
+
+      // ── FIX 1: Hits & Errors ─────────────────────────────────────────────
+      const getStat = (team, statName) => {
+        for (const group of (team?.statistics || [])) {
+          const found = (group.stats || []).find(s => s.name === statName);
+          if (found) return found.displayValue ?? '—';
+        }
+        return '—';
+      };
+
+      const hitsAway   = getStat(bsAway, 'hits');
+      const hitsHome   = getStat(bsHome, 'hits');
+      const errorsAway = getStat(bsAway, 'errors');
+      const errorsHome = getStat(bsHome, 'errors');
+
+      const totalInnings = Math.max(lsAway.length, lsHome.length, 9);
+
+      // ── FIX 2: Current inning highlight ──────────────────────────────────
+      const curInning = inProgress ? lsAway.length : -1;
+
+      // ── FIX 3: Line score cell values ────────────────────────────────────
+      const renderCells = (linescores, totalInn) => {
+        let cells = '';
+        for (let i = 0; i < totalInn; i++) {
+          const raw = linescores[i]?.value;
+          let display;
+          if (raw !== undefined && raw !== null && raw !== '') {
+            display = parseInt(raw, 10);
+            if (isNaN(display)) display = raw;
+          } else {
+            display = (inProgress && i >= linescores.length) ? '' : '—';
+          }
+          const isCur = inProgress && i === curInning;
+          cells += `<td class="${isCur ? 'sc-ls-cur' : ''}">${display}</td>`;
+        }
+        return cells;
+      };
+
+      lineScoreHTML = `
+        <div class="sc-linescore">
+          <table>
+            <thead>
+              <tr>
+                <th class="sc-ls-team"></th>
+                ${Array.from({length: totalInnings}, (_, i) => `<th>${i+1}</th>`).join('')}
+                <th class="sc-ls-total">R</th>
+                <th class="sc-ls-total">H</th>
+                <th class="sc-ls-total">E</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="sc-ls-team">${a1}</td>
+                ${renderCells(lsAway, totalInnings)}
+                <td class="sc-ls-total ${done && s1>s2 ? 'sc-ls-winner' : ''}">${showScore ? s1 : '—'}</td>
+                <td class="sc-ls-total">${hitsAway}</td>
+                <td class="sc-ls-total">${errorsAway}</td>
+              </tr>
+              <tr>
+                <td class="sc-ls-team">${a2}</td>
+                ${renderCells(lsHome, totalInnings)}
+                <td class="sc-ls-total ${done && s2>s1 ? 'sc-ls-winner' : ''}">${showScore ? s2 : '—'}</td>
+                <td class="sc-ls-total">${hitsHome}</td>
+                <td class="sc-ls-total">${errorsHome}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>`;
+
+      // ── Live situation strip ──────────────────────────────────────────────
+      if (inProgress) {
+        const sit      = data.situation || {};
+        const balls    = sit.balls   ?? '—';
+        const strikes  = sit.strikes ?? '—';
+        const outs     = sit.outs    ?? '—';
+        const inningStr = inningLabel(statusObj?.detail || '');
+        const athletes  = data.boxscore?.players?.flatMap(t=>t.statistics||[]).flatMap(s=>s.athletes||[]) || [];
+        const findName  = id => {
+          const a = athletes.find(a => String(a.athlete?.id) === String(id));
+          return a?.athlete?.shortName || a?.athlete?.displayName || '—';
+        };
+        const batter  = findName(sit.batter?.playerId);
+        const pitcher = findName(sit.pitcher?.playerId);
+        const base    = on => on ? 'var(--blue)' : 'var(--surface2)';
+        liveHTML = `
+          <div class="sc-live">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+              <span class="sc-inning-label">${inningStr}</span>
+              <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">B${balls} S${strikes} O${outs}</span>
+              <div style="position:relative;width:26px;height:26px;flex-shrink:0">
+                <div style="position:absolute;top:0;left:50%;transform:translateX(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onSecond)};border:1.5px solid var(--blue);border-radius:1px"></div>
+                <div style="position:absolute;top:50%;right:0;transform:translateY(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onFirst)};border:1.5px solid var(--blue);border-radius:1px"></div>
+                <div style="position:absolute;top:50%;left:0;transform:translateY(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onThird)};border:1.5px solid var(--blue);border-radius:1px"></div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--muted)">&#x1F3CF; <span style="color:var(--text)">${batter}</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">&#x26BE; <span style="color:var(--text)">${pitcher}</span></div>
+          </div>`;
+      }
+
+    } catch(e) { /* silently skip line score on error */ }
+
+  } else if ((league === 'nba' || league === 'nhl') && inProgress) {
+    try {
+      const sp  = league==='nba' ? 'basketball/nba' : 'hockey/nhl';
+      const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${sp}/summary?event=${game.id}`);
+      const data = await res.json();
+      const period = statusObj?.period || comp?.status?.period || '—';
+      const clock  = statusObj?.displayClock || comp?.status?.displayClock || '—';
+      let pl;
+      if (league==='nba') pl = period===1?'1st':period===2?'2nd':period===3?'3rd':period===4?'4th':`OT${period-4}`;
+      else                 pl = period===1?'1st':period===2?'2nd':period===3?'3rd':'OT';
+      liveHTML = `
+        <div class="sc-live" style="text-align:center">
+          <span style="font-size:12px;font-weight:600;color:var(--text)">${pl}</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:6px;font-family:'DM Mono',monospace">${clock}</span>
+        </div>`;
+    } catch(e) {}
   }
 
-  return `<div class="mlb-linescore"><table>
-    <thead><tr>
-      <th class="ls-team-h"></th>
-      ${Array.from({length:totalInn},(_,i) => `<th>${i+1}</th>`).join('')}
-      <th class="ls-team-h" style="border-left:0.5px solid rgba(255,255,255,0.12)">R</th>
-      <th class="ls-team-h">H</th>
-      <th class="ls-team-h">E</th>
-    </tr></thead>
-    <tbody>
-      <tr>
-        <td class="ls-team">${awayAbbr}</td>
-        ${awayRow}
-        <td class="ls-total ${awayWin ? 'ls-winner-cell' : ''}">${awayR}</td>
-        <td class="ls-total">${awayH}</td>
-        <td class="ls-total">${awayE}</td>
-      </tr>
-      <tr>
-        <td class="ls-team">${homeAbbr}</td>
-        ${homeRow}
-        <td class="ls-total ${homeWin ? 'ls-winner-cell' : ''}">${homeR}</td>
-        <td class="ls-total">${homeH}</td>
-        <td class="ls-total">${homeE}</td>
-      </tr>
-    </tbody>
-  </table></div>`;
+  const teamRow = (abbr, record, score, isWinner) => `
+    <div class="sc-team">
+      <div class="sc-team-name">
+        <div class="sc-team-info">
+          <span class="sc-abbr">${abbr}</span>
+          ${record ? `<span class="sc-record">${record}</span>` : ''}
+        </div>
+      </div>
+      <span class="sc-score ${isWinner?'winner':''}">${showScore ? score : '—'}</span>
+    </div>`;
+
+  const card = document.createElement('div');
+  card.className = `score-card ${league}`;
+  card.innerHTML = `
+    <div class="sc-header">
+      <span class="sc-league-label">${tp || lp}</span>
+      <span class="sc-status">${statusLabel}</span>
+    </div>
+    ${seriesStr ? `<div class="sc-series" style="background:${seriesBg}">${seriesStr}</div>` : ''}
+    <div class="sc-body">
+      ${teamRow(a1, r1, s1, done&&s1>s2)}
+      ${teamRow(a2, r2, s2, done&&s2>s1)}
+      ${lineScoreHTML}
+      ${liveHTML}
+    </div>`;
+  return card;
 }
-
-/* ────────────────────────────────────────────────────────────────
-   Helper: find the next upcoming Sox game from schedule data
-──────────────────────────────────────────────────────────────── */
-function findNextGame(schedData, today) {
-  const events = schedData.events || [];
-  for (const ev of events) {
-    // ESPN schedule events have a date and a competitions array
-    const evDateStr = ev.date ? ev.date.slice(0,10) : '';
-    if (evDateStr <= today) continue;                        // skip past games
-    const statusState = ev.competitions?.[0]?.status?.type?.state;
-    if (statusState === 'post') continue;                    // skip finished
-    const detail = ev.competitions?.[0]?.status?.type?.detail || '';
-    if (/postponed|cancelled|suspended/i.test(detail)) continue;
-    return ev;
-  }
-  return null;
-}
-
-/* ────────────────────────────────────────────────────────────────
-   Helper: build "Next Game" block HTML
-──────────────────────────────────────────────────────────────── */
-function buildNextGameBlock(event) {
-  const comp      = event.competitions?.[0];
-  const awayComp  = comp?.competitors?.find(c => c.homeAway === 'away');
-  const homeComp  = comp?.competitors?.find(c => c.homeAway === 'home');
-  const awayName  = awayComp?.team?.shortDisplayName || awayComp?.team?.displayName || '—';
-  const homeName  = homeComp?.team?.shortDisplayName || homeComp?.team?.displayName || '—';
-  const isSoxHome = homeComp?.team?.abbreviation === SOX_ABBR || homeComp?.team?.id === SOX_ESPN_ID;
-  const opponent  = isSoxHome ? `vs ${awayName}` : `@ ${homeName}`;
-
-  return `<div class="mlb-next">
-    <div class="mlb-next-label">Next Game</div>
-    <div class="mlb-next-info">${opponent}</div>
-    <div class="mlb-next-detail">${fmtGameTime(event.date)}</div>
-  </div>`;
-}
-
-/* ────────────────────────────────────────────────────────────────
-   Helper: render "No game" state
-──────────────────────────────────────────────────────────────── */
-function renderNoGame(inner, nextGame) {
-  let html = `<div class="mlb-nogame">
-    <div class="mlb-nogame-icon">&#9918;</div>
-    <div class="mlb-nogame-text">No game today</div>
-  </div>`;
-  if (nextGame) {
-    html += `<div style="padding:0 4px 4px">` + buildNextGameBlock(nextGame) + `</div>`;
-  }
-  inner.innerHTML = html;
-}
-
-/* ────────────────────────────────────────────────────────────────
-   Helper: ordinal number string  (1 → "1st", 2 → "2nd", etc.)
-──────────────────────────────────────────────────────────────── */
-function ordinal(n) {
-  const s = ['th','st','nd','rd'], v = n % 100;
-  return n + (s[(v-20)%10] || s[v] || s[0]);
-}
-
 
 /* ================================================================
    BOOT
    ================================================================ */
 async function refreshAll() {
+  renderDots();
+  const oneTeam = TEAMS.length === 1;
+  document.getElementById('carousel-dots').style.display = oneTeam ? 'none' : 'flex';
+  document.querySelectorAll('[onclick="carouselPrev()"], [onclick="carouselNext()"]')
+    .forEach(btn => btn.style.display = oneTeam ? 'none' : 'flex');
   await fetchWeather();
 }
 
+resetAutoAdvance();
+fetchScores();
 refreshAll();
-fetchMLB();
-setInterval(refreshAll, 15 * 60 * 1000);   // weather every 15 min
-setInterval(fetchMLB,   30 * 1000);          // scores every 30 sec
+setInterval(refreshAll,  15*60*1000);
+setInterval(fetchScores, 30*1000);
 </script>
 </body>
 </html>
