@@ -552,26 +552,30 @@ async function buildMLBCard(game) {
           const wins   = pStat.wins   ?? entry.stats?.pitching?.wins   ?? '';
           const losses = pStat.losses ?? entry.stats?.pitching?.losses ?? '';
           const saves  = pStat.saves  ?? entry.stats?.pitching?.saves  ?? '';
+          const eraRaw = pStat.era    ?? entry.stats?.pitching?.era    ?? '';
           const record = (wins!==''&&losses!=='') ? `${wins}-${losses}` : '';
-          return { name, record, saves };
+          const era    = eraRaw !== '' ? parseFloat(eraRaw).toFixed(2) : '';
+          return { name, record, saves, era };
         };
 
         const winner = getDecPitcher(dec.winner);
         const loser  = getDecPitcher(dec.loser);
         const save   = getDecPitcher(dec.save);
 
-        const decRow = (badge, color, bg, p, extraLabel) =>
+        const decRow = (badge, color, bg, p, isSave) =>
           `<div style="display:flex;align-items:center;gap:6px;font-size:11px;padding:3px 0;border-bottom:0.5px solid var(--border)">
             <span style="font-size:10px;font-weight:700;color:${color};background:${bg};padding:1px 5px;border-radius:3px;flex-shrink:0;min-width:18px;text-align:center">${badge}</span>
             <span style="color:var(--text);font-weight:500;flex:1">${p.name}</span>
-            <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px">${extraLabel||p.record}</span>
+            <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px">
+              ${isSave && p.saves ? `${p.saves} SV` : p.record}${p.era ? ` · ${p.era} ERA` : ''}
+            </span>
           </div>`;
 
         if (winner||loser||save) {
           decisionsHTML = `<div class="sc-decisions">
-            ${winner ? decRow('W','#16a34a','rgba(22,163,74,0.1)',winner, winner.record) : ''}
-            ${loser  ? decRow('L','#dc2626','rgba(220,38,38,0.1)',loser,  loser.record)  : ''}
-            ${save   ? decRow('S','#2563eb','rgba(37,99,235,0.1)',save,   save.saves ? `${save.saves} SV` : save.record) : ''}
+            ${winner ? decRow('W','#16a34a','rgba(22,163,74,0.1)',winner, false) : ''}
+            ${loser  ? decRow('L','#dc2626','rgba(220,38,38,0.1)',loser,  false) : ''}
+            ${save   ? decRow('S','#2563eb','rgba(37,99,235,0.1)',save,   true)  : ''}
           </div>`;
         }
       }
