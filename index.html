@@ -415,7 +415,7 @@ async function buildMLBCard(game) {
       const { record, era } = parsePitcherStats(pp);
       rows.push({ abbr, name, record, era });
     }
-    if (rows.length) {
+    if (rows.length && isPreview) {
       probablesHTML = `
         <div class="sc-probables">
           <div class="sc-probables-label">Probable Pitchers</div>
