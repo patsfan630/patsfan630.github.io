@@ -198,6 +198,57 @@
     letter-spacing: 0.03em;
   }
 
+  /* ── Probable pitchers strip ─────────────────────────────────────────────── */
+  .sc-probables {
+    margin: 0 12px 6px;
+    padding: 6px 0 4px;
+    border-top: 0.5px solid var(--border);
+  }
+  .sc-probables-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  .sc-probable-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    padding: 3px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .sc-probable-row:last-child { border-bottom: none; }
+  .sc-probable-team {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    min-width: 30px;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+  }
+  .sc-probable-name {
+    color: var(--text);
+    font-weight: 500;
+    flex: 1;
+  }
+  .sc-probable-record {
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+  }
+  .sc-probable-era {
+    color: var(--dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+  }
+
 /* Line score table */
 .sc-linescore {
   margin: 4px 12px 6px;
@@ -488,6 +539,63 @@ function buildEmptyCard(label, league) {
   return card;
 }
 
+// ── Build probable pitchers HTML from summary data ────────────────────────────
+// Works for pre-game, in-progress, and completed games.
+// Returns an HTML string for the .sc-probables block, or '' if none found.
+function buildProbablesHTML(data, awayAbbr, homeAbbr) {
+  // ESPN puts probable pitchers in header.competitions[0].competitors[].probables
+  const hdrComps = data.header?.competitions?.[0]?.competitors || [];
+
+  // Map competitor home/away to team abbreviation
+  const compMap = {};
+  for (const hc of hdrComps) {
+    const side = hc.homeAway; // 'away' or 'home'
+    const abbr = side === 'away' ? awayAbbr : homeAbbr;
+    compMap[side] = { abbr, probables: hc.probables || [] };
+  }
+
+  const rows = [];
+  for (const side of ['away', 'home']) {
+    const comp = compMap[side];
+    if (!comp) continue;
+    for (const p of comp.probables) {
+      const name   = p.athlete?.displayName || p.athlete?.shortName || '';
+      if (!name) continue;
+
+      // W-L record (e.g. "3-2")
+      const record = p.athlete?.record || '';
+
+      // ERA: ESPN sometimes puts it in p.athlete?.statistics[] or p.statistics[]
+      let era = '';
+      const statsArr = p.athlete?.statistics || p.statistics || [];
+      for (const stat of statsArr) {
+        if (stat.name === 'ERA' || stat.abbreviation === 'ERA') {
+          era = stat.displayValue ?? '';
+          break;
+        }
+      }
+
+      rows.push({ abbr: comp.abbr, name, record, era });
+    }
+  }
+
+  if (rows.length === 0) return '';
+
+  const rowsHTML = rows.map(r => `
+    <div class="sc-probable-row">
+      <span class="sc-probable-team">${r.abbr}</span>
+      <span class="sc-probable-name">${r.name}</span>
+      ${r.era  ? `<span class="sc-probable-era">${r.era} ERA</span>` : ''}
+      ${r.record ? `<span class="sc-probable-record">${r.record}</span>` : ''}
+    </div>`).join('');
+
+  return `
+    <div class="sc-probables">
+      <div class="sc-probables-label">Probable Pitchers</div>
+      ${rowsHTML}
+    </div>`;
+}
+
 async function buildScoreCard(game, label, league) {
   const comp        = game.competitions?.[0];
   const statusObj   = comp?.status;
@@ -500,6 +608,7 @@ async function buildScoreCard(game, label, league) {
   const s2 = parseInt(home.score || 0);
   const done       = statusType?.completed;
   const inProgress = statusType?.state === 'in';
+  const preGame    = statusType?.state === 'pre';
   const showScore  = done || inProgress;
 
   const a1 = away.team?.abbreviation || '—';
@@ -519,158 +628,151 @@ async function buildScoreCard(game, label, league) {
 
   let liveHTML      = '';
   let lineScoreHTML = '';
+  let probablesHTML = '';
 
-  if (league === 'mlb' && (inProgress || done)) {
+  if (league === 'mlb') {
     try {
       const res  = await fetch(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event=${game.id}`);
       const data = await res.json();
 
-      // ── Line score ────────────────────────────────────────────────────────
-      // ESPN stores per-inning data in data.linescore.lines[], each entry:
-      //   { displayValue: "3", away: { runs:"2" }, home: { runs:"1" } }
-      // For hits/errors, fall back to boxscore.teams[].statistics
-      const lsLines = data.linescore?.lines || [];
+      // ── Probable pitchers (shown pre-game, in-progress, and post-game) ────
+      probablesHTML = buildProbablesHTML(data, a1, a2);
 
-      // Totals row from linescore (most reliable source for R/H/E)
-      const lsTotals = data.linescore?.teams || [];
-      const lsTotAway = lsTotals.find(t => t.homeAway === 'away') || lsTotals[0] || {};
-      const lsTotHome = lsTotals.find(t => t.homeAway === 'home') || lsTotals[1] || {};
+      if (inProgress || done) {
+        // ── Line score ──────────────────────────────────────────────────────
+        const lsLines = data.linescore?.lines || [];
+        const lsTotals = data.linescore?.teams || [];
+        const lsTotAway = lsTotals.find(t => t.homeAway === 'away') || lsTotals[0] || {};
+        const lsTotHome = lsTotals.find(t => t.homeAway === 'home') || lsTotals[1] || {};
 
-      // Hits & errors: try linescore totals first, then boxscore statistics
-      const bsTeams  = data.boxscore?.teams || [];
-      const bsAway   = bsTeams.find(t => t.homeAway === 'away') || bsTeams[0];
-      const bsHome   = bsTeams.find(t => t.homeAway === 'home') || bsTeams[1];
-      const getStat  = (team, statName) => {
-        for (const group of (team?.statistics || [])) {
-          const found = (group.stats || []).find(s => s.name === statName);
-          if (found) return found.displayValue ?? '—';
-        }
-        return '—';
-      };
-      const hitsAway   = lsTotAway.hits   ?? getStat(bsAway, 'hits');
-      const hitsHome   = lsTotHome.hits   ?? getStat(bsHome, 'hits');
-      const errorsAway = lsTotAway.errors ?? getStat(bsAway, 'errors');
-      const errorsHome = lsTotHome.errors ?? getStat(bsHome, 'errors');
-
-      const totalInnings = Math.max(lsLines.length, 9);
-
-      // Current inning: statusObj.period is 1-based; convert to 0-based index
-      const curInning = inProgress ? (statusObj?.period ?? 1) - 1 : -1;
-
-      // Build inning cells from linescore.lines
-      const renderCells = (side, totalInn) => {
-        let cells = '';
-        for (let i = 0; i < totalInn; i++) {
-          const line  = lsLines[i];
-          // Each line has away/home sub-objects with a `runs` string
-          const runs  = line?.[side]?.runs;
-          let display;
-          if (runs !== undefined && runs !== null && runs !== '') {
-            const parsed = parseInt(runs, 10);
-            display = isNaN(parsed) ? runs : parsed;
-          } else {
-            display = (inProgress && i >= lsLines.length) ? '' : '—';
+        const bsTeams  = data.boxscore?.teams || [];
+        const bsAway   = bsTeams.find(t => t.homeAway === 'away') || bsTeams[0];
+        const bsHome   = bsTeams.find(t => t.homeAway === 'home') || bsTeams[1];
+        const getStat  = (team, statName) => {
+          for (const group of (team?.statistics || [])) {
+            const found = (group.stats || []).find(s => s.name === statName);
+            if (found) return found.displayValue ?? '—';
           }
-          const isCur = inProgress && i === curInning;
-          cells += `<td class="${isCur ? 'sc-ls-cur' : ''}">${display}</td>`;
-        }
-        return cells;
-      };
-
-      lineScoreHTML = `
-        <div class="sc-linescore">
-          <table>
-            <thead>
-              <tr>
-                <th class="sc-ls-team"></th>
-                ${Array.from({length: totalInnings}, (_, i) => `<th>${i+1}</th>`).join('')}
-                <th class="sc-ls-total">R</th>
-                <th class="sc-ls-total">H</th>
-                <th class="sc-ls-total">E</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="sc-ls-team">${a1}</td>
-                ${renderCells('away', totalInnings)}
-                <td class="sc-ls-total ${done && s1>s2 ? 'sc-ls-winner' : ''}">${showScore ? s1 : '—'}</td>
-                <td class="sc-ls-total">${hitsAway}</td>
-                <td class="sc-ls-total">${errorsAway}</td>
-              </tr>
-              <tr>
-                <td class="sc-ls-team">${a2}</td>
-                ${renderCells('home', totalInnings)}
-                <td class="sc-ls-total ${done && s2>s1 ? 'sc-ls-winner' : ''}">${showScore ? s2 : '—'}</td>
-                <td class="sc-ls-total">${hitsHome}</td>
-                <td class="sc-ls-total">${errorsHome}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>`;
-
-      // ── Live situation strip ──────────────────────────────────────────────
-      if (inProgress) {
-        const sit       = data.situation || {};
-        const balls     = sit.balls   ?? '—';
-        const strikes   = sit.strikes ?? '—';
-        const outs      = sit.outs    ?? '—';
-        const inningStr = inningLabel(statusObj?.detail || '');
-        const athletes  = data.boxscore?.players?.flatMap(t=>t.statistics||[]).flatMap(s=>s.athletes||[]) || [];
-        const findName  = id => {
-          const a = athletes.find(a => String(a.athlete?.id) === String(id));
-          return a?.athlete?.displayName || a?.athlete?.fullName || a?.athlete?.shortName || '—';
+          return '—';
         };
-        const batter  = findName(sit.batter?.playerId);
-        const pitcher = findName(sit.pitcher?.playerId);
-        const base    = on => on ? 'var(--blue)' : 'var(--surface2)';
-        liveHTML = `
-          <div class="sc-live">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
-              <span class="sc-inning-label">${inningStr}</span>
-              <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">B${balls} S${strikes} O${outs}</span>
-              <div style="position:relative;width:26px;height:26px;flex-shrink:0">
-                <div style="position:absolute;top:0;left:50%;transform:translateX(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onSecond)};border:1.5px solid var(--blue);border-radius:1px"></div>
-                <div style="position:absolute;top:50%;right:0;transform:translateY(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onFirst)};border:1.5px solid var(--blue);border-radius:1px"></div>
-                <div style="position:absolute;top:50%;left:0;transform:translateY(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onThird)};border:1.5px solid var(--blue);border-radius:1px"></div>
-              </div>
-            </div>
-            <div style="font-size:11px;color:var(--muted)"><b style="color:var(--text);font-weight:600">BAT</b> <span style="color:var(--text)">${batter}</span></div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px"><b style="color:var(--text);font-weight:600">PIT</b> <span style="color:var(--text)">${pitcher}</span></div>
-          </div>`;
-      }
+        const hitsAway   = lsTotAway.hits   ?? getStat(bsAway, 'hits');
+        const hitsHome   = lsTotHome.hits   ?? getStat(bsHome, 'hits');
+        const errorsAway = lsTotAway.errors ?? getStat(bsAway, 'errors');
+        const errorsHome = lsTotHome.errors ?? getStat(bsHome, 'errors');
 
-      // ── Post-game decisions (W / L / SV) ─────────────────────────────────
-      if (done) {
-        // ESPN surfaces decisions in data.header.competitions[0].competitors[]
-        // Each competitor has a `probables` array; the pitcher with a decision
-        // has a `decision` field: { displayValue: "W", athlete: { displayName, record } }
-        const hdrComps = data.header?.competitions?.[0]?.competitors || [];
-        let winPitcher = null, lossPitcher = null, savePitcher = null;
+        const totalInnings = Math.max(lsLines.length, 9);
+        const curInning = inProgress ? (statusObj?.period ?? 1) - 1 : -1;
 
-        for (const hc of hdrComps) {
-          for (const p of (hc.probables || [])) {
-            const dec = p.decision?.displayValue || '';
-            const name   = p.athlete?.displayName || p.athlete?.shortName || '';
-            const record = p.athlete?.record || '';  // e.g. "3-2" or "5 SV"
-            if (!name) continue;
-            if (/^W$/i.test(dec) && !winPitcher)  winPitcher  = { name, record };
-            if (/^L$/i.test(dec) && !lossPitcher) lossPitcher = { name, record };
-            if (/^S$/i.test(dec) && !savePitcher) savePitcher = { name, record };
+        const renderCells = (side, totalInn) => {
+          let cells = '';
+          for (let i = 0; i < totalInn; i++) {
+            const line  = lsLines[i];
+            const runs  = line?.[side]?.runs;
+            let display;
+            if (runs !== undefined && runs !== null && runs !== '') {
+              const parsed = parseInt(runs, 10);
+              display = isNaN(parsed) ? runs : parsed;
+            } else {
+              display = (inProgress && i >= lsLines.length) ? '' : '—';
+            }
+            const isCur = inProgress && i === curInning;
+            cells += `<td class="${isCur ? 'sc-ls-cur' : ''}">${display}</td>`;
           }
+          return cells;
+        };
+
+        lineScoreHTML = `
+          <div class="sc-linescore">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sc-ls-team"></th>
+                  ${Array.from({length: totalInnings}, (_, i) => `<th>${i+1}</th>`).join('')}
+                  <th class="sc-ls-total">R</th>
+                  <th class="sc-ls-total">H</th>
+                  <th class="sc-ls-total">E</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="sc-ls-team">${a1}</td>
+                  ${renderCells('away', totalInnings)}
+                  <td class="sc-ls-total ${done && s1>s2 ? 'sc-ls-winner' : ''}">${showScore ? s1 : '—'}</td>
+                  <td class="sc-ls-total">${hitsAway}</td>
+                  <td class="sc-ls-total">${errorsAway}</td>
+                </tr>
+                <tr>
+                  <td class="sc-ls-team">${a2}</td>
+                  ${renderCells('home', totalInnings)}
+                  <td class="sc-ls-total ${done && s2>s1 ? 'sc-ls-winner' : ''}">${showScore ? s2 : '—'}</td>
+                  <td class="sc-ls-total">${hitsHome}</td>
+                  <td class="sc-ls-total">${errorsHome}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>`;
+
+        // ── Live situation strip ────────────────────────────────────────────
+        if (inProgress) {
+          const sit       = data.situation || {};
+          const balls     = sit.balls   ?? '—';
+          const strikes   = sit.strikes ?? '—';
+          const outs      = sit.outs    ?? '—';
+          const inningStr = inningLabel(statusObj?.detail || '');
+          const athletes  = data.boxscore?.players?.flatMap(t=>t.statistics||[]).flatMap(s=>s.athletes||[]) || [];
+          const findName  = id => {
+            const a = athletes.find(a => String(a.athlete?.id) === String(id));
+            return a?.athlete?.displayName || a?.athlete?.fullName || a?.athlete?.shortName || '—';
+          };
+          const batter  = findName(sit.batter?.playerId);
+          const pitcher = findName(sit.pitcher?.playerId);
+          const base    = on => on ? 'var(--blue)' : 'var(--surface2)';
+          liveHTML = `
+            <div class="sc-live">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+                <span class="sc-inning-label">${inningStr}</span>
+                <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">B${balls} S${strikes} O${outs}</span>
+                <div style="position:relative;width:26px;height:26px;flex-shrink:0">
+                  <div style="position:absolute;top:0;left:50%;transform:translateX(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onSecond)};border:1.5px solid var(--blue);border-radius:1px"></div>
+                  <div style="position:absolute;top:50%;right:0;transform:translateY(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onFirst)};border:1.5px solid var(--blue);border-radius:1px"></div>
+                  <div style="position:absolute;top:50%;left:0;transform:translateY(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onThird)};border:1.5px solid var(--blue);border-radius:1px"></div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--muted)"><b style="color:var(--text);font-weight:600">BAT</b> <span style="color:var(--text)">${batter}</span></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px"><b style="color:var(--text);font-weight:600">PIT</b> <span style="color:var(--text)">${pitcher}</span></div>
+            </div>`;
         }
 
-        if (winPitcher || lossPitcher || savePitcher) {
-          const decRow = (badge, color, bg, p) =>
-            `<div style="display:flex;align-items:center;gap:6px;font-size:11px;padding:3px 0;border-bottom:0.5px solid var(--border)">
-              <span style="font-size:10px;font-weight:700;color:${color};background:${bg};padding:1px 5px;border-radius:3px;flex-shrink:0;min-width:18px;text-align:center">${badge}</span>
-              <span style="color:var(--text);font-weight:500;flex:1">${p.name}</span>
-              <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px">${p.record}</span>
+        // ── Post-game decisions (W / L / SV) ───────────────────────────────
+        if (done) {
+          const hdrComps = data.header?.competitions?.[0]?.competitors || [];
+          let winPitcher = null, lossPitcher = null, savePitcher = null;
+
+          for (const hc of hdrComps) {
+            for (const p of (hc.probables || [])) {
+              const dec = p.decision?.displayValue || '';
+              const name   = p.athlete?.displayName || p.athlete?.shortName || '';
+              const record = p.athlete?.record || '';
+              if (!name) continue;
+              if (/^W$/i.test(dec) && !winPitcher)  winPitcher  = { name, record };
+              if (/^L$/i.test(dec) && !lossPitcher) lossPitcher = { name, record };
+              if (/^S$/i.test(dec) && !savePitcher) savePitcher = { name, record };
+            }
+          }
+
+          if (winPitcher || lossPitcher || savePitcher) {
+            const decRow = (badge, color, bg, p) =>
+              `<div style="display:flex;align-items:center;gap:6px;font-size:11px;padding:3px 0;border-bottom:0.5px solid var(--border)">
+                <span style="font-size:10px;font-weight:700;color:${color};background:${bg};padding:1px 5px;border-radius:3px;flex-shrink:0;min-width:18px;text-align:center">${badge}</span>
+                <span style="color:var(--text);font-weight:500;flex:1">${p.name}</span>
+                <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px">${p.record}</span>
+              </div>`;
+            liveHTML += `<div style="margin:6px 12px 4px;border-top:0.5px solid var(--border);padding-top:5px">
+              ${winPitcher  ? decRow('W', '#16a34a', 'rgba(22,163,74,0.1)',  winPitcher)  : ''}
+              ${lossPitcher ? decRow('L', '#dc2626', 'rgba(220,38,38,0.1)',  lossPitcher) : ''}
+              ${savePitcher ? decRow('S', '#2563eb', 'rgba(37,99,235,0.1)',  savePitcher) : ''}
             </div>`;
-          liveHTML += `<div style="margin:6px 12px 4px;border-top:0.5px solid var(--border);padding-top:5px">
-            ${winPitcher  ? decRow('W', '#16a34a', 'rgba(22,163,74,0.1)',  winPitcher)  : ''}
-            ${lossPitcher ? decRow('L', '#dc2626', 'rgba(220,38,38,0.1)',  lossPitcher) : ''}
-            ${savePitcher ? decRow('S', '#2563eb', 'rgba(37,99,235,0.1)',  savePitcher) : ''}
-          </div>`;
+          }
         }
       }
 
@@ -717,6 +819,7 @@ async function buildScoreCard(game, label, league) {
       ${teamRow(a1, r1, s1, done&&s1>s2)}
       ${teamRow(a2, r2, s2, done&&s2>s1)}
       ${lineScoreHTML}
+      ${probablesHTML}
       ${liveHTML}
     </div>`;
   return card;
