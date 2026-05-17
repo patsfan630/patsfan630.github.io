@@ -179,7 +179,6 @@
 
       <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-shrink:0;">
-          <div class="card-title" style="margin-bottom:0">Boston scores</div>
           <div style="display:flex;align-items:center;gap:5px;">
             <div id="carousel-dots" style="display:flex;gap:4px;align-items:center;"></div>
             <button onclick="carouselPrev()" style="background:var(--surface2);border:0.5px solid var(--border);border-radius:5px;color:var(--muted);width:22px;height:22px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;">&#8249;</button>
@@ -531,8 +530,8 @@ async function buildMLBCard(game) {
                 <div style="position:absolute;top:50%;left:0;transform:translateY(-50%) rotate(45deg);width:8px;height:8px;background:${base(offense.third)};border:1.5px solid var(--blue);border-radius:1px"></div>
               </div>
             </div>
-            <div style="font-size:11px;color:var(--muted)"><b style="color:var(--text);font-weight:600">BAT</b> <span style="color:var(--text)">${batter}</span></div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px"><b style="color:var(--text);font-weight:600">PIT</b> <span style="color:var(--text)">${pitcher}</span></div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);flex-shrink:0"><path d="M3 21 L19 5"/><path d="M3 21 Q1 19 3 17 L17 3 Q19 1 21 3 Q23 5 21 7 L7 21 Q5 23 3 21Z"/></svg>${batter}</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text);margin-top:3px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);flex-shrink:0"><circle cx="12" cy="12" r="9"/><path d="M6.5 12 Q8.5 7.5 12 12 Q15.5 16.5 17.5 12"/><path d="M6.5 12 Q8.5 16.5 12 12 Q15.5 7.5 17.5 12"/></svg>${pitcher}</div>
           </div>`;
       }
 
