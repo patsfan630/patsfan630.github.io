@@ -550,17 +550,22 @@ async function buildScoreCard(game, label, league) {
       const totalInnings = Math.max(lsAway.length, lsHome.length, 9);
 
       // ── FIX 2: Current inning highlight ──────────────────────────────────
-      const curInning = inProgress ? lsAway.length : -1;
+      // statusObj.period is the 1-based inning currently being played.
+      // Convert to 0-based index for array comparison.
+      const curInning = inProgress ? (statusObj?.period ?? 1) - 1 : -1;
 
       // ── FIX 3: Line score cell values ────────────────────────────────────
+      // ESPN returns per-inning run totals in `displayValue`, not `value`.
       const renderCells = (linescores, totalInn) => {
         let cells = '';
         for (let i = 0; i < totalInn; i++) {
-          const raw = linescores[i]?.value;
+          const entry = linescores[i];
+          // displayValue holds the run total (e.g. "0", "2"); value is sometimes absent
+          const raw = entry?.displayValue ?? entry?.value;
           let display;
           if (raw !== undefined && raw !== null && raw !== '') {
-            display = parseInt(raw, 10);
-            if (isNaN(display)) display = raw;
+            const parsed = parseInt(raw, 10);
+            display = isNaN(parsed) ? raw : parsed;
           } else {
             display = (inProgress && i >= linescores.length) ? '' : '—';
           }
@@ -611,7 +616,7 @@ async function buildScoreCard(game, label, league) {
         const athletes  = data.boxscore?.players?.flatMap(t=>t.statistics||[]).flatMap(s=>s.athletes||[]) || [];
         const findName  = id => {
           const a = athletes.find(a => String(a.athlete?.id) === String(id));
-          return a?.athlete?.shortName || a?.athlete?.displayName || '—';
+          return a?.athlete?.displayName || a?.athlete?.fullName || a?.athlete?.shortName || '—';
         };
         const batter  = findName(sit.batter?.playerId);
         const pitcher = findName(sit.pitcher?.playerId);
@@ -627,8 +632,8 @@ async function buildScoreCard(game, label, league) {
                 <div style="position:absolute;top:50%;left:0;transform:translateY(-50%) rotate(45deg);width:8px;height:8px;background:${base(sit.onThird)};border:1.5px solid var(--blue);border-radius:1px"></div>
               </div>
             </div>
-            <div style="font-size:11px;color:var(--muted)">&#x1F3CF; <span style="color:var(--text)">${batter}</span></div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">&#x26BE; <span style="color:var(--text)">${pitcher}</span></div>
+            <div style="font-size:11px;color:var(--muted)"><b style="color:var(--text);font-weight:600">BAT</b> <span style="color:var(--text)">${batter}</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px"><b style="color:var(--text);font-weight:600">PIT</b> <span style="color:var(--text)">${pitcher}</span></div>
           </div>`;
       }
 
