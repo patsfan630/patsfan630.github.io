@@ -526,48 +526,50 @@ async function buildScoreCard(game, label, league) {
       const data = await res.json();
 
       // ── Line score ────────────────────────────────────────────────────────
-      const bsTeams = data.boxscore?.teams || [];
-      const bsAway = bsTeams.find(t => t.homeAway === 'away') || bsTeams[0];
-      const bsHome = bsTeams.find(t => t.homeAway === 'home') || bsTeams[1];
+      // ESPN stores per-inning data in data.linescore.lines[], each entry:
+      //   { displayValue: "3", away: { runs:"2" }, home: { runs:"1" } }
+      // For hits/errors, fall back to boxscore.teams[].statistics
+      const lsLines = data.linescore?.lines || [];
 
-      const lsAway = bsAway?.linescores || [];
-      const lsHome = bsHome?.linescores || [];
+      // Totals row from linescore (most reliable source for R/H/E)
+      const lsTotals = data.linescore?.teams || [];
+      const lsTotAway = lsTotals.find(t => t.homeAway === 'away') || lsTotals[0] || {};
+      const lsTotHome = lsTotals.find(t => t.homeAway === 'home') || lsTotals[1] || {};
 
-      // ── FIX 1: Hits & Errors ─────────────────────────────────────────────
-      const getStat = (team, statName) => {
+      // Hits & errors: try linescore totals first, then boxscore statistics
+      const bsTeams  = data.boxscore?.teams || [];
+      const bsAway   = bsTeams.find(t => t.homeAway === 'away') || bsTeams[0];
+      const bsHome   = bsTeams.find(t => t.homeAway === 'home') || bsTeams[1];
+      const getStat  = (team, statName) => {
         for (const group of (team?.statistics || [])) {
           const found = (group.stats || []).find(s => s.name === statName);
           if (found) return found.displayValue ?? '—';
         }
         return '—';
       };
+      const hitsAway   = lsTotAway.hits   ?? getStat(bsAway, 'hits');
+      const hitsHome   = lsTotHome.hits   ?? getStat(bsHome, 'hits');
+      const errorsAway = lsTotAway.errors ?? getStat(bsAway, 'errors');
+      const errorsHome = lsTotHome.errors ?? getStat(bsHome, 'errors');
 
-      const hitsAway   = getStat(bsAway, 'hits');
-      const hitsHome   = getStat(bsHome, 'hits');
-      const errorsAway = getStat(bsAway, 'errors');
-      const errorsHome = getStat(bsHome, 'errors');
+      const totalInnings = Math.max(lsLines.length, 9);
 
-      const totalInnings = Math.max(lsAway.length, lsHome.length, 9);
-
-      // ── FIX 2: Current inning highlight ──────────────────────────────────
-      // statusObj.period is the 1-based inning currently being played.
-      // Convert to 0-based index for array comparison.
+      // Current inning: statusObj.period is 1-based; convert to 0-based index
       const curInning = inProgress ? (statusObj?.period ?? 1) - 1 : -1;
 
-      // ── FIX 3: Line score cell values ────────────────────────────────────
-      // ESPN returns per-inning run totals in `displayValue`, not `value`.
-      const renderCells = (linescores, totalInn) => {
+      // Build inning cells from linescore.lines
+      const renderCells = (side, totalInn) => {
         let cells = '';
         for (let i = 0; i < totalInn; i++) {
-          const entry = linescores[i];
-          // displayValue holds the run total (e.g. "0", "2"); value is sometimes absent
-          const raw = entry?.displayValue ?? entry?.value;
+          const line  = lsLines[i];
+          // Each line has away/home sub-objects with a `runs` string
+          const runs  = line?.[side]?.runs;
           let display;
-          if (raw !== undefined && raw !== null && raw !== '') {
-            const parsed = parseInt(raw, 10);
-            display = isNaN(parsed) ? raw : parsed;
+          if (runs !== undefined && runs !== null && runs !== '') {
+            const parsed = parseInt(runs, 10);
+            display = isNaN(parsed) ? runs : parsed;
           } else {
-            display = (inProgress && i >= linescores.length) ? '' : '—';
+            display = (inProgress && i >= lsLines.length) ? '' : '—';
           }
           const isCur = inProgress && i === curInning;
           cells += `<td class="${isCur ? 'sc-ls-cur' : ''}">${display}</td>`;
@@ -590,14 +592,14 @@ async function buildScoreCard(game, label, league) {
             <tbody>
               <tr>
                 <td class="sc-ls-team">${a1}</td>
-                ${renderCells(lsAway, totalInnings)}
+                ${renderCells('away', totalInnings)}
                 <td class="sc-ls-total ${done && s1>s2 ? 'sc-ls-winner' : ''}">${showScore ? s1 : '—'}</td>
                 <td class="sc-ls-total">${hitsAway}</td>
                 <td class="sc-ls-total">${errorsAway}</td>
               </tr>
               <tr>
                 <td class="sc-ls-team">${a2}</td>
-                ${renderCells(lsHome, totalInnings)}
+                ${renderCells('home', totalInnings)}
                 <td class="sc-ls-total ${done && s2>s1 ? 'sc-ls-winner' : ''}">${showScore ? s2 : '—'}</td>
                 <td class="sc-ls-total">${hitsHome}</td>
                 <td class="sc-ls-total">${errorsHome}</td>
@@ -608,10 +610,10 @@ async function buildScoreCard(game, label, league) {
 
       // ── Live situation strip ──────────────────────────────────────────────
       if (inProgress) {
-        const sit      = data.situation || {};
-        const balls    = sit.balls   ?? '—';
-        const strikes  = sit.strikes ?? '—';
-        const outs     = sit.outs    ?? '—';
+        const sit       = data.situation || {};
+        const balls     = sit.balls   ?? '—';
+        const strikes   = sit.strikes ?? '—';
+        const outs      = sit.outs    ?? '—';
         const inningStr = inningLabel(statusObj?.detail || '');
         const athletes  = data.boxscore?.players?.flatMap(t=>t.statistics||[]).flatMap(s=>s.athletes||[]) || [];
         const findName  = id => {
@@ -637,7 +639,42 @@ async function buildScoreCard(game, label, league) {
           </div>`;
       }
 
-    } catch(e) { /* silently skip line score on error */ }
+      // ── Post-game decisions (W / L / SV) ─────────────────────────────────
+      if (done) {
+        // ESPN surfaces decisions in data.header.competitions[0].competitors[]
+        // Each competitor has a `probables` array; the pitcher with a decision
+        // has a `decision` field: { displayValue: "W", athlete: { displayName, record } }
+        const hdrComps = data.header?.competitions?.[0]?.competitors || [];
+        let winPitcher = null, lossPitcher = null, savePitcher = null;
+
+        for (const hc of hdrComps) {
+          for (const p of (hc.probables || [])) {
+            const dec = p.decision?.displayValue || '';
+            const name   = p.athlete?.displayName || p.athlete?.shortName || '';
+            const record = p.athlete?.record || '';  // e.g. "3-2" or "5 SV"
+            if (!name) continue;
+            if (/^W$/i.test(dec) && !winPitcher)  winPitcher  = { name, record };
+            if (/^L$/i.test(dec) && !lossPitcher) lossPitcher = { name, record };
+            if (/^S$/i.test(dec) && !savePitcher) savePitcher = { name, record };
+          }
+        }
+
+        if (winPitcher || lossPitcher || savePitcher) {
+          const decRow = (badge, color, bg, p) =>
+            `<div style="display:flex;align-items:center;gap:6px;font-size:11px;padding:3px 0;border-bottom:0.5px solid var(--border)">
+              <span style="font-size:10px;font-weight:700;color:${color};background:${bg};padding:1px 5px;border-radius:3px;flex-shrink:0;min-width:18px;text-align:center">${badge}</span>
+              <span style="color:var(--text);font-weight:500;flex:1">${p.name}</span>
+              <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px">${p.record}</span>
+            </div>`;
+          liveHTML += `<div style="margin:6px 12px 4px;border-top:0.5px solid var(--border);padding-top:5px">
+            ${winPitcher  ? decRow('W', '#16a34a', 'rgba(22,163,74,0.1)',  winPitcher)  : ''}
+            ${lossPitcher ? decRow('L', '#dc2626', 'rgba(220,38,38,0.1)',  lossPitcher) : ''}
+            ${savePitcher ? decRow('S', '#2563eb', 'rgba(37,99,235,0.1)',  savePitcher) : ''}
+          </div>`;
+        }
+      }
+
+    } catch(e) { /* silently skip on error */ }
 
   } else if ((league === 'nba' || league === 'nhl') && inProgress) {
     try {
