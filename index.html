@@ -152,7 +152,7 @@ body { background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--text)
 .cal-allday-event {
   border-radius: 3px;
   padding: 1px 5px;
-  font-size: 0.62vw;
+  font-size: 0.76vw;
   font-weight: 500;
   line-height: 1.35;
   color: #fff;
@@ -235,7 +235,7 @@ body { background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--text)
   left: 2px; right: 2px;
   border-radius: 4px;
   padding: 2px 5px;
-  font-size: 0.62vw;
+  font-size: 0.78vw;
   line-height: 1.35;
   color: #fff;
   overflow: hidden;
@@ -246,7 +246,7 @@ body { background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--text)
 }
 .cal-event-time {
   font-family: 'DM Mono', monospace;
-  font-size: 0.58vw;
+  font-size: 0.72vw;
   opacity: 0.82;
   white-space: nowrap;
   overflow: hidden;
@@ -717,11 +717,11 @@ const CAL_REFRESH = 5 * 60 * 1000;   // re-fetch every 5 min
 const CAL_TICK    = 60 * 1000;       // scroll / now-line tick every 1 min
 
 const CALENDARS = [
-  { id:'family06071768983274341555@group.calendar.google.com',                                          color:'#7986cb' },
-  { id:'3lmel4i9s4986sorpekg2st8ek@group.calendar.google.com',                                         color:'#8e24aa' },
-  { id:'gqvubh330psg63ohfaeqdelbso4llacr@import.calendar.google.com',                                  color:'#3f51b5' },
-  { id:'en.usa#holiday@group.v.calendar.google.com',                                                    color:'#7cb342' },
-  { id:'c_faf900f7afdcfe6667145cc126e5f9bd56f96dce866e751432fea1120350368@group.calendar.google.com',  color:'#ad1457' },
+  { id:'3lmel4i9s4986sorpekg2st8ek@group.calendar.google.com',                                              color:'#8e24aa' },
+  { id:'family06071768983274341555@group.calendar.google.com',                                              color:'#7986cb' },
+  { id:'gqvubh330psg63ohfaeqdelbs04llacr@import.calendar.google.com',                                      color:'#3f51b5' },
+  { id:'en.usa#holiday@group.v.calendar.google.com',                                                        color:'#7cb342' },
+  { id:'c_faf9900f7afdcfe6667145cc126e5f9bd56f96dce866e751432fea1120350368@group.calendar.google.com',     color:'#ad1457' },
 ];
 
 let _calApiKey   = localStorage.getItem('gcal_api_key') || '';
