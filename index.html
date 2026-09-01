@@ -402,6 +402,33 @@ html.dark-mode .sc-linescore td.sc-ls-winner { color:#e06060; }
 /* Decisions */
 .sc-decisions { margin:4px 12px 4px; border-top:0.5px solid var(--border); padding-top:5px; }
 
+/* NFL card (Patriots) — primary navy #002a5c */
+.score-card.nfl { background:#eef2f8; border:0.5px solid rgba(0,42,92,0.22); }
+.score-card.nfl .sc-header { background:#002a5c; padding:6px 12px; display:flex; justify-content:space-between; align-items:center; }
+.score-card.nfl .sc-league-label { font-size:15px; font-weight:700; color:#fff; }
+.score-card.nfl .sc-status { font-size:12px; color:rgba(255,255,255,0.88); font-family:'DM Mono',monospace; }
+.score-card.nfl .sc-body { padding:4px 0; }
+.score-card.nfl .sc-team { display:flex; justify-content:space-between; align-items:center; padding:5px 12px; border-bottom:0.5px solid rgba(0,0,0,0.07); }
+.score-card.nfl .sc-team:last-of-type { border-bottom:none; }
+.score-card.nfl .sc-team.has-ball { background:rgba(0,42,92,0.07); }
+.score-card.nfl .sc-abbr { font-size:15px; font-weight:500; color:#111; display:flex; align-items:center; gap:6px; }
+.score-card.nfl .sc-score { font-family:'DM Mono',monospace; font-size:26px; font-weight:500; color:#aaa; }
+.score-card.nfl .sc-score.winner { color:#002a5c; }
+html.dark-mode .score-card.nfl { background:#0a1526; border-color:rgba(70,120,190,0.3); }
+html.dark-mode .score-card.nfl .sc-abbr { color:#d6e2f2; }
+html.dark-mode .score-card.nfl .sc-score { color:#4a5a70; }
+html.dark-mode .score-card.nfl .sc-score.winner { color:#7ba7e0; }
+html.dark-mode .score-card.nfl .sc-team.has-ball { background:rgba(90,140,210,0.13); }
+/* NFL upcoming info rows + live situation bar */
+.sc-nfl-info { margin:2px 12px 8px; display:flex; flex-direction:column; gap:6px; padding-top:7px; }
+.sc-nfl-row { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text); line-height:1.3; }
+.sc-nfl-row svg { flex-shrink:0; color:var(--muted); }
+.sc-nfl-row .sub { color:var(--muted); font-size:11px; }
+.sc-nfl-situation { margin:2px 12px 8px; padding:6px 10px; background:rgba(0,42,92,0.07); border-radius:8px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+html.dark-mode .sc-nfl-situation { background:rgba(90,140,210,0.13); }
+.sc-nfl-dd { font-size:12px; font-weight:600; color:var(--text); }
+.sc-nfl-poss { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; display:flex; align-items:center; gap:5px; }
+
 /* Carousel */
 .carousel-dot { width:6px; height:6px; border-radius:50%; background:var(--surface2); border:0.5px solid var(--border); cursor:pointer; transition:background 0.2s; flex-shrink:0; }
 .carousel-dot.active { background:var(--muted); }
@@ -697,7 +724,129 @@ async function buildMLBCard(game){
   return card;
 }
 
-const TEAM_CONFIGS = [{ label:'MLB · Red Sox', teamId: BOS_TEAM_ID }];
+/* ════════════════════════════════════════════════════════════════════════
+   NFL SCORES (Patriots) — ESPN public API
+════════════════════════════════════════════════════════════════════════ */
+const ESPN_NFL = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl';
+const _geoCache = {};
+const _svgCal = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`;
+const _svgPin = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+const _svgTv  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M17 2l-5 5-5-5"/></svg>`;
+function nflBall(size=13){return `<svg width="${size}" height="${(size*0.68).toFixed(1)}" viewBox="0 0 25 17" fill="none" style="flex-shrink:0"><ellipse cx="12.5" cy="8.5" rx="11" ry="6.5" fill="#7a4a2b"/><path d="M2.5 8.5 h3.5 M19 8.5 h3.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M12.5 5.5 v6 M10.5 6.5 h4 M10.5 8.5 h4 M10.5 10.5 h4" stroke="#fff" stroke-width="1" stroke-linecap="round"/></svg>`;}
+
+function nflFmt(dateISO){
+  const d=new Date(dateISO),ET={timeZone:'America/New_York'};
+  const dateLabel=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',...ET});
+  const timeLabel=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',...ET})+' ET';
+  const shortDayTime=d.toLocaleDateString('en-US',{weekday:'short',...ET})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',...ET});
+  return {dateLabel,timeLabel,shortDayTime};
+}
+// ET-naive Date (a local Date carrying ET wall-clock values) so week math compares consistently.
+function nflETNaive(dateISO){const p=toNY(new Date(dateISO));return new Date(p.y,p.mo-1,p.d,p.h,p.min).getTime();}
+// Current NFL week: Wednesday 00:00 ET through the following Tuesday 23:59 ET (end exclusive at next Wed 00:00).
+function nflWeekWindow(){const n=toNY(new Date());const dsw=(new Date(n.y,n.mo-1,n.d).getDay()-3+7)%7;return {start:new Date(n.y,n.mo-1,n.d-dsw).getTime(),end:new Date(n.y,n.mo-1,n.d-dsw+7).getTime()};}
+function nflScoreVal(c){const s=c&&c.score;if(s==null)return null;return typeof s==='object'?(s.displayValue??s.value):s;}
+function nflBroadcast(comp){
+  const b=comp.broadcasts||comp.geoBroadcasts||[],names=[];
+  b.forEach(x=>{if(Array.isArray(x.names))names.push(...x.names);else if(x.media&&x.media.shortName)names.push(x.media.shortName);else if(x.shortName)names.push(x.shortName);});
+  return [...new Set(names.filter(Boolean))].join(', ');
+}
+async function nflGameWeather(city,state,dateISO){
+  try{
+    const key=(city+','+(state||'')).toLowerCase();
+    let geo=_geoCache[key];
+    if(!geo){
+      const gr=await(await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=5&language=en&format=json`)).json();
+      const hit=(gr.results||[]).find(r=>r.country_code==='US')||(gr.results||[])[0];
+      if(!hit)return null;
+      geo={lat:hit.latitude,lon:hit.longitude};_geoCache[key]=geo;
+    }
+    const day=new Date(dateISO).toISOString().slice(0,10);   // UTC date of kickoff
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${geo.lat}&longitude=${geo.lon}&hourly=temperature_2m,weather_code,precipitation_probability&temperature_unit=fahrenheit&timezone=GMT&start_date=${day}&end_date=${day}`;
+    const wd=await(await fetch(url)).json(),hrs=wd.hourly||{},target=dateISO.slice(0,13);
+    let idx=(hrs.time||[]).findIndex(t=>t.slice(0,13)===target);
+    if(idx<0)idx=Math.min(12,(hrs.time||[]).length-1);
+    if(idx<0||!hrs.temperature_2m)return null;
+    return {temp:Math.round(hrs.temperature_2m[idx]),code:hrs.weather_code[idx],precip:hrs.precipitation_probability?.[idx]||0};
+  }catch(e){return null;}
+}
+function nflSides(comp){const cs=comp.competitors||[];return {away:cs.find(c=>c.homeAway==='away')||cs[0]||{},home:cs.find(c=>c.homeAway==='home')||cs[1]||{}};}
+function nflTeamRow(t,o){
+  o=o||{};const abbr=(t.team&&t.team.abbreviation)||'—',rec=(t.records&&t.records[0]&&t.records[0].summary)||'';
+  const ball=o.hasBall?`<span style="display:inline-flex">${nflBall(13)}</span>`:'';
+  return `<div class="sc-team${o.hasBall?' has-ball':''}"><div style="display:flex;flex-direction:column;gap:1px;"><span class="sc-abbr">${abbr}${ball}</span>${rec?`<span style="font-size:10px;color:var(--dim)">${rec}</span>`:''}</div><span class="sc-score ${o.isWinner?'winner':''}">${o.showScore?(o.score??'—'):'—'}</span></div>`;
+}
+function nflCardEl(statusLabel,bodyInner){const card=document.createElement('div');card.className='score-card nfl';card.innerHTML=`<div class="sc-header"><span class="sc-league-label">Patriots</span><span class="sc-status">${statusLabel}</span></div><div class="sc-body">${bodyInner}</div>`;return card;}
+
+function nflLiveCard(comp){
+  const st=comp.status||{},period=st.period||0,clock=st.displayClock||'';
+  const q=period<=4?`Q${period}`:(period===5?'OT':`OT${period-4}`);
+  const {away,home}=nflSides(comp),sit=comp.situation||{},possId=sit.possession;
+  const awayBall=possId!=null&&away.team&&String(away.team.id)===String(possId);
+  const homeBall=possId!=null&&home.team&&String(home.team.id)===String(possId);
+  const dd=sit.downDistanceText||sit.shortDownDistanceText||'';
+  const possAbbr=awayBall?(away.team.abbreviation):homeBall?(home.team.abbreviation):'';
+  const sitHTML=(dd||possAbbr)?`<div class="sc-nfl-situation"><span class="sc-nfl-dd">${dd||'&nbsp;'}</span>${possAbbr?`<span class="sc-nfl-poss">${nflBall(12)} ${possAbbr} ball</span>`:''}</div>`:'';
+  return nflCardEl(`${q} ${clock}`.trim(),
+    nflTeamRow(away,{showScore:true,score:nflScoreVal(away),hasBall:awayBall})+
+    nflTeamRow(home,{showScore:true,score:nflScoreVal(home),hasBall:homeBall})+sitHTML);
+}
+async function nflPreCard(ev,comp){
+  const {away,home}=nflSides(comp),fmt=nflFmt(ev.date);
+  const venue=(comp.venue&&comp.venue.fullName)||'',addr=(comp.venue&&comp.venue.address)?`${comp.venue.address.city}, ${comp.venue.address.state}`:'';
+  const bcast=nflBroadcast(comp);
+  let wxHTML='';
+  if(comp.venue&&comp.venue.address&&comp.venue.address.city){
+    const w=await nflGameWeather(comp.venue.address.city,comp.venue.address.state,ev.date);
+    if(w){const wi=wmo(w.code);wxHTML=`<div class="sc-nfl-row">${wxSVG(wi.svg,18)}<span>${w.temp}&deg; ${wi.l}${w.precip>15?` <span class="sub">&middot; ${w.precip}% precip</span>`:''}</span></div>`;}
+  }
+  const info=`<div class="sc-nfl-info"><div class="sc-nfl-row">${_svgCal}<span>${fmt.dateLabel} &middot; ${fmt.timeLabel}</span></div><div class="sc-nfl-row">${_svgPin}<span>${venue}${addr?` <span class="sub">&middot; ${addr}</span>`:''}</span></div>${bcast?`<div class="sc-nfl-row">${_svgTv}<span>${bcast}</span></div>`:''}${wxHTML}</div>`;
+  return nflCardEl(fmt.shortDayTime,nflTeamRow(away,{showScore:false})+nflTeamRow(home,{showScore:false})+info);
+}
+function nflByeCard(){
+  return nflCardEl('Bye Week',`<div style="padding:20px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px"><span style="opacity:0.85">${nflBall(30)}</span><div style="font-size:13px;color:var(--muted)">No game scheduled this week</div></div>`);
+}
+function nflPostCard(ev,comp){
+  const {away,home}=nflSides(comp),as=nflScoreVal(away),hs=nflScoreVal(home);
+  const aw=Number(as)>Number(hs),hw=Number(hs)>Number(as);
+  const det=(comp.status&&comp.status.type&&comp.status.type.shortDetail)||'';
+  return nflCardEl(/OT/i.test(det)?'Final/OT':'Final',
+    nflTeamRow(away,{showScore:true,score:as,isWinner:aw})+nflTeamRow(home,{showScore:true,score:hs,isWinner:hw})+
+    `<div class="sc-nfl-info"><div class="sc-nfl-row">${_svgCal}<span class="sub">${nflFmt(ev.date).dateLabel}</span></div></div>`);
+}
+async function buildNFLSlide(){
+  // Scoreboard reflects the current week and is the only feed with live possession/down/clock. Ignore preseason (season.type 1).
+  let sb=null;try{sb=await(await fetch(`${ESPN_NFL}/scoreboard`)).json();}catch(e){}
+  const sbNE=(sb&&sb.events||[]).find(e=>e.season&&e.season.type!==1&&(e.competitions[0].competitors||[]).some(c=>c.team&&c.team.abbreviation==='NE'));
+  const sbState=sbNE&&sbNE.competitions[0].status&&sbNE.competitions[0].status.type&&sbNE.competitions[0].status.type.state;
+  if(sbNE&&sbState==='in')return nflLiveCard(sbNE.competitions[0]);
+  // Regular season + playoffs only (no preseason); the default feed omits most of these.
+  const byId=new Map();
+  await Promise.all([2,3].map(async t=>{try{const d=await(await fetch(`${ESPN_NFL}/teams/ne/schedule?seasontype=${t}`)).json();(d.events||[]).forEach(ev=>{if(ev.competitions&&ev.competitions[0]&&!byId.has(ev.id))byId.set(ev.id,{ev,c:ev.competitions[0]});});}catch(e){}}));
+  if(sbNE&&!byId.has(sbNE.id))byId.set(sbNE.id,{ev:sbNE,c:sbNE.competitions[0]}); // covers a current game not in the schedule feeds
+  const cands=[...byId.values()].map(o=>({...o,state:o.c.status&&o.c.status.type&&o.c.status.type.state,ts:nflETNaive(o.ev.date)}));
+  // Game in the current NFL week (Wed 00:00 ET -> Tue 23:59 ET). Result stays until Tue; flips to next game at 12am Wed.
+  const {start,end}=nflWeekWindow();
+  const g=cands.filter(o=>o.ts>=start&&o.ts<end).sort((a,b)=>a.ts-b.ts);
+  const game=g.find(o=>o.state==='in')||g[0];
+  if(game){
+    if(game.state==='in')return nflLiveCard(game.c);            // live: score, quarter, clock, possession
+    if(game.state==='post')return nflPostCard(game.ev,game.c);  // finished earlier this week: keep the result up
+    return await nflPreCard(game.ev,game.c);                    // scheduled this week: date/time/location/network/weather
+  }
+  // No game in the current week.
+  const upcoming=cands.filter(o=>o.state==='pre').sort((a,b)=>a.ts-b.ts)[0];
+  const played=cands.some(o=>o.state==='post');
+  if(upcoming&&!played)return await nflPreCard(upcoming.ev,upcoming.c); // season not started yet: show the opener now
+  if(upcoming)return nflByeCard();                                      // mid-season bye
+  const lastDone=cands.filter(o=>o.state==='post').sort((a,b)=>b.ts-a.ts)[0];
+  return lastDone?nflPostCard(lastDone.ev,lastDone.c):nflByeCard();     // season over: keep the last result up
+}
+
+const TEAM_CONFIGS = [
+  { label:'MLB · Red Sox',  kind:'mlb', teamId: BOS_TEAM_ID },
+  { label:'NFL · Patriots', kind:'nfl' },
+];
 let carouselIndex=0,carouselCards=[],carouselAutoTimer=null;
 function renderDots(){const el=document.getElementById('carousel-dots');el.innerHTML='';TEAM_CONFIGS.forEach((_,i)=>{const dot=document.createElement('div');dot.className='carousel-dot'+(i===carouselIndex?' active':'');dot.onclick=()=>goToSlide(i);el.appendChild(dot);});}
 function showSlide(idx){carouselIndex=((idx%TEAM_CONFIGS.length)+TEAM_CONFIGS.length)%TEAM_CONFIGS.length;renderDots();const wrap=document.getElementById('scores-wrap');wrap.innerHTML='';if(carouselCards[carouselIndex])wrap.appendChild(carouselCards[carouselIndex]);else wrap.innerHTML='<div class="score-loading"><span class="spinner"></span></div>';}
@@ -706,8 +855,11 @@ function carouselNext(){goToSlide(carouselIndex+1);}
 function carouselPrev(){goToSlide(carouselIndex-1);}
 function resetAutoAdvance(){if(carouselAutoTimer)clearInterval(carouselAutoTimer);carouselAutoTimer=setInterval(()=>showSlide(carouselIndex+1),8000);}
 async function fetchScores(){
-  const etStr=new Date().toLocaleString('en-US',{timeZone:'America/New_York'}),etNow=new Date(etStr),ymd=`${etNow.getFullYear()}-${String(etNow.getMonth()+1).padStart(2,'0')}-${String(etNow.getDate()).padStart(2,'0')}`;
-  await Promise.all(TEAM_CONFIGS.map(async(cfg,idx)=>{try{const url=`${MLB_BASE}/api/v1/schedule?teamId=${cfg.teamId}&sportId=1&date=${ymd}&hydrate=probablePitcher(stats),linescore,decisions,seriesStatus,team`,res=await fetch(url),data=await res.json(),games=data.dates?.[0]?.games||[],game=games.find(g=>g.status?.detailedState!=='Postponed')||games[0]||null;carouselCards[idx]=game?await buildMLBCard(game):buildEmptyCard(cfg.label.split(' · ')[1]||cfg.label);}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';carouselCards[idx]=el;}}));
+  const etStr=new Date().toLocaleString('en-US',{timeZone:'America/New_York'}),etNow=new Date(etStr);
+  // Keep last night's game up until 11am ET the next day: before 11am, use yesterday's date.
+  if(etNow.getHours()<11)etNow.setDate(etNow.getDate()-1);
+  const ymd=`${etNow.getFullYear()}-${String(etNow.getMonth()+1).padStart(2,'0')}-${String(etNow.getDate()).padStart(2,'0')}`;
+  await Promise.all(TEAM_CONFIGS.map(async(cfg,idx)=>{try{if(cfg.kind==='nfl'){carouselCards[idx]=await buildNFLSlide();return;}const url=`${MLB_BASE}/api/v1/schedule?teamId=${cfg.teamId}&sportId=1&date=${ymd}&hydrate=probablePitcher(stats),linescore,decisions,seriesStatus,team`,res=await fetch(url),data=await res.json(),games=data.dates?.[0]?.games||[],game=games.find(g=>g.status?.detailedState!=='Postponed')||games[0]||null;carouselCards[idx]=game?await buildMLBCard(game):buildEmptyCard(cfg.label.split(' · ')[1]||cfg.label);}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';carouselCards[idx]=el;}}));
   showSlide(carouselIndex);
 }
 
