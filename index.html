@@ -429,6 +429,24 @@ html.dark-mode .sc-nfl-situation { background:rgba(90,140,210,0.13); }
 .sc-nfl-dd { font-size:12px; font-weight:600; color:var(--text); }
 .sc-nfl-poss { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; display:flex; align-items:center; gap:5px; }
 
+/* NBA card (Celtics) — primary green #007a33 */
+.score-card.nba { background:#eef5f0; border:0.5px solid rgba(0,122,51,0.22); }
+.score-card.nba .sc-header { background:#007a33; padding:6px 12px; display:flex; justify-content:space-between; align-items:center; }
+.score-card.nba .sc-league-label { font-size:15px; font-weight:700; color:#fff; }
+.score-card.nba .sc-status { font-size:12px; color:rgba(255,255,255,0.88); font-family:'DM Mono',monospace; }
+.score-card.nba .sc-body { padding:4px 0; }
+.score-card.nba .sc-team { display:flex; justify-content:space-between; align-items:center; padding:5px 12px; border-bottom:0.5px solid rgba(0,0,0,0.07); }
+.score-card.nba .sc-team:last-of-type { border-bottom:none; }
+.score-card.nba .sc-abbr { font-size:15px; font-weight:500; color:#111; }
+.score-card.nba .sc-score { font-family:'DM Mono',monospace; font-size:26px; font-weight:500; color:#aaa; }
+.score-card.nba .sc-score.winner { color:#007a33; }
+.score-card.nba .sc-linescore td.sc-ls-winner { color:#007a33; }
+html.dark-mode .score-card.nba { background:#0a1a10; border-color:rgba(45,150,90,0.3); }
+html.dark-mode .score-card.nba .sc-abbr { color:#d6ecdd; }
+html.dark-mode .score-card.nba .sc-score { color:#4a6a55; }
+html.dark-mode .score-card.nba .sc-score.winner { color:#5dca7a; }
+html.dark-mode .score-card.nba .sc-linescore td.sc-ls-winner { color:#5dca7a; }
+
 /* Carousel */
 .carousel-dot { width:6px; height:6px; border-radius:50%; background:var(--surface2); border:0.5px solid var(--border); cursor:pointer; transition:background 0.2s; flex-shrink:0; }
 .carousel-dot.active { background:var(--muted); }
@@ -843,9 +861,76 @@ async function buildNFLSlide(){
   return lastDone?nflPostCard(lastDone.ev,lastDone.c):nflByeCard();     // season over: keep the last result up
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   NBA SCORES (Celtics) — ESPN public API
+════════════════════════════════════════════════════════════════════════ */
+const ESPN_NBA = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba';
+const CELTICS_ABBR = 'BOS';
+function nbaSides(comp){const cs=comp.competitors||[];return {away:cs.find(c=>c.homeAway==='away')||cs[0]||{},home:cs.find(c=>c.homeAway==='home')||cs[1]||{}};}
+function nbaScoreVal(c){const s=c&&c.score;if(s==null)return null;return typeof s==='object'?(s.displayValue??s.value):s;}
+function nbaBroadcast(comp){
+  const b=comp.broadcasts||comp.geoBroadcasts||[],names=[];
+  b.forEach(x=>{if(Array.isArray(x.names))names.push(...x.names);else if(x.media&&x.media.shortName)names.push(x.media.shortName);else if(x.shortName)names.push(x.shortName);});
+  return [...new Set(names.filter(Boolean))].join(', ');
+}
+function nbaCardEl(statusLabel,bodyInner){const card=document.createElement('div');card.className='score-card nba';card.innerHTML=`<div class="sc-header"><span class="sc-league-label">Celtics</span><span class="sc-status">${statusLabel}</span></div><div class="sc-body">${bodyInner}</div>`;return card;}
+function nbaTeamRow(t,o){
+  o=o||{};const abbr=(t.team&&t.team.abbreviation)||'—',rec=(t.records&&t.records[0]&&t.records[0].summary)||'';
+  return `<div class="sc-team"><div style="display:flex;flex-direction:column;gap:1px;"><span class="sc-abbr">${abbr}</span>${rec?`<span style="font-size:10px;color:var(--dim)">${rec}</span>`:''}</div><span class="sc-score ${o.isWinner?'winner':''}">${o.showScore?(o.score??'—'):'—'}</span></div>`;
+}
+// Score by quarter: team + Q1–Q4 (+ OT columns when played) + total.
+function nbaLinescore(away,home,period){
+  const aLs=away.linescores||[],hLs=home.linescores||[];
+  const nPer=Math.max(4,aLs.length,hLs.length,period||0);
+  const head=[];for(let i=0;i<nPer;i++)head.push(i<4?`Q${i+1}`:(i===4?'OT':`OT${i-3}`));
+  const cell=(ls,i)=>{const v=ls[i];if(!v)return'—';const d=(v.displayValue??v.value);return (d===undefined||d===null||d==='')?'—':d;};
+  const aTot=nbaScoreVal(away),hTot=nbaScoreVal(home),aw=Number(aTot)>Number(hTot),hw=Number(hTot)>Number(aTot);
+  const row=(t,ls,tot,win)=>`<tr><td class="sc-ls-team">${(t.team&&t.team.abbreviation)||'—'}</td>${head.map((_,i)=>`<td>${cell(ls,i)}</td>`).join('')}<td class="sc-ls-total ${win?'sc-ls-winner':''}">${tot??'—'}</td></tr>`;
+  return `<div class="sc-linescore"><table><thead><tr><th class="sc-ls-team"></th>${head.map(h=>`<th>${h}</th>`).join('')}<th class="sc-ls-total">T</th></tr></thead><tbody>${row(away,aLs,aTot,aw)}${row(home,hLs,hTot,hw)}</tbody></table></div>`;
+}
+function nbaInfoRows(ev,comp,opt){
+  opt=opt||{};const rows=[];
+  if(opt.dateTime){const f=nflFmt(ev.date);rows.push(`<div class="sc-nfl-row">${_svgCal}<span>${f.dateLabel} &middot; ${f.timeLabel}</span></div>`);}
+  else if(opt.date){rows.push(`<div class="sc-nfl-row">${_svgCal}<span class="sub">${nflFmt(ev.date).dateLabel}</span></div>`);}
+  const bcast=nbaBroadcast(comp);
+  if(bcast)rows.push(`<div class="sc-nfl-row">${_svgTv}<span>${bcast}</span></div>`);
+  return rows.length?`<div class="sc-nfl-info">${rows.join('')}</div>`:'';
+}
+function nbaNoGameCard(){
+  return nbaCardEl('No Game',`<div style="padding:20px 12px;text-align:center;font-size:13px;color:var(--muted)">No game today</div>`);
+}
+async function buildNBASlide(ymd){
+  // Query the Celtics' game for the effective date (ymd already applies the 11am-ET carryover).
+  const dateParam=ymd.replace(/-/g,'');
+  let sb=null;try{sb=await(await fetch(`${ESPN_NBA}/scoreboard?dates=${dateParam}`)).json();}catch(e){}
+  const ev=(sb&&sb.events||[]).find(e=>e.competitions&&e.competitions[0]&&(e.competitions[0].competitors||[]).some(c=>c.team&&c.team.abbreviation===CELTICS_ABBR));
+  if(!ev)return nbaNoGameCard();
+  const comp=ev.competitions[0],st=comp.status||{},type=st.type||{},state=type.state,{away,home}=nbaSides(comp);
+  if(state==='pre'){
+    // Scheduled: opponent, game time, broadcast network.
+    return nbaCardEl(nflFmt(ev.date).shortDayTime,
+      nbaTeamRow(away,{showScore:false})+nbaTeamRow(home,{showScore:false})+nbaInfoRows(ev,comp,{dateTime:true}));
+  }
+  const as=nbaScoreVal(away),hs=nbaScoreVal(home);
+  if(state==='in'){
+    // Live: score, quarter + time remaining, score by quarter, broadcast.
+    const p=st.period||0,clock=st.displayClock||'',q=p<=4?`Q${p}`:(p===5?'OT':`OT${p-4}`);
+    return nbaCardEl(`${q} ${clock}`.trim(),
+      nbaTeamRow(away,{showScore:true,score:as})+nbaTeamRow(home,{showScore:true,score:hs})+
+      nbaLinescore(away,home,p)+nbaInfoRows(ev,comp,{}));
+  }
+  // Final: score, winner, score by quarter, broadcast + date.
+  const aw=Number(as)>Number(hs),hw=Number(hs)>Number(as);
+  const label=/OT/i.test(type.shortDetail||'')?'Final/OT':'Final';
+  return nbaCardEl(label,
+    nbaTeamRow(away,{showScore:true,score:as,isWinner:aw})+nbaTeamRow(home,{showScore:true,score:hs,isWinner:hw})+
+    nbaLinescore(away,home,st.period)+nbaInfoRows(ev,comp,{date:true}));
+}
+
 const TEAM_CONFIGS = [
   { label:'MLB · Red Sox',  kind:'mlb', teamId: BOS_TEAM_ID },
   { label:'NFL · Patriots', kind:'nfl' },
+  { label:'NBA · Celtics',  kind:'nba' },
 ];
 let carouselIndex=0,carouselCards=[],carouselAutoTimer=null;
 function renderDots(){const el=document.getElementById('carousel-dots');el.innerHTML='';TEAM_CONFIGS.forEach((_,i)=>{const dot=document.createElement('div');dot.className='carousel-dot'+(i===carouselIndex?' active':'');dot.onclick=()=>goToSlide(i);el.appendChild(dot);});}
@@ -853,13 +938,13 @@ function showSlide(idx){carouselIndex=((idx%TEAM_CONFIGS.length)+TEAM_CONFIGS.le
 function goToSlide(idx){showSlide(idx);resetAutoAdvance();}
 function carouselNext(){goToSlide(carouselIndex+1);}
 function carouselPrev(){goToSlide(carouselIndex-1);}
-function resetAutoAdvance(){if(carouselAutoTimer)clearInterval(carouselAutoTimer);carouselAutoTimer=setInterval(()=>showSlide(carouselIndex+1),8000);}
+function resetAutoAdvance(){if(carouselAutoTimer)clearInterval(carouselAutoTimer);carouselAutoTimer=setInterval(()=>showSlide(carouselIndex+1),30000);}
 async function fetchScores(){
   const etStr=new Date().toLocaleString('en-US',{timeZone:'America/New_York'}),etNow=new Date(etStr);
   // Keep last night's game up until 11am ET the next day: before 11am, use yesterday's date.
   if(etNow.getHours()<11)etNow.setDate(etNow.getDate()-1);
   const ymd=`${etNow.getFullYear()}-${String(etNow.getMonth()+1).padStart(2,'0')}-${String(etNow.getDate()).padStart(2,'0')}`;
-  await Promise.all(TEAM_CONFIGS.map(async(cfg,idx)=>{try{if(cfg.kind==='nfl'){carouselCards[idx]=await buildNFLSlide();return;}const url=`${MLB_BASE}/api/v1/schedule?teamId=${cfg.teamId}&sportId=1&date=${ymd}&hydrate=probablePitcher(stats),linescore,decisions,seriesStatus,team`,res=await fetch(url),data=await res.json(),games=data.dates?.[0]?.games||[],game=games.find(g=>g.status?.detailedState!=='Postponed')||games[0]||null;carouselCards[idx]=game?await buildMLBCard(game):buildEmptyCard(cfg.label.split(' · ')[1]||cfg.label);}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';carouselCards[idx]=el;}}));
+  await Promise.all(TEAM_CONFIGS.map(async(cfg,idx)=>{try{if(cfg.kind==='nfl'){carouselCards[idx]=await buildNFLSlide();return;}if(cfg.kind==='nba'){carouselCards[idx]=await buildNBASlide(ymd);return;}const url=`${MLB_BASE}/api/v1/schedule?teamId=${cfg.teamId}&sportId=1&date=${ymd}&hydrate=probablePitcher(stats),linescore,decisions,seriesStatus,team`,res=await fetch(url),data=await res.json(),games=data.dates?.[0]?.games||[],game=games.find(g=>g.status?.detailedState!=='Postponed')||games[0]||null;carouselCards[idx]=game?await buildMLBCard(game):buildEmptyCard(cfg.label.split(' · ')[1]||cfg.label);}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';carouselCards[idx]=el;}}));
   showSlide(carouselIndex);
 }
 
@@ -1175,7 +1260,7 @@ refreshAll();
 initCalendar();
 
 setInterval(refreshAll,  15*60*1000);  // weather every 15 min
-setInterval(fetchScores,    30*1000);  // scores every 30 sec
+setInterval(fetchScores,    15*1000);  // scores refresh every 15 sec
 </script>
 </body>
 </html>
