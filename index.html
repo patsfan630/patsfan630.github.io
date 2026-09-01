@@ -69,8 +69,8 @@ body { background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--text)
 .refresh-btn { background:var(--surface2); border:0.5px solid var(--border); border-radius:6px; color:var(--muted); font-size:0.72vw; padding:0.2vw 0.6vw; cursor:pointer; font-family:'DM Sans',sans-serif; transition:color 0.2s; }
 .refresh-btn:hover { color:var(--text); }
 
-.main { display:grid; grid-template-columns:5fr 1fr; gap:0.8vw; min-height:0; min-width:0; }
-.col  { display:flex; flex-direction:column; gap:0.8vw; min-height:0; }
+.main { display:grid; grid-template-columns:minmax(0,1fr) 16vw; gap:0.8vw; min-height:0; min-width:0; }
+.col  { display:flex; flex-direction:column; gap:0.8vw; min-height:0; min-width:0; }
 .card { background:var(--surface); border:0.5px solid var(--border); border-radius:0.8vw; padding:0.9vw 1vw; overflow:hidden; }
 .card-title { font-size:0.8vw; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:0.7vw; }
 
