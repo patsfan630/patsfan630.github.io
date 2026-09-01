@@ -927,14 +927,37 @@ async function buildNBASlide(ymd){
     nbaLinescore(away,home,st.period)+nbaInfoRows(ev,comp,{date:true}));
 }
 
+// Season-opener date for the Celtics (earliest regular-season game), cached ~6h.
+// Used to keep the NBA card hidden until 2 days before the season starts.
+let _nbaStart = { ts: 0, val: undefined };
+async function nbaSeasonStartMs(){
+  const now = Date.now();
+  if(_nbaStart.val!==undefined && now-_nbaStart.ts < 6*3600*1000) return _nbaStart.val;
+  let val = (_nbaStart.val!==undefined) ? _nbaStart.val : null; // keep last known value on failure
+  try{
+    const d = await(await fetch(`${ESPN_NBA}/teams/bos/schedule?seasontype=2`)).json();
+    const times = (d.events||[]).map(e=>Date.parse(e.date)).filter(t=>!isNaN(t)).sort((a,b)=>a-b);
+    val = times.length ? times[0] : null;
+  }catch(e){}
+  _nbaStart = { ts: now, val };
+  return val;
+}
+async function nbaShouldShow(){
+  const start = await nbaSeasonStartMs();
+  if(start==null) return false;                     // season unknown -> stay hidden
+  return Date.now() >= start - 2*24*3600*1000;      // reveal 2 days before opening night
+}
+
 const TEAM_CONFIGS = [
   { label:'MLB · Red Sox',  kind:'mlb', teamId: BOS_TEAM_ID },
   { label:'NFL · Patriots', kind:'nfl' },
   { label:'NBA · Celtics',  kind:'nba' },
 ];
+// Cards actually in the carousel right now (the Celtics card is added only in-season).
+let activeConfigs = TEAM_CONFIGS.slice();
 let carouselIndex=0,carouselCards=[],carouselAutoTimer=null;
-function renderDots(){const el=document.getElementById('carousel-dots');el.innerHTML='';TEAM_CONFIGS.forEach((_,i)=>{const dot=document.createElement('div');dot.className='carousel-dot'+(i===carouselIndex?' active':'');dot.onclick=()=>goToSlide(i);el.appendChild(dot);});}
-function showSlide(idx){carouselIndex=((idx%TEAM_CONFIGS.length)+TEAM_CONFIGS.length)%TEAM_CONFIGS.length;renderDots();const wrap=document.getElementById('scores-wrap');wrap.innerHTML='';if(carouselCards[carouselIndex])wrap.appendChild(carouselCards[carouselIndex]);else wrap.innerHTML='<div class="score-loading"><span class="spinner"></span></div>';}
+function renderDots(){const el=document.getElementById('carousel-dots');el.innerHTML='';activeConfigs.forEach((_,i)=>{const dot=document.createElement('div');dot.className='carousel-dot'+(i===carouselIndex?' active':'');dot.onclick=()=>goToSlide(i);el.appendChild(dot);});}
+function showSlide(idx){const n=activeConfigs.length||1;carouselIndex=((idx%n)+n)%n;renderDots();const wrap=document.getElementById('scores-wrap');wrap.innerHTML='';if(carouselCards[carouselIndex])wrap.appendChild(carouselCards[carouselIndex]);else wrap.innerHTML='<div class="score-loading"><span class="spinner"></span></div>';}
 function goToSlide(idx){showSlide(idx);resetAutoAdvance();}
 function carouselNext(){goToSlide(carouselIndex+1);}
 function carouselPrev(){goToSlide(carouselIndex-1);}
@@ -944,7 +967,13 @@ async function fetchScores(){
   // Keep last night's game up until 11am ET the next day: before 11am, use yesterday's date.
   if(etNow.getHours()<11)etNow.setDate(etNow.getDate()-1);
   const ymd=`${etNow.getFullYear()}-${String(etNow.getMonth()+1).padStart(2,'0')}-${String(etNow.getDate()).padStart(2,'0')}`;
-  await Promise.all(TEAM_CONFIGS.map(async(cfg,idx)=>{try{if(cfg.kind==='nfl'){carouselCards[idx]=await buildNFLSlide();return;}if(cfg.kind==='nba'){carouselCards[idx]=await buildNBASlide(ymd);return;}const url=`${MLB_BASE}/api/v1/schedule?teamId=${cfg.teamId}&sportId=1&date=${ymd}&hydrate=probablePitcher(stats),linescore,decisions,seriesStatus,team`,res=await fetch(url),data=await res.json(),games=data.dates?.[0]?.games||[],game=games.find(g=>g.status?.detailedState!=='Postponed')||games[0]||null;carouselCards[idx]=game?await buildMLBCard(game):buildEmptyCard(cfg.label.split(' · ')[1]||cfg.label);}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';carouselCards[idx]=el;}}));
+  // The Celtics card joins the carousel only from 2 days before the NBA season through its end.
+  const showNBA=await nbaShouldShow();
+  activeConfigs=TEAM_CONFIGS.filter(cfg=>cfg.kind!=='nba'||showNBA);
+  if(carouselIndex>=activeConfigs.length)carouselIndex=0;
+  const cards=[];
+  await Promise.all(activeConfigs.map(async(cfg,idx)=>{try{if(cfg.kind==='nfl'){cards[idx]=await buildNFLSlide();return;}if(cfg.kind==='nba'){cards[idx]=await buildNBASlide(ymd);return;}const url=`${MLB_BASE}/api/v1/schedule?teamId=${cfg.teamId}&sportId=1&date=${ymd}&hydrate=probablePitcher(stats),linescore,decisions,seriesStatus,team`,res=await fetch(url),data=await res.json(),games=data.dates?.[0]?.games||[],game=games.find(g=>g.status?.detailedState!=='Postponed')||games[0]||null;cards[idx]=game?await buildMLBCard(game):buildEmptyCard(cfg.label.split(' · ')[1]||cfg.label);}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';cards[idx]=el;}}));
+  carouselCards=cards;
   showSlide(carouselIndex);
 }
 
@@ -1247,7 +1276,7 @@ async function initCalendar() {
    BOOT
 ════════════════════════════════════════════════════════════════════════ */
 async function refreshAll() {
-  const oneTeam = TEAM_CONFIGS.length === 1;
+  const oneTeam = activeConfigs.length === 1;
   document.getElementById('carousel-dots').style.display = oneTeam ? 'none' : 'flex';
   document.querySelectorAll('[onclick="carouselPrev()"], [onclick="carouselNext()"]')
     .forEach(btn => btn.style.display = oneTeam ? 'none' : 'flex');
