@@ -447,6 +447,44 @@ html.dark-mode .score-card.nba .sc-score { color:#4a6a55; }
 html.dark-mode .score-card.nba .sc-score.winner { color:#5dca7a; }
 html.dark-mode .score-card.nba .sc-linescore td.sc-ls-winner { color:#5dca7a; }
 
+/* CFB card (UMass football) — primary maroon #881c1c */
+.score-card.cfb { background:#f7eded; border:0.5px solid rgba(136,28,28,0.22); }
+.score-card.cfb .sc-header { background:#881c1c; padding:6px 12px; display:flex; justify-content:space-between; align-items:center; }
+.score-card.cfb .sc-league-label { font-size:15px; font-weight:700; color:#fff; }
+.score-card.cfb .sc-status { font-size:12px; color:rgba(255,255,255,0.88); font-family:'DM Mono',monospace; }
+.score-card.cfb .sc-body { padding:4px 0; }
+.score-card.cfb .sc-team { display:flex; justify-content:space-between; align-items:center; padding:5px 12px; border-bottom:0.5px solid rgba(0,0,0,0.07); }
+.score-card.cfb .sc-team:last-of-type { border-bottom:none; }
+.score-card.cfb .sc-team.has-ball { background:rgba(136,28,28,0.08); }
+.score-card.cfb .sc-abbr { font-size:15px; font-weight:500; color:#111; display:flex; align-items:center; gap:6px; }
+.score-card.cfb .sc-score { font-family:'DM Mono',monospace; font-size:26px; font-weight:500; color:#aaa; }
+.score-card.cfb .sc-score.winner { color:#881c1c; }
+.score-card.cfb .sc-nfl-situation { background:rgba(136,28,28,0.08); }
+html.dark-mode .score-card.cfb { background:#1a0d0d; border-color:rgba(180,70,70,0.3); }
+html.dark-mode .score-card.cfb .sc-abbr { color:#e8d8d8; }
+html.dark-mode .score-card.cfb .sc-score { color:#6a4a4a; }
+html.dark-mode .score-card.cfb .sc-score.winner { color:#e06060; }
+html.dark-mode .score-card.cfb .sc-team.has-ball { background:rgba(200,90,90,0.13); }
+html.dark-mode .score-card.cfb .sc-nfl-situation { background:rgba(200,90,90,0.13); }
+
+/* UMBB card (UMass men's basketball) — primary maroon #881c1c */
+.score-card.umbb { background:#f7eded; border:0.5px solid rgba(136,28,28,0.22); }
+.score-card.umbb .sc-header { background:#881c1c; padding:6px 12px; display:flex; justify-content:space-between; align-items:center; }
+.score-card.umbb .sc-league-label { font-size:15px; font-weight:700; color:#fff; }
+.score-card.umbb .sc-status { font-size:12px; color:rgba(255,255,255,0.88); font-family:'DM Mono',monospace; }
+.score-card.umbb .sc-body { padding:4px 0; }
+.score-card.umbb .sc-team { display:flex; justify-content:space-between; align-items:center; padding:5px 12px; border-bottom:0.5px solid rgba(0,0,0,0.07); }
+.score-card.umbb .sc-team:last-of-type { border-bottom:none; }
+.score-card.umbb .sc-abbr { font-size:15px; font-weight:500; color:#111; }
+.score-card.umbb .sc-score { font-family:'DM Mono',monospace; font-size:26px; font-weight:500; color:#aaa; }
+.score-card.umbb .sc-score.winner { color:#881c1c; }
+.score-card.umbb .sc-linescore td.sc-ls-winner { color:#881c1c; }
+html.dark-mode .score-card.umbb { background:#1a0d0d; border-color:rgba(180,70,70,0.3); }
+html.dark-mode .score-card.umbb .sc-abbr { color:#e8d8d8; }
+html.dark-mode .score-card.umbb .sc-score { color:#6a4a4a; }
+html.dark-mode .score-card.umbb .sc-score.winner { color:#e06060; }
+html.dark-mode .score-card.umbb .sc-linescore td.sc-ls-winner { color:#e06060; }
+
 /* Carousel */
 .carousel-dot { width:6px; height:6px; border-radius:50%; background:var(--surface2); border:0.5px solid var(--border); cursor:pointer; transition:background 0.2s; flex-shrink:0; }
 .carousel-dot.active { background:var(--muted); }
@@ -794,9 +832,12 @@ function nflTeamRow(t,o){
   const ball=o.hasBall?`<span style="display:inline-flex">${nflBall(13)}</span>`:'';
   return `<div class="sc-team${o.hasBall?' has-ball':''}"><div style="display:flex;flex-direction:column;gap:1px;"><span class="sc-abbr">${abbr}${ball}</span>${rec?`<span style="font-size:10px;color:var(--dim)">${rec}</span>`:''}</div><span class="sc-score ${o.isWinner?'winner':''}">${o.showScore?(o.score??'—'):'—'}</span></div>`;
 }
-function nflCardEl(statusLabel,bodyInner){const card=document.createElement('div');card.className='score-card nfl';card.innerHTML=`<div class="sc-header"><span class="sc-league-label">Patriots</span><span class="sc-status">${statusLabel}</span></div><div class="sc-body">${bodyInner}</div>`;return card;}
+// Card chrome (CSS class + header label) differs per football team; defaults to the Patriots.
+const NFL_META = { cls:'nfl', label:'Patriots' };
+const CFB_META = { cls:'cfb', label:'UMass Football' };
+function nflCardEl(statusLabel,bodyInner,meta){meta=meta||NFL_META;const card=document.createElement('div');card.className='score-card '+meta.cls;card.innerHTML=`<div class="sc-header"><span class="sc-league-label">${meta.label}</span><span class="sc-status">${statusLabel}</span></div><div class="sc-body">${bodyInner}</div>`;return card;}
 
-function nflLiveCard(comp){
+function nflLiveCard(comp,meta){
   const st=comp.status||{},period=st.period||0,clock=st.displayClock||'';
   const q=period<=4?`Q${period}`:(period===5?'OT':`OT${period-4}`);
   const {away,home}=nflSides(comp),sit=comp.situation||{},possId=sit.possession;
@@ -807,9 +848,9 @@ function nflLiveCard(comp){
   const sitHTML=(dd||possAbbr)?`<div class="sc-nfl-situation"><span class="sc-nfl-dd">${dd||'&nbsp;'}</span>${possAbbr?`<span class="sc-nfl-poss">${nflBall(12)} ${possAbbr} ball</span>`:''}</div>`:'';
   return nflCardEl(`${q} ${clock}`.trim(),
     nflTeamRow(away,{showScore:true,score:nflScoreVal(away),hasBall:awayBall})+
-    nflTeamRow(home,{showScore:true,score:nflScoreVal(home),hasBall:homeBall})+sitHTML);
+    nflTeamRow(home,{showScore:true,score:nflScoreVal(home),hasBall:homeBall})+sitHTML,meta);
 }
-async function nflPreCard(ev,comp){
+async function nflPreCard(ev,comp,meta){
   const {away,home}=nflSides(comp),fmt=nflFmt(ev.date);
   const venue=(comp.venue&&comp.venue.fullName)||'',addr=(comp.venue&&comp.venue.address)?`${comp.venue.address.city}, ${comp.venue.address.state}`:'';
   const bcast=nflBroadcast(comp);
@@ -819,18 +860,18 @@ async function nflPreCard(ev,comp){
     if(w){const wi=wmo(w.code);wxHTML=`<div class="sc-nfl-row">${wxSVG(wi.svg,18)}<span>${w.temp}&deg; ${wi.l}${w.precip>15?` <span class="sub">&middot; ${w.precip}% precip</span>`:''}</span></div>`;}
   }
   const info=`<div class="sc-nfl-info"><div class="sc-nfl-row">${_svgCal}<span>${fmt.dateLabel} &middot; ${fmt.timeLabel}</span></div><div class="sc-nfl-row">${_svgPin}<span>${venue}${addr?` <span class="sub">&middot; ${addr}</span>`:''}</span></div>${bcast?`<div class="sc-nfl-row">${_svgTv}<span>${bcast}</span></div>`:''}${wxHTML}</div>`;
-  return nflCardEl(fmt.shortDayTime,nflTeamRow(away,{showScore:false})+nflTeamRow(home,{showScore:false})+info);
+  return nflCardEl(fmt.shortDayTime,nflTeamRow(away,{showScore:false})+nflTeamRow(home,{showScore:false})+info,meta);
 }
-function nflByeCard(){
-  return nflCardEl('Bye Week',`<div style="padding:20px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px"><span style="opacity:0.85">${nflBall(30)}</span><div style="font-size:13px;color:var(--muted)">No game scheduled this week</div></div>`);
+function nflByeCard(meta){
+  return nflCardEl('Bye Week',`<div style="padding:20px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px"><span style="opacity:0.85">${nflBall(30)}</span><div style="font-size:13px;color:var(--muted)">No game scheduled this week</div></div>`,meta);
 }
-function nflPostCard(ev,comp){
+function nflPostCard(ev,comp,meta){
   const {away,home}=nflSides(comp),as=nflScoreVal(away),hs=nflScoreVal(home);
   const aw=Number(as)>Number(hs),hw=Number(hs)>Number(as);
   const det=(comp.status&&comp.status.type&&comp.status.type.shortDetail)||'';
   return nflCardEl(/OT/i.test(det)?'Final/OT':'Final',
     nflTeamRow(away,{showScore:true,score:as,isWinner:aw})+nflTeamRow(home,{showScore:true,score:hs,isWinner:hw})+
-    `<div class="sc-nfl-info"><div class="sc-nfl-row">${_svgCal}<span class="sub">${nflFmt(ev.date).dateLabel}</span></div></div>`);
+    `<div class="sc-nfl-info"><div class="sc-nfl-row">${_svgCal}<span class="sub">${nflFmt(ev.date).dateLabel}</span></div></div>`,meta);
 }
 async function buildNFLSlide(){
   // Scoreboard reflects the current week and is the only feed with live possession/down/clock. Ignore preseason (season.type 1).
@@ -862,6 +903,33 @@ async function buildNFLSlide(){
 }
 
 /* ════════════════════════════════════════════════════════════════════════
+   COLLEGE FOOTBALL (UMass) — ESPN public API
+   Reuses the NFL card renderers. Different game-selection rule: show a game
+   from 4 days before kickoff until 4 days before the NEXT game's kickoff —
+   i.e. the latest game whose kickoff is at most 4 days in the future.
+════════════════════════════════════════════════════════════════════════ */
+const ESPN_CFB   = 'https://site.api.espn.com/apis/site/v2/sports/football/college-football';
+const UMASS_ID   = '113';   // ESPN team id for UMass (shared by football & basketball feeds)
+async function buildCFBSlide(){
+  const byId=new Map();
+  // seasontype 2 = regular season, 3 = postseason (bowls)
+  await Promise.all([2,3].map(async t=>{try{const d=await(await fetch(`${SCHED_BASE.cfb}?seasontype=${t}`)).json();(d.events||[]).forEach(ev=>{if(ev.competitions&&ev.competitions[0]&&!byId.has(ev.id))byId.set(ev.id,{ev,c:ev.competitions[0]});});}catch(e){}}));
+  // ts = real kickoff instant (UTC ms); the 4-day window is a duration, so no ET-naive math.
+  const cands=[...byId.values()].map(o=>({...o,state:o.c.status&&o.c.status.type&&o.c.status.type.state,ts:Date.parse(o.ev.date)})).filter(o=>!isNaN(o.ts)).sort((a,b)=>a.ts-b.ts);
+  const now=Date.now();
+  // Reveal a game 4 days before kickoff; it stays up (through its result) until the next
+  // game is itself 4 days away, at which point the next game takes over.
+  const eligible=cands.filter(o=>o.ts-CFB_WINDOW_EDGE<=now);
+  const game=eligible.length?eligible[eligible.length-1]:cands[0];
+  if(game){
+    if(game.state==='in')return nflLiveCard(game.c,CFB_META);          // live: score, quarter, clock
+    if(game.state==='post')return nflPostCard(game.ev,game.c,CFB_META);// finished: keep the result up
+    return await nflPreCard(game.ev,game.c,CFB_META);                  // scheduled: date/time/location/network/weather
+  }
+  return nflByeCard(CFB_META);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    NBA SCORES (Celtics) — ESPN public API
 ════════════════════════════════════════════════════════════════════════ */
 const ESPN_NBA = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba';
@@ -873,16 +941,20 @@ function nbaBroadcast(comp){
   b.forEach(x=>{if(Array.isArray(x.names))names.push(...x.names);else if(x.media&&x.media.shortName)names.push(x.media.shortName);else if(x.shortName)names.push(x.shortName);});
   return [...new Set(names.filter(Boolean))].join(', ');
 }
-function nbaCardEl(statusLabel,bodyInner){const card=document.createElement('div');card.className='score-card nba';card.innerHTML=`<div class="sc-header"><span class="sc-league-label">Celtics</span><span class="sc-status">${statusLabel}</span></div><div class="sc-body">${bodyInner}</div>`;return card;}
+// Card chrome (CSS class + header label) differs per basketball team; defaults to the Celtics.
+const NBA_META  = { cls:'nba',  label:'Celtics' };
+const UMBB_META = { cls:'umbb', label:'UMass Basketball' };
+function nbaCardEl(statusLabel,bodyInner,meta){meta=meta||NBA_META;const card=document.createElement('div');card.className='score-card '+meta.cls;card.innerHTML=`<div class="sc-header"><span class="sc-league-label">${meta.label}</span><span class="sc-status">${statusLabel}</span></div><div class="sc-body">${bodyInner}</div>`;return card;}
 function nbaTeamRow(t,o){
   o=o||{};const abbr=(t.team&&t.team.abbreviation)||'—',rec=(t.records&&t.records[0]&&t.records[0].summary)||'';
   return `<div class="sc-team"><div style="display:flex;flex-direction:column;gap:1px;"><span class="sc-abbr">${abbr}</span>${rec?`<span style="font-size:10px;color:var(--dim)">${rec}</span>`:''}</div><span class="sc-score ${o.isWinner?'winner':''}">${o.showScore?(o.score??'—'):'—'}</span></div>`;
 }
-// Score by quarter: team + Q1–Q4 (+ OT columns when played) + total.
-function nbaLinescore(away,home,period){
+// Score by period: NBA = Q1–Q4, college = H1–H2 (reg=2), plus OT columns + total.
+function nbaLinescore(away,home,period,reg){
+  reg=reg||4;const pre=reg===2?'H':'Q';
   const aLs=away.linescores||[],hLs=home.linescores||[];
-  const nPer=Math.max(4,aLs.length,hLs.length,period||0);
-  const head=[];for(let i=0;i<nPer;i++)head.push(i<4?`Q${i+1}`:(i===4?'OT':`OT${i-3}`));
+  const nPer=Math.max(reg,aLs.length,hLs.length,period||0);
+  const head=[];for(let i=0;i<nPer;i++)head.push(i<reg?`${pre}${i+1}`:(i===reg?'OT':`OT${i-reg+1}`));
   const cell=(ls,i)=>{const v=ls[i];if(!v)return'—';const d=(v.displayValue??v.value);return (d===undefined||d===null||d==='')?'—':d;};
   const aTot=nbaScoreVal(away),hTot=nbaScoreVal(home),aw=Number(aTot)>Number(hTot),hw=Number(hTot)>Number(aTot);
   const row=(t,ls,tot,win)=>`<tr><td class="sc-ls-team">${(t.team&&t.team.abbreviation)||'—'}</td>${head.map((_,i)=>`<td>${cell(ls,i)}</td>`).join('')}<td class="sc-ls-total ${win?'sc-ls-winner':''}">${tot??'—'}</td></tr>`;
@@ -896,8 +968,8 @@ function nbaInfoRows(ev,comp,opt){
   if(bcast)rows.push(`<div class="sc-nfl-row">${_svgTv}<span>${bcast}</span></div>`);
   return rows.length?`<div class="sc-nfl-info">${rows.join('')}</div>`:'';
 }
-function nbaNoGameCard(){
-  return nbaCardEl('No Game',`<div style="padding:20px 12px;text-align:center;font-size:13px;color:var(--muted)">No game today</div>`);
+function nbaNoGameCard(meta){
+  return nbaCardEl('No Game',`<div style="padding:20px 12px;text-align:center;font-size:13px;color:var(--muted)">No game today</div>`,meta);
 }
 async function buildNBASlide(ymd){
   // Query the Celtics' game for the effective date (ymd already applies the 11am-ET carryover).
@@ -928,15 +1000,55 @@ async function buildNBASlide(ymd){
 }
 
 /* ════════════════════════════════════════════════════════════════════════
+   COLLEGE BASKETBALL (UMass men's) — ESPN public API
+   Same display rule as the Celtics: show the game on the effective date
+   (ymd already carries the 11am-ET carryover). Uses the season schedule feed
+   (more reliable than the college scoreboard-by-date) to find that day's game.
+   College basketball is played in 2 halves, so the linescore uses reg=2.
+════════════════════════════════════════════════════════════════════════ */
+const ESPN_MBB = 'https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball';
+async function buildUMBBSlide(ymd){
+  const byId=new Map();
+  await Promise.all([2,3].map(async t=>{try{const d=await(await fetch(`${SCHED_BASE.umbb}?seasontype=${t}`)).json();(d.events||[]).forEach(ev=>{if(ev.competitions&&ev.competitions[0]&&!byId.has(ev.id))byId.set(ev.id,{ev,c:ev.competitions[0]});});}catch(e){}}));
+  const ev=[...byId.values()].map(o=>o.ev).find(e=>espnETymd(e.date)===ymd);
+  if(!ev)return nbaNoGameCard(UMBB_META);
+  const comp=ev.competitions[0],st=comp.status||{},type=st.type||{},state=type.state,{away,home}=nbaSides(comp);
+  if(state==='pre'){
+    // Scheduled: opponent, game time, broadcast network.
+    return nbaCardEl(nflFmt(ev.date).shortDayTime,
+      nbaTeamRow(away,{showScore:false})+nbaTeamRow(home,{showScore:false})+nbaInfoRows(ev,comp,{dateTime:true}),UMBB_META);
+  }
+  const as=nbaScoreVal(away),hs=nbaScoreVal(home);
+  if(state==='in'){
+    // Live: score, half + time remaining, score by half, broadcast.
+    const p=st.period||0,clock=st.displayClock||'',q=p<=2?`H${p}`:(p===3?'OT':`OT${p-2}`);
+    return nbaCardEl(`${q} ${clock}`.trim(),
+      nbaTeamRow(away,{showScore:true,score:as})+nbaTeamRow(home,{showScore:true,score:hs})+
+      nbaLinescore(away,home,p,2)+nbaInfoRows(ev,comp,{}),UMBB_META);
+  }
+  // Final: score, winner, score by half, broadcast + date.
+  const aw=Number(as)>Number(hs),hw=Number(hs)>Number(as);
+  const label=/OT/i.test(type.shortDetail||'')?'Final/OT':'Final';
+  return nbaCardEl(label,
+    nbaTeamRow(away,{showScore:true,score:as,isWinner:aw})+nbaTeamRow(home,{showScore:true,score:hs,isWinner:hw})+
+    nbaLinescore(away,home,st.period,2)+nbaInfoRows(ev,comp,{date:true}),UMBB_META);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    SEASON WINDOWS — each card shows only from 2 days before its season's
    first game through 2 days after its last game (ESPN schedule feeds).
 ════════════════════════════════════════════════════════════════════════ */
 const DAY = 24*3600*1000;
 const SEASON_EDGE = 2*DAY;   // reveal 2 days before opener; hide 2 days after finale
+const CFB_WINDOW_EDGE = 4*DAY;  // college football: show a game from 4 days before kickoff
+// Effective ET calendar date (YYYY-MM-DD) of an ESPN event's kickoff/tip time.
+function espnETymd(dateISO){const p=toNY(new Date(dateISO));return `${p.y}-${String(p.mo).padStart(2,'0')}-${String(p.d).padStart(2,'0')}`;}
 const SCHED_BASE = {
-  mlb: 'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/bos/schedule',
-  nfl: `${ESPN_NFL}/teams/ne/schedule`,
-  nba: `${ESPN_NBA}/teams/bos/schedule`,
+  mlb:  'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/bos/schedule',
+  nfl:  `${ESPN_NFL}/teams/ne/schedule`,
+  nba:  `${ESPN_NBA}/teams/bos/schedule`,
+  cfb:  `${ESPN_CFB}/teams/${UMASS_ID}/schedule`,
+  umbb: `${ESPN_MBB}/teams/${UMASS_ID}/schedule`,
 };
 const _seasonCache = {};  // kind -> { ts, start, end } (start/end are ms, or null if unknown)
 async function seasonWindow(kind){
@@ -965,9 +1077,11 @@ async function inSeason(kind){
 }
 
 const TEAM_CONFIGS = [
-  { label:'MLB · Red Sox',  kind:'mlb', teamId: BOS_TEAM_ID },
-  { label:'NFL · Patriots', kind:'nfl' },
-  { label:'NBA · Celtics',  kind:'nba' },
+  { label:'MLB · Red Sox',        kind:'mlb', teamId: BOS_TEAM_ID },
+  { label:'NFL · Patriots',       kind:'nfl' },
+  { label:'NBA · Celtics',        kind:'nba' },
+  { label:'CFB · UMass',          kind:'cfb' },
+  { label:'MBB · UMass',          kind:'umbb' },
 ];
 // Cards actually in the carousel right now (each team's card is added only in-season).
 let activeConfigs = TEAM_CONFIGS.slice();
@@ -993,7 +1107,7 @@ async function fetchScores(){
   }
   if(carouselIndex>=activeConfigs.length)carouselIndex=0;
   const cards=[];
-  await Promise.all(activeConfigs.map(async(cfg,idx)=>{try{if(cfg.kind==='nfl'){cards[idx]=await buildNFLSlide();return;}if(cfg.kind==='nba'){cards[idx]=await buildNBASlide(ymd);return;}const url=`${MLB_BASE}/api/v1/schedule?teamId=${cfg.teamId}&sportId=1&date=${ymd}&hydrate=probablePitcher(stats),linescore,decisions,seriesStatus,team`,res=await fetch(url),data=await res.json(),games=data.dates?.[0]?.games||[],game=games.find(g=>g.status?.detailedState!=='Postponed')||games[0]||null;cards[idx]=game?await buildMLBCard(game):buildEmptyCard(cfg.label.split(' · ')[1]||cfg.label);}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';cards[idx]=el;}}));
+  await Promise.all(activeConfigs.map(async(cfg,idx)=>{try{if(cfg.kind==='nfl'){cards[idx]=await buildNFLSlide();return;}if(cfg.kind==='cfb'){cards[idx]=await buildCFBSlide();return;}if(cfg.kind==='nba'){cards[idx]=await buildNBASlide(ymd);return;}if(cfg.kind==='umbb'){cards[idx]=await buildUMBBSlide(ymd);return;}const url=`${MLB_BASE}/api/v1/schedule?teamId=${cfg.teamId}&sportId=1&date=${ymd}&hydrate=probablePitcher(stats),linescore,decisions,seriesStatus,team`,res=await fetch(url),data=await res.json(),games=data.dates?.[0]?.games||[],game=games.find(g=>g.status?.detailedState!=='Postponed')||games[0]||null;cards[idx]=game?await buildMLBCard(game):buildEmptyCard(cfg.label.split(' · ')[1]||cfg.label);}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';cards[idx]=el;}}));
   carouselCards=cards;
   showSlide(carouselIndex);
 }
