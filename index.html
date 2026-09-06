@@ -762,7 +762,6 @@ async function buildMLBCard(game){
   if(isFinal)statusLabel='Final';
   else if(isLive)statusLabel='Live';
   else{const d=new Date(game.gameDate);statusLabel=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/New_York'});}
-  const seriesStr=game.seriesStatus?.description||null;
   let probablesHTML='';
   {const rows=[];for(const[side,abbr]of[['away',awayAbbr],['home',homeAbbr]]){const pp=game.teams?.[side]?.probablePitcher;if(!pp)continue;const name=pp.fullName||'—';const{record,era}=parsePitcherStats(pp);rows.push({abbr,name,record,era});}if(rows.length&&isPreview){probablesHTML=`<div class="sc-probables"><div class="sc-probables-label">Probable Pitchers</div>${rows.map(r=>`<div class="sc-probable-row"><span class="sc-probable-team">${r.abbr}</span><span class="sc-probable-name">${r.name}</span>${r.era?`<span class="sc-probable-stat">${r.era} ERA</span>`:''} ${r.record?`<span class="sc-probable-record">${r.record}</span>`:''}</div>`).join('')}</div>`;}}
   let lineScoreHTML='',liveHTML='',decisionsHTML='';
@@ -786,7 +785,7 @@ async function buildMLBCard(game){
   if(isFinal){try{nextGameHTML=await espnNextGameLineFromSchedule('mlb',Date.parse(game.gameDate),c=>c.team&&c.team.abbreviation==='BOS');}catch(e){}}
   const card=document.createElement('div');
   card.className='score-card mlb';
-  card.innerHTML=`<div class="sc-header"><span class="sc-league-label">Red Sox</span><span class="sc-status">${statusLabel}</span></div>${seriesStr?`<div class="sc-series" style="background:#bd3039">${seriesStr}</div>`:''}<div class="sc-body">${teamRow(awayAbbr,awayRecStr,awayRuns,isFinal&&awayRuns>homeRuns)}${teamRow(homeAbbr,homeRecStr,homeRuns,isFinal&&homeRuns>awayRuns)}${lineScoreHTML}${probablesHTML}${liveHTML}${decisionsHTML}${nextGameHTML}</div>`;
+  card.innerHTML=`<div class="sc-header"><span class="sc-league-label">Red Sox</span><span class="sc-status">${statusLabel}</span></div><div class="sc-body">${teamRow(awayAbbr,awayRecStr,awayRuns,isFinal&&awayRuns>homeRuns)}${teamRow(homeAbbr,homeRecStr,homeRuns,isFinal&&homeRuns>awayRuns)}${lineScoreHTML}${probablesHTML}${liveHTML}${decisionsHTML}${nextGameHTML}</div>`;
   return card;
 }
 
