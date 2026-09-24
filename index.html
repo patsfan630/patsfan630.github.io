@@ -731,7 +731,12 @@ function ordinal(n){return n===1?'1st':n===2?'2nd':n===3?'3rd':`${n}th`;}
 function inningLabel(half,num){if(!half||!num)return'';const sym=/top/i.test(half)?'▲':/bot/i.test(half)?'▼':'—';return`${sym} ${ordinal(num)}`;}
 function parsePitcherStats(pitcher){if(!pitcher)return{record:'',era:''};const stats=pitcher.stats||[];let stat=null;for(const s of stats){const dn=s.type?.displayName||'';if(dn==='statsSingleSeason'||dn==='season'){stat=s.stat;break;}if(!stat&&s.stat?.era!==undefined)stat=s.stat;}if(!stat)return{record:'',era:''};const w=stat.wins??'',l=stat.losses??'',era=stat.era!=null?parseFloat(stat.era).toFixed(2):'',record=(w!==''&&l!=='')?`${w}-${l}`:'';return{record,era};}
 
-function buildEmptyCard(label){const card=document.createElement('div');card.className='score-card mlb';card.innerHTML=`<div class="sc-header"><span class="sc-league-label">${label}</span></div><div class="sc-body" style="padding:14px 12px;text-align:center;font-size:12px;color:var(--muted)">No game today</div>`;return card;}
+async function buildEmptyCard(label){
+  const card=document.createElement('div');card.className='score-card mlb';
+  let nextLine='';try{nextLine=await espnNextGameLineFromSchedule('mlb',Date.now(),c=>c.team&&c.team.abbreviation==='BOS');}catch(e){}
+  card.innerHTML=`<div class="sc-header"><span class="sc-league-label">${label}</span></div><div class="sc-body"><div style="padding:14px 12px;text-align:center;font-size:12px;color:var(--muted)">No game today</div>${nextLine}</div>`;
+  return card;
+}
 
 async function buildMLBCard(game){
   const gamePk=game.gamePk,statusCode=game.status?.abstractGameState,isLive=statusCode==='Live',isFinal=statusCode==='Final',isPreview=statusCode==='Preview',showScore=isLive||isFinal;
@@ -889,8 +894,8 @@ async function nflPreCard(ev,comp,meta){
   const info=`<div class="sc-nfl-info"><div class="sc-nfl-row">${_svgCal}<span>${fmt.dateLabel} &middot; ${fmt.timeLabel}</span></div><div class="sc-nfl-row">${_svgPin}<span>${venue}${addr?` <span class="sub">&middot; ${addr}</span>`:''}</span></div>${bcast?`<div class="sc-nfl-row">${_svgTv}<span>${bcast}</span></div>`:''}${wxHTML}</div>`;
   return nflCardEl(fmt.shortDayTime,nflTeamRow(away,{showScore:false})+nflTeamRow(home,{showScore:false})+info,meta);
 }
-function nflByeCard(meta){
-  return nflCardEl('Bye Week',`<div style="padding:20px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px"><span style="opacity:0.85">${nflBall(30)}</span><div style="font-size:13px;color:var(--muted)">No game scheduled this week</div></div>`,meta);
+function nflByeCard(meta,nextLine){
+  return nflCardEl('Bye Week',`<div style="padding:20px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px"><span style="opacity:0.85">${nflBall(30)}</span><div style="font-size:13px;color:var(--muted)">No game scheduled this week</div></div>${nextLine||''}`,meta);
 }
 function nflPostCard(ev,comp,meta,nextLine){
   const {away,home}=nflSides(comp),as=nflScoreVal(away),hs=nflScoreVal(home);
@@ -929,7 +934,7 @@ async function buildNFLSlide(){
   const upcoming=cands.filter(o=>o.state==='pre').sort((a,b)=>a.ts-b.ts)[0];
   const played=cands.some(o=>o.state==='post');
   if(upcoming&&!played)return await nflPreCard(upcoming.ev,upcoming.c); // season not started yet: show the opener now
-  if(upcoming)return nflByeCard();                                      // mid-season bye
+  if(upcoming)return nflByeCard(NFL_META,espnNextGameLine(upcoming.ev,upcoming.c,c=>c.team&&c.team.abbreviation==='NE')); // mid-season bye: show the next game
   const lastDone=cands.filter(o=>o.state==='post').sort((a,b)=>b.ts-a.ts)[0];
   return lastDone?nflPostCard(lastDone.ev,lastDone.c):nflByeCard();     // season over: keep the last result up
 }
@@ -972,15 +977,18 @@ function nbaInfoRows(ev,comp,opt){
   if(bcast)rows.push(`<div class="sc-nfl-row">${_svgTv}<span>${bcast}</span></div>`);
   return rows.length?`<div class="sc-nfl-info">${rows.join('')}</div>`:'';
 }
-function nbaNoGameCard(meta){
-  return nbaCardEl('No Game',`<div style="padding:20px 12px;text-align:center;font-size:13px;color:var(--muted)">No game today</div>`,meta);
+function nbaNoGameCard(meta,nextLine){
+  return nbaCardEl('No Game',`<div style="padding:20px 12px;text-align:center;font-size:13px;color:var(--muted)">No game today</div>${nextLine||''}`,meta);
 }
 async function buildNBASlide(ymd){
   // Query the Celtics' game for the effective date (ymd already applies the 11am-ET carryover).
   const dateParam=ymd.replace(/-/g,'');
   let sb=null;try{sb=await(await fetch(`${ESPN_NBA}/scoreboard?dates=${dateParam}`)).json();}catch(e){}
   const ev=(sb&&sb.events||[]).find(e=>e.competitions&&e.competitions[0]&&(e.competitions[0].competitors||[]).some(c=>c.team&&c.team.abbreviation===CELTICS_ABBR));
-  if(!ev)return nbaNoGameCard();
+  if(!ev){
+    let nextLine='';try{nextLine=await espnNextGameLineFromSchedule('nba',Date.now(),c=>c.team&&c.team.abbreviation===CELTICS_ABBR);}catch(e){}
+    return nbaNoGameCard(undefined,nextLine);
+  }
   const comp=ev.competitions[0],st=comp.status||{},type=st.type||{},state=type.state,{away,home}=nbaSides(comp);
   if(state==='pre'){
     // Scheduled: opponent, game time, broadcast network.
@@ -1040,15 +1048,18 @@ function nhlInfoRows(ev,comp,opt){
   if(bcast)rows.push(`<div class="sc-nfl-row">${_svgTv}<span>${bcast}</span></div>`);
   return rows.length?`<div class="sc-nfl-info">${rows.join('')}</div>`:'';
 }
-function nhlNoGameCard(meta){
-  return nhlCardEl('No Game',`<div style="padding:20px 12px;text-align:center;font-size:13px;color:var(--muted)">No game today</div>`,meta);
+function nhlNoGameCard(meta,nextLine){
+  return nhlCardEl('No Game',`<div style="padding:20px 12px;text-align:center;font-size:13px;color:var(--muted)">No game today</div>${nextLine||''}`,meta);
 }
 async function buildNHLSlide(ymd){
   // Query the Bruins' game for the effective date (ymd already applies the 11am-ET carryover).
   const dateParam=ymd.replace(/-/g,'');
   let sb=null;try{sb=await(await fetch(`${ESPN_NHL}/scoreboard?dates=${dateParam}`)).json();}catch(e){}
   const ev=(sb&&sb.events||[]).find(e=>e.competitions&&e.competitions[0]&&(e.competitions[0].competitors||[]).some(c=>c.team&&c.team.abbreviation===BRUINS_ABBR));
-  if(!ev)return nhlNoGameCard();
+  if(!ev){
+    let nextLine='';try{nextLine=await espnNextGameLineFromSchedule('nhl',Date.now(),c=>c.team&&c.team.abbreviation===BRUINS_ABBR);}catch(e){}
+    return nhlNoGameCard(undefined,nextLine);
+  }
   const comp=ev.competitions[0],st=comp.status||{},type=st.type||{},state=type.state,{away,home}=nhlSides(comp);
   if(state==='pre'){
     // Scheduled: opponent, game time, broadcast network.
@@ -1148,7 +1159,7 @@ async function fetchScores(){
   }
   if(carouselIndex>=activeConfigs.length)carouselIndex=0;
   const cards=[];
-  await Promise.all(activeConfigs.map(async(cfg,idx)=>{try{if(cfg.kind==='nfl'){cards[idx]=await buildNFLSlide();return;}if(cfg.kind==='nba'){cards[idx]=await buildNBASlide(ymd);return;}if(cfg.kind==='nhl'){cards[idx]=await buildNHLSlide(ymd);return;}const url=`${MLB_BASE}/api/v1/schedule?teamId=${cfg.teamId}&sportId=1&date=${ymd}&hydrate=probablePitcher(stats),linescore,decisions,seriesStatus,team`,res=await fetch(url),data=await res.json(),games=data.dates?.[0]?.games||[],game=games.find(g=>g.status?.detailedState!=='Postponed')||games[0]||null;cards[idx]=game?await buildMLBCard(game):buildEmptyCard(cfg.label.split(' · ')[1]||cfg.label);}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';cards[idx]=el;}}));
+  await Promise.all(activeConfigs.map(async(cfg,idx)=>{try{if(cfg.kind==='nfl'){cards[idx]=await buildNFLSlide();return;}if(cfg.kind==='nba'){cards[idx]=await buildNBASlide(ymd);return;}if(cfg.kind==='nhl'){cards[idx]=await buildNHLSlide(ymd);return;}const url=`${MLB_BASE}/api/v1/schedule?teamId=${cfg.teamId}&sportId=1&date=${ymd}&hydrate=probablePitcher(stats),linescore,decisions,seriesStatus,team`,res=await fetch(url),data=await res.json(),games=data.dates?.[0]?.games||[],game=games.find(g=>g.status?.detailedState!=='Postponed')||games[0]||null;cards[idx]=game?await buildMLBCard(game):await buildEmptyCard(cfg.label.split(' · ')[1]||cfg.label);}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';cards[idx]=el;}}));
   carouselCards=cards;
   showSlide(carouselIndex);
 }
