@@ -972,7 +972,6 @@ function nbaLinescore(away,home,period,reg){
 function nbaInfoRows(ev,comp,opt){
   opt=opt||{};const rows=[];
   if(opt.dateTime){const f=nflFmt(ev.date);rows.push(`<div class="sc-nfl-row">${_svgCal}<span>${f.dateLabel} &middot; ${f.timeLabel}</span></div>`);}
-  else if(opt.date){rows.push(`<div class="sc-nfl-row">${_svgCal}<span class="sub">${nflFmt(ev.date).dateLabel}</span></div>`);}
   const bcast=nbaBroadcast(comp);
   if(bcast)rows.push(`<div class="sc-nfl-row">${_svgTv}<span>${bcast}</span></div>`);
   return rows.length?`<div class="sc-nfl-info">${rows.join('')}</div>`:'';
@@ -1003,13 +1002,13 @@ async function buildNBASlide(ymd){
       nbaTeamRow(away,{showScore:true,score:as})+nbaTeamRow(home,{showScore:true,score:hs})+
       nbaLinescore(away,home,p)+nbaInfoRows(ev,comp,{}));
   }
-  // Final: score, winner, score by quarter, broadcast + date, and the next game.
+  // Final: score, winner, score by quarter, and the next game (no date/broadcast).
   const aw=Number(as)>Number(hs),hw=Number(hs)>Number(as);
   const label=/OT/i.test(type.shortDetail||'')?'Final/OT':'Final';
   const nextLine=await espnNextGameLineFromSchedule('nba',Date.parse(ev.date),c=>c.team&&c.team.abbreviation===CELTICS_ABBR);
   return nbaCardEl(label,
     nbaTeamRow(away,{showScore:true,score:as,isWinner:aw})+nbaTeamRow(home,{showScore:true,score:hs,isWinner:hw})+
-    nbaLinescore(away,home,st.period)+nbaInfoRows(ev,comp,{date:true})+nextLine);
+    nbaLinescore(away,home,st.period)+nextLine);
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -1043,7 +1042,6 @@ function nhlLinescore(away,home,period){
 function nhlInfoRows(ev,comp,opt){
   opt=opt||{};const rows=[];
   if(opt.dateTime){const f=nflFmt(ev.date);rows.push(`<div class="sc-nfl-row">${_svgCal}<span>${f.dateLabel} &middot; ${f.timeLabel}</span></div>`);}
-  else if(opt.date){rows.push(`<div class="sc-nfl-row">${_svgCal}<span class="sub">${nflFmt(ev.date).dateLabel}</span></div>`);}
   const bcast=nhlBroadcast(comp);
   if(bcast)rows.push(`<div class="sc-nfl-row">${_svgTv}<span>${bcast}</span></div>`);
   return rows.length?`<div class="sc-nfl-info">${rows.join('')}</div>`:'';
@@ -1074,13 +1072,13 @@ async function buildNHLSlide(ymd){
       nhlTeamRow(away,{showScore:true,score:as})+nhlTeamRow(home,{showScore:true,score:hs})+
       nhlLinescore(away,home,p)+nhlInfoRows(ev,comp,{}));
   }
-  // Final: score, winner, score by period, broadcast + date, and the next game.
+  // Final: score, winner, score by period, and the next game (no date/broadcast).
   const aw=Number(as)>Number(hs),hw=Number(hs)>Number(as);
   const label=/SO/i.test(type.shortDetail||'')?'Final/SO':(/OT/i.test(type.shortDetail||'')?'Final/OT':'Final');
   const nextLine=await espnNextGameLineFromSchedule('nhl',Date.parse(ev.date),c=>c.team&&c.team.abbreviation===BRUINS_ABBR);
   return nhlCardEl(label,
     nhlTeamRow(away,{showScore:true,score:as,isWinner:aw})+nhlTeamRow(home,{showScore:true,score:hs,isWinner:hw})+
-    nhlLinescore(away,home,st.period)+nhlInfoRows(ev,comp,{date:true})+nextLine);
+    nhlLinescore(away,home,st.period)+nextLine);
 }
 
 /* ════════════════════════════════════════════════════════════════════════
