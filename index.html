@@ -256,19 +256,14 @@ body { background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--text)
   flex-shrink: 0;
 }
 .cal-event-inner {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 4px;
+  /* Time and title flow as one run of text, so wrapped lines start flush left under the time */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .cal-event-title {
   font-weight: 500;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  flex: 1;
-  min-width: 0;
 }
 
 /* Now indicator */
@@ -1383,6 +1378,14 @@ function renderCalGrid() {
     });
 
     grid.appendChild(col);
+  });
+
+  // Let each event show as many lines as its height allows (instead of a fixed cap)
+  grid.querySelectorAll('.cal-event').forEach(block => {
+    const inner = block.firstElementChild;
+    const lh = parseFloat(getComputedStyle(inner).lineHeight);
+    const pad = parseFloat(getComputedStyle(block).paddingTop) + parseFloat(getComputedStyle(block).paddingBottom);
+    if (lh > 0) inner.style.webkitLineClamp = Math.max(1, Math.floor((block.offsetHeight - pad) / lh));
   });
 
   // Now indicator
