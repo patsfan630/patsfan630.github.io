@@ -98,7 +98,13 @@ body { background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--text)
   background: var(--surface);
   z-index: 10;
 }
-.cal-header-gutter { /* spacer */ }
+.cal-header-gutter {
+  font-size: 0.5vw; color: var(--cal-time-text);
+  letter-spacing: 0.08em; line-height: 1.2;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 5px; text-align: right;
+  font-family: 'DM Mono', monospace;
+}
 .cal-day-header {
   padding: 5px 5px 4px;
   text-align: center;
@@ -142,8 +148,6 @@ body { background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--text)
   border-left: 0.5px solid var(--border);
   padding: 2px 2px 2px;
   min-height: 24px;
-  max-height: 50px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -252,19 +256,14 @@ body { background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--text)
   flex-shrink: 0;
 }
 .cal-event-inner {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 4px;
+  /* Time and title flow as one run of text, so wrapped lines start flush left under the time */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .cal-event-title {
   font-weight: 500;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  flex: 1;
-  min-width: 0;
 }
 
 /* Now indicator */
@@ -1186,6 +1185,9 @@ let _calDays     = [];
 let _calRefresh  = null;
 let _calTick     = null;
 let _calFirstScroll = true;
+let _calWeekOffset  = 0;     // 0 = this week, 1 = next week
+let _calRotate      = null;
+const CAL_ROTATE    = 30 * 1000;   // swap between this week / next week every 30 sec
 
 const MONS3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DAYS3 = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -1199,19 +1201,22 @@ function toNY(date) {
   return {y,mo,d,h,min};
 }
 
-function buildCalDays() {
-  const now = new Date();
-  const todNY = toNY(now);
+// Sunday–Saturday for the current week (weekOffset 0) or following week (weekOffset 1).
+function buildCalDays(weekOffset = 0) {
+  const todNY = toNY(new Date());
+  // Pure calendar-date math in UTC so the browser's own timezone can't shift the week.
+  const sunday = new Date(Date.UTC(todNY.y, todNY.mo-1, todNY.d));
+  sunday.setUTCDate(sunday.getUTCDate() - sunday.getUTCDay() + weekOffset*7);
   const days = [];
-  for (let offset = -1; offset <= 5; offset++) {
-    const dt = new Date(now);
-    dt.setDate(dt.getDate() + offset);
-    const info = toNY(dt);
+  for (let i = 0; i < 7; i++) {
+    const dt = new Date(sunday);
+    dt.setUTCDate(sunday.getUTCDate() + i);
+    const y = dt.getUTCFullYear(), mo = dt.getUTCMonth()+1, d = dt.getUTCDate();
     days.push({
-      year:info.y, month:info.mo, day:info.d,
-      dow: DAYS3[dt.getDay()],
-      label:`${MONS3[info.mo-1]} ${info.d}`,
-      isToday:(info.y===todNY.y && info.mo===todNY.mo && info.d===todNY.d),
+      year:y, month:mo, day:d,
+      dow: DAYS3[dt.getUTCDay()],
+      label:`${MONS3[mo-1]} ${d}`,
+      isToday:(y===todNY.y && mo===todNY.mo && d===todNY.d),
     });
   }
   return days;
@@ -1241,8 +1246,9 @@ function hexToRgba(hex, a) {
 
 async function fetchCalendarData() {
   if (!_calApiKey) return;
-  _calDays = buildCalDays();
-  const first = _calDays[0], last = _calDays[6];
+  _calDays = buildCalDays(_calWeekOffset);
+  // Fetch both weeks at once so the 30-second rotation never has to wait on the network
+  const first = buildCalDays(0)[0], last = buildCalDays(1)[6];
   // Use noon UTC offsets to safely cover day boundaries
   const timeMin = new Date(first.year, first.month-1, first.day, 0, 0, 0).toISOString();
   const timeMax = new Date(last.year,  last.month-1,  last.day,  23,59,59).toISOString();
@@ -1280,6 +1286,7 @@ async function fetchCalendarData() {
 function renderCalHeader() {
   const header = document.getElementById('cal-header');
   while (header.children.length > 1) header.removeChild(header.lastChild);
+  header.firstElementChild.innerHTML = _calWeekOffset === 0 ? 'THIS<br>WEEK' : 'NEXT<br>WEEK';
   _calDays.forEach(day => {
     const col = document.createElement('div');
     col.className = 'cal-day-header' + (day.isToday?' today':'');
@@ -1302,19 +1309,14 @@ function renderCalAllDay() {
       const d = new Date(day.year,day.month-1,day.day);
       return d>=s && d<e;
     });
-    adEvts.slice(0,2).forEach(ev => {
+    // Show every all-day event; the strip grows to fit the busiest day
+    adEvts.forEach(ev => {
       const pill = document.createElement('div');
       pill.className = 'cal-allday-event';
       pill.style.background = ev._color;
       pill.textContent = ev.summary || '(no title)';
       col.appendChild(pill);
     });
-    if (adEvts.length > 2) {
-      const more = document.createElement('div');
-      more.className = 'cal-allday-more';
-      more.textContent = `+${adEvts.length-2} more`;
-      col.appendChild(more);
-    }
     strip.appendChild(col);
   });
 }
@@ -1378,6 +1380,14 @@ function renderCalGrid() {
     grid.appendChild(col);
   });
 
+  // Let each event show as many lines as its height allows (instead of a fixed cap)
+  grid.querySelectorAll('.cal-event').forEach(block => {
+    const inner = block.firstElementChild;
+    const lh = parseFloat(getComputedStyle(inner).lineHeight);
+    const pad = parseFloat(getComputedStyle(block).paddingTop) + parseFloat(getComputedStyle(block).paddingBottom);
+    if (lh > 0) inner.style.webkitLineClamp = Math.max(1, Math.floor((block.offsetHeight - pad) / lh));
+  });
+
   // Now indicator
   const todayIdx = _calDays.findIndex(d => d.isToday);
   if (todayIdx >= 0) {
@@ -1429,7 +1439,7 @@ async function initCalendar() {
     const grid = document.getElementById('cal-grid');
     if (grid) grid.innerHTML = `<div style="padding:32px;text-align:center;color:var(--muted);font-size:0.8vw;line-height:2;">No Google Calendar API key set.<br><span style="font-size:0.7vw;">Open <strong>⚙ Setup</strong> to enter your key.</span></div>`;
     // Still render the shell so headers show
-    _calDays = buildCalDays();
+    _calDays = buildCalDays(_calWeekOffset);
     renderCalHeader();
     renderCalAllDay();
     return;
@@ -1441,10 +1451,16 @@ async function initCalendar() {
   document.getElementById('cal-loading').style.display = 'none';
 
   if (_calRefresh) clearInterval(_calRefresh);
-  _calRefresh = setInterval(async () => {
-    _calDays = buildCalDays();
-    await fetchCalendarData();
-  }, CAL_REFRESH);
+  _calRefresh = setInterval(fetchCalendarData, CAL_REFRESH);
+
+  // Alternate between this week and next week
+  _calWeekOffset = 0;
+  if (_calRotate) clearInterval(_calRotate);
+  _calRotate = setInterval(() => {
+    _calWeekOffset = _calWeekOffset === 0 ? 1 : 0;
+    _calDays = buildCalDays(_calWeekOffset);
+    renderCalendar();
+  }, CAL_ROTATE);
 
   if (_calTick) clearInterval(_calTick);
   _calTick = setInterval(() => {
