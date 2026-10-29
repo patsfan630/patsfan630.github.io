@@ -473,21 +473,6 @@ html.dark-mode .score-card.nhl .sc-score { color:#6a5a35; }
 html.dark-mode .score-card.nhl .sc-score.winner { color:#FFB81C; }
 html.dark-mode .score-card.nhl .sc-linescore td.sc-ls-winner { color:#FFB81C; }
 
-/* MLB postseason cards (ALCS / NLCS / World Series) — reuse the .mlb layout, recolored per series */
-.score-card.mlbpost.alcs { --pc:#0f3b7a; --pc-bg:#eef2f9; --pc-lt:#7ba7e0; --pc-dbg:#0a1526; --pc-label:#fff; }
-.score-card.mlbpost.nlcs { --pc:#8a1c2b; --pc-bg:#f8eef0; --pc-lt:#e0808e; --pc-dbg:#1a0d10; --pc-label:#fff; }
-.score-card.mlbpost.ws   { --pc:#0b1f3a; --pc-bg:#f6f2e6; --pc-lt:#d4af37; --pc-dbg:#12151c; --pc-label:#d4af37; }
-.score-card.mlbpost { background:var(--pc-bg); border-color:var(--pc); }
-.score-card.mlbpost .sc-header { background:var(--pc); }
-.score-card.mlbpost .sc-league-label { color:var(--pc-label); }
-.score-card.mlbpost .sc-score.winner, .score-card.mlbpost .sc-linescore td.sc-ls-winner { color:var(--pc); }
-.sc-series { margin:2px 12px 6px; padding:5px 10px; border-radius:8px; background:var(--surface2); display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12px; }
-.sc-series-game { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); }
-.sc-series-status { font-weight:600; color:var(--text); }
-html.dark-mode .score-card.mlbpost { background:var(--pc-dbg); border-color:var(--pc-lt); }
-html.dark-mode .score-card.mlbpost .sc-score { color:#5a6270; }
-html.dark-mode .score-card.mlbpost .sc-score.winner, html.dark-mode .score-card.mlbpost .sc-linescore td.sc-ls-winner { color:var(--pc-lt); }
-
 /* Carousel */
 .carousel-dot { width:6px; height:6px; border-radius:50%; background:var(--surface2); border:0.5px solid var(--border); cursor:pointer; transition:background 0.2s; flex-shrink:0; }
 .carousel-dot.active { background:var(--muted); }
@@ -752,14 +737,12 @@ async function buildEmptyCard(label){
   return card;
 }
 
-// opts lets the postseason cards reuse this builder: { label, cls, seriesHTML, nextGameHTML, hideRecords }.
-async function buildMLBCard(game,opts){
-  opts=opts||{};
+async function buildMLBCard(game){
   const gamePk=game.gamePk,statusCode=game.status?.abstractGameState,isLive=statusCode==='Live',isFinal=statusCode==='Final',isPreview=statusCode==='Preview',showScore=isLive||isFinal;
   const awayData=game.teams?.away||{},homeData=game.teams?.home||{},awayTeam=awayData.team||{},homeTeam=homeData.team||{};
   const awayAbbr=awayTeam.abbreviation||'—',homeAbbr=homeTeam.abbreviation||'—';
   const awayLR=awayData.leagueRecord,homeLR=homeData.leagueRecord;
-  const awayRecStr=(awayLR&&!opts.hideRecords)?`${awayLR.wins}-${awayLR.losses}`:'',homeRecStr=(homeLR&&!opts.hideRecords)?`${homeLR.wins}-${homeLR.losses}`:'';
+  const awayRecStr=awayLR?`${awayLR.wins}-${awayLR.losses}`:'',homeRecStr=homeLR?`${homeLR.wins}-${homeLR.losses}`:'';
   let awayRuns=awayData.score??null,homeRuns=homeData.score??null;
   let statusLabel='';
   if(isFinal)statusLabel='Final';
@@ -785,8 +768,7 @@ async function buildMLBCard(game,opts){
   const teamRow=(abbr,recStr,runs,isWinner)=>`<div class="sc-team"><div style="display:flex;flex-direction:column;gap:1px;"><span class="sc-abbr">${abbr}</span>${recStr?`<span style="font-size:10px;color:var(--dim)">${recStr}</span>`:''}</div><span class="sc-score ${isWinner?'winner':''}">${showScore?(runs??'—'):'—'}</span></div>`;
   // Once the game is Final, show the next Red Sox game beneath the card.
   let nextGameHTML='';
-  if(opts.nextGameHTML!==undefined)nextGameHTML=isFinal?opts.nextGameHTML:'';
-  else if(isFinal){try{nextGameHTML=await espnNextGameLineFromSchedule('mlb',Date.parse(game.gameDate),c=>c.team&&c.team.abbreviation==='BOS');}catch(e){}}
+  if(isFinal){try{nextGameHTML=await espnNextGameLineFromSchedule('mlb',Date.parse(game.gameDate),c=>c.team&&c.team.abbreviation==='BOS');}catch(e){}}
   // When the game is Final we have both the pitcher decisions and the next-game
   // line. Rather than stack them, alternate the two every 15s (see applyScAlt).
   let finalExtras=decisionsHTML+nextGameHTML;
@@ -794,8 +776,8 @@ async function buildMLBCard(game,opts){
     finalExtras=`<div class="sc-alt"><div class="sc-alt-pane" data-alt="0">${decisionsHTML}</div><div class="sc-alt-pane" data-alt="1" hidden>${nextGameHTML}</div></div>`;
   }
   const card=document.createElement('div');
-  card.className='score-card '+(opts.cls||'mlb');
-  card.innerHTML=`<div class="sc-header"><span class="sc-league-label">${opts.label||'Red Sox'}</span><span class="sc-status">${statusLabel}</span></div><div class="sc-body">${teamRow(awayAbbr,awayRecStr,awayRuns,isFinal&&awayRuns>homeRuns)}${teamRow(homeAbbr,homeRecStr,homeRuns,isFinal&&homeRuns>awayRuns)}${opts.seriesHTML||''}${lineScoreHTML}${probablesHTML}${liveHTML}${finalExtras}</div>`;
+  card.className='score-card mlb';
+  card.innerHTML=`<div class="sc-header"><span class="sc-league-label">Red Sox</span><span class="sc-status">${statusLabel}</span></div><div class="sc-body">${teamRow(awayAbbr,awayRecStr,awayRuns,isFinal&&awayRuns>homeRuns)}${teamRow(homeAbbr,homeRecStr,homeRuns,isFinal&&homeRuns>awayRuns)}${lineScoreHTML}${probablesHTML}${liveHTML}${finalExtras}</div>`;
   return card;
 }
 
@@ -1099,95 +1081,6 @@ async function buildNHLSlide(ymd){
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   MLB POSTSEASON (ALCS, NLCS, World Series) — MLB Stats API
-   Each series has its own card, shown from 2 days before Game 1 through
-   2 days after the clinching game.
-════════════════════════════════════════════════════════════════════════ */
-const POST_SERIES = {
-  ALCS: { gameType:'L', league:103,  label:'ALCS',         cls:'mlb mlbpost alcs' },
-  NLCS: { gameType:'L', league:104,  label:'NLCS',         cls:'mlb mlbpost nlcs' },
-  WS:   { gameType:'W', league:null, label:'World Series', cls:'mlb mlbpost ws' },
-};
-const _postFetch = {};  // gameType -> { ts, p }: ALCS and NLCS share one request per refresh
-function mlbPostGames(gameType){
-  const now=Date.now(),c=_postFetch[gameType];
-  if(c&&now-c.ts<10*1000)return c.p;
-  const p=fetch(`${MLB_BASE}/api/v1/schedule?sportId=1&season=${toNY(new Date()).y}&gameType=${gameType}&hydrate=team,linescore,probablePitcher(stats),decisions,broadcasts(all),venue`)
-    .then(r=>r.json()).then(d=>(d.dates||[]).flatMap(x=>x.games||[]));
-  _postFetch[gameType]={ts:now,p};
-  p.catch(()=>{if(_postFetch[gameType]&&_postFetch[gameType].p===p)delete _postFetch[gameType];});
-  return p;
-}
-// One series' games in date order, minus postponed/cancelled entries.
-async function postSeriesGames(key){
-  const cfg=POST_SERIES[key],all=await mlbPostGames(cfg.gameType);
-  return all.filter(g=>{
-    if(/Postponed|Cancel/i.test(g.status?.detailedState||''))return false;
-    if(!cfg.league)return true;
-    const lg=g.teams?.home?.team?.league?.id??g.teams?.away?.team?.league?.id;
-    return lg!=null?lg===cfg.league:new RegExp(key,'i').test(`${g.description||''} ${g.seriesDescription||''}`);
-  }).sort((a,b)=>Date.parse(a.gameDate)-Date.parse(b.gameDate));
-}
-// Series score from completed games: wins per team id, wins needed, and the clinching game (if any).
-function postSeriesState(games){
-  const wins={},need=Math.floor((games[0]?.gamesInSeries||7)/2)+1;let clinch=null;
-  for(const g of games){
-    if(g.status?.abstractGameState!=='Final')continue;
-    for(const side of ['away','home']){const t=g.teams?.[side];if(t?.isWinner&&t.team?.id!=null){wins[t.team.id]=(wins[t.team.id]||0)+1;if(wins[t.team.id]>=need&&!clinch)clinch=g;}}
-  }
-  return {wins,need,clinch};
-}
-function postAbbr(t){return (t&&(t.abbreviation||t.teamName))||'TBD';}
-// "Game 3 · NYY leads 2-1" style line under the team rows.
-function postSeriesLine(game,st){
-  const a=game.teams?.away?.team||{},h=game.teams?.home?.team||{},aw=st.wins[a.id]||0,hw=st.wins[h.id]||0;
-  let txt;
-  if(aw>=st.need||hw>=st.need)txt=`${postAbbr(aw>hw?a:h)} wins series ${Math.max(aw,hw)}-${Math.min(aw,hw)}`;
-  else if(aw===hw)txt=aw?`Series tied ${aw}-${hw}`:'Series begins';
-  else txt=`${postAbbr(aw>hw?a:h)} leads series ${Math.max(aw,hw)}-${Math.min(aw,hw)}`;
-  const gn=game.seriesGameNumber?`Game ${game.seriesGameNumber}`:'';
-  return `<div class="sc-series">${gn?`<span class="sc-series-game">${gn}</span>`:''}<span class="sc-series-status">${txt}</span></div>`;
-}
-function postTV(g){return [...new Set((g.broadcasts||[]).filter(b=>b.type==='TV'&&b.isNational!==false).map(b=>b.name).filter(Boolean))].join(', ');}
-// Date/time, matchup, ballpark and national TV for an upcoming game.
-function postGameInfo(g,label){
-  const f=nflFmt(g.gameDate),when=g.status?.startTimeTBD?`${f.dateLabel} &middot; Time TBD`:`${f.dateLabel} &middot; ${f.timeLabel}`;
-  const venue=g.venue?.name||'',tv=postTV(g);
-  return `<div class="sc-next-game">${label?`<div class="sc-next-game-label">${label}</div>`:''}<div class="sc-next-game-row">${_svgCal}<span>${when} <span class="sub">&middot; ${postAbbr(g.teams?.away?.team)} @ ${postAbbr(g.teams?.home?.team)}</span></span></div>${venue?`<div class="sc-next-game-row">${_svgPin}<span>${venue}</span></div>`:''}${tv?`<div class="sc-next-game-row">${_svgTv}<span>${tv}</span></div>`:''}</div>`;
-}
-// Off day (or series not started yet): series score in place of runs, plus the next game.
-function postOffDayCard(cfg,next,st){
-  const a=next.teams?.away?.team||{},h=next.teams?.home?.team||{},aw=st.wins[a.id]||0,hw=st.wins[h.id]||0,started=aw+hw>0;
-  const row=(t,w)=>`<div class="sc-team"><span class="sc-abbr">${postAbbr(t)}</span><span class="sc-score">${started?w:'—'}</span></div>`;
-  const card=document.createElement('div');card.className='score-card '+cfg.cls;
-  card.innerHTML=`<div class="sc-header"><span class="sc-league-label">${cfg.label}</span><span class="sc-status">${started?'Off Day':'Upcoming'}</span></div><div class="sc-body">${row(a,aw)}${row(h,hw)}${postSeriesLine(next,st)}${postGameInfo(next,started?`Next &middot; Game ${next.seriesGameNumber||''}`:'Game 1')}</div>`;
-  return card;
-}
-const _postWinCache = {};  // key -> last known active flag, used if a refresh fails
-async function postSeriesActive(key){
-  try{
-    const games=await postSeriesGames(key);
-    if(!games.length)return (_postWinCache[key]=false);
-    const st=postSeriesState(games),now=Date.now();
-    const start=Date.parse(games[0].gameDate),end=Date.parse((st.clinch||games[games.length-1]).gameDate);
-    return (_postWinCache[key]=now>=start-SEASON_EDGE&&now<=end+SEASON_EDGE);
-  }catch(e){return _postWinCache[key]||false;}
-}
-async function buildPostSlide(key,ymd){
-  const cfg=POST_SERIES[key],games=await postSeriesGames(key),st=postSeriesState(games);
-  // Once a team clinches, any leftover "if necessary" games are ignored.
-  const playable=st.clinch?games.filter(g=>Date.parse(g.gameDate)<=Date.parse(st.clinch.gameDate)):games;
-  const game=playable.find(g=>g.status?.abstractGameState==='Live')||playable.find(g=>espnETymd(g.gameDate)===ymd)||st.clinch;
-  const next=st.clinch?null:playable.find(g=>g.status?.abstractGameState==='Preview'&&(!game||Date.parse(g.gameDate)>Date.parse(game.gameDate)));
-  if(!game&&next)return postOffDayCard(cfg,next,st);
-  if(!game){const el=document.createElement('div');el.className='score-loading';el.textContent=`${cfg.label}: no games scheduled`;return el;}
-  const isPreview=game.status?.abstractGameState==='Preview';
-  return buildMLBCard(game,{label:cfg.label,cls:cfg.cls,hideRecords:true,
-    seriesHTML:postSeriesLine(game,st)+(isPreview?postGameInfo(game,''):''),
-    nextGameHTML:next?postGameInfo(next,`Next &middot; Game ${next.seriesGameNumber||''}`):''});
-}
-
-/* ════════════════════════════════════════════════════════════════════════
    SEASON WINDOWS — each card shows only from 2 days before its season's
    first game through 2 days after its last game (ESPN schedule feeds).
 ════════════════════════════════════════════════════════════════════════ */
@@ -1232,9 +1125,6 @@ const TEAM_CONFIGS = [
   { label:'NFL · Patriots',       kind:'nfl' },
   { label:'NBA · Celtics',        kind:'nba' },
   { label:'NHL · Bruins',         kind:'nhl' },
-  { label:'MLB · ALCS',           kind:'post', series:'ALCS' },
-  { label:'MLB · NLCS',           kind:'post', series:'NLCS' },
-  { label:'MLB · World Series',   kind:'post', series:'WS' },
 ];
 // Cards actually in the carousel right now (each team's card is added only in-season).
 let activeConfigs = TEAM_CONFIGS.slice();
@@ -1257,16 +1147,16 @@ async function fetchScores(){
   if(etNow.getHours()<11)etNow.setDate(etNow.getDate()-1);
   const ymd=`${etNow.getFullYear()}-${String(etNow.getMonth()+1).padStart(2,'0')}-${String(etNow.getDate()).padStart(2,'0')}`;
   // Each card is shown only during its own season (2 days before first game .. 2 days after last).
-  const flags=await Promise.all(TEAM_CONFIGS.map(cfg=>cfg.kind==='post'?postSeriesActive(cfg.series):inSeason(cfg.kind)));
+  const flags=await Promise.all(TEAM_CONFIGS.map(cfg=>inSeason(cfg.kind)));
   activeConfigs=TEAM_CONFIGS.filter((_,i)=>flags[i]===true);
   if(!activeConfigs.length){
     // Fail-safe: never blank the whole panel — show any whose window is unknown, else all.
     const unknown=TEAM_CONFIGS.filter((_,i)=>flags[i]===null);
-    activeConfigs=unknown.length?unknown:TEAM_CONFIGS.filter(cfg=>cfg.kind!=='post');
+    activeConfigs=unknown.length?unknown:TEAM_CONFIGS.slice();
   }
   if(carouselIndex>=activeConfigs.length)carouselIndex=0;
   const cards=[];
-  await Promise.all(activeConfigs.map(async(cfg,idx)=>{try{if(cfg.kind==='nfl'){cards[idx]=await buildNFLSlide();return;}if(cfg.kind==='nba'){cards[idx]=await buildNBASlide(ymd);return;}if(cfg.kind==='nhl'){cards[idx]=await buildNHLSlide(ymd);return;}if(cfg.kind==='post'){cards[idx]=await buildPostSlide(cfg.series,ymd);return;}const url=`${MLB_BASE}/api/v1/schedule?teamId=${cfg.teamId}&sportId=1&date=${ymd}&hydrate=probablePitcher(stats),linescore,decisions,seriesStatus,team`,res=await fetch(url),data=await res.json(),games=data.dates?.[0]?.games||[],game=games.find(g=>g.status?.detailedState!=='Postponed')||games[0]||null;cards[idx]=game?await buildMLBCard(game):await buildEmptyCard(cfg.label.split(' · ')[1]||cfg.label);}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';cards[idx]=el;}}));
+  await Promise.all(activeConfigs.map(async(cfg,idx)=>{try{if(cfg.kind==='nfl'){cards[idx]=await buildNFLSlide();return;}if(cfg.kind==='nba'){cards[idx]=await buildNBASlide(ymd);return;}if(cfg.kind==='nhl'){cards[idx]=await buildNHLSlide(ymd);return;}const url=`${MLB_BASE}/api/v1/schedule?teamId=${cfg.teamId}&sportId=1&date=${ymd}&hydrate=probablePitcher(stats),linescore,decisions,seriesStatus,team`,res=await fetch(url),data=await res.json(),games=data.dates?.[0]?.games||[],game=games.find(g=>g.status?.detailedState!=='Postponed')||games[0]||null;cards[idx]=game?await buildMLBCard(game):await buildEmptyCard(cfg.label.split(' · ')[1]||cfg.label);}catch(e){const el=document.createElement('div');el.className='score-loading';el.textContent='Unable to load';cards[idx]=el;}}));
   carouselCards=cards;
   showSlide(carouselIndex);
 }
