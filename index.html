@@ -607,8 +607,8 @@ html.dark-mode .score-card.nhl .sc-linescore td.sc-ls-winner { color:#FFB81C; }
 ════════════════════════════════════════════════════════════════════════ */
 function getMode(now) {
   const mins = now.getHours()*60 + now.getMinutes();
-  if (mins >= 7*60 && mins < 20*60)     return 'light';
-  if (mins >= 20*60 && mins < 22*60+30) return 'dark';
+  if (mins >= 7*60 && mins < 19*60)     return 'light';
+  if (mins >= 19*60 && mins < 22*60+30) return 'dark';
   return 'screensaver';
 }
 let _lastMode = null, _lastScheduledMode = null;
@@ -649,7 +649,10 @@ function saveConfig() {
   initCalendar();
 }
 function overrideMode(mode) {
-  _lastMode = null; _lastScheduledMode = null;
+  // Mark the current scheduled mode as already applied so checkMode() (run every
+  // second) doesn't immediately revert the override. The override then holds
+  // until the next scheduled transition.
+  _lastMode = null; _lastScheduledMode = getMode(new Date());
   const html = document.documentElement, ss = document.getElementById('screensaver');
   if (mode === 'screensaver') { html.classList.add('dark-mode'); ss.classList.add('active'); _lastMode = 'screensaver'; closeConfig(); }
   else if (mode === 'dark')   { ss.classList.remove('active'); html.classList.add('dark-mode'); _lastMode = 'dark'; }
